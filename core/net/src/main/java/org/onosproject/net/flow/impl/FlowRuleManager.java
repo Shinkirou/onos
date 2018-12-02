@@ -113,7 +113,7 @@ public class FlowRuleManager
             label = "Purge entries associated with a device when the device goes offline")
     private boolean purgeOnDisconnection = false;
 
-    private static final int DEFAULT_POLL_FREQUENCY = 30;
+    private static final int DEFAULT_POLL_FREQUENCY = 5;
     @Property(name = "fallbackFlowPollFrequency", intValue = DEFAULT_POLL_FREQUENCY,
             label = "Frequency (in seconds) for polling flow statistics via fallback provider")
     private int fallbackFlowPollFrequency = DEFAULT_POLL_FREQUENCY;

@@ -100,7 +100,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Service(value = ReactiveForwarding.class)
 public class ReactiveForwarding {
 
-    private static final int DEFAULT_TIMEOUT = 10;
+    private static final int DEFAULT_TIMEOUT = 99999;
     private static final int DEFAULT_PRIORITY = 10;
 
     private final Logger log = getLogger(getClass());
@@ -166,7 +166,7 @@ public class ReactiveForwarding {
             label = "Enable matching Vlan ID; default is false")
     private boolean matchVlanId = false;
 
-    @Property(name = "matchIpv4Address", boolValue = false,
+    @Property(name = "matchIpv4Address", boolValue = true,
             label = "Enable matching IPv4 Addresses; default is false")
     private boolean matchIpv4Address = false;
 
@@ -182,7 +182,7 @@ public class ReactiveForwarding {
             label = "Enable matching IPv6 FlowLabel; default is false")
     private boolean matchIpv6FlowLabel = false;
 
-    @Property(name = "matchTcpUdpPorts", boolValue = false,
+    @Property(name = "matchTcpUdpPorts", boolValue = true,
             label = "Enable matching TCP/UDP ports; default is false")
     private boolean matchTcpUdpPorts = false;
 
