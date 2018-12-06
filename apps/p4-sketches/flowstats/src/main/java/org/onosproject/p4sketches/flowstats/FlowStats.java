@@ -107,19 +107,7 @@ import org.onosproject.p4sketches.flowstats.FlowNew;
 public class FlowStats {
 
     private static final String APP_NAME = "org.onosproject.p4sketches.flowstats";
-    // private final java.nio.file.Path txtpath = Paths.get("/home/shinkirou/Documents/thesis-flow-stats/flows.txt");
-    
-    // private static Map<String,String> flowLifeMap = new ConcurrentHashMap<String,String>();
 
-    // private static Map<String,String> flowPacketsMap = new ConcurrentHashMap<String,String>();
-    // private static Map<String,String> flowSrcIPMap = new ConcurrentHashMap<String,String>();
-    // private static Map<String,String> flowDstIpMap = new ConcurrentHashMap<String,String>();
-    // private static Map<String,String> flowCMHashMap = new ConcurrentHashMap<String,String>();
-    // private static Map<String,String> flowBMHashMap = new ConcurrentHashMap<String,String>();        
-    // private static Map<String,String> flowCMSketchMap = new ConcurrentHashMap<String,String>();
-    // private static Map<String,String> flowBMSketchMap = new ConcurrentHashMap<String,String>();    
-    // private static Map<String,Long> flowCountMap = new ConcurrentHashMap<String,Long>();
-    // private static Map<String,FlowRule> flowRuleMap = new ConcurrentHashMap<String,FlowRule>();
     private static Map<String,FlowNew> flowNewMap = new ConcurrentHashMap<String,FlowNew>();
 
     private static Long globalPackets = 0L;
@@ -196,7 +184,7 @@ public class FlowStats {
         String udpDstPort   = "";
 
         Long flowPackets = 0L;
-        Long flowBytes = 0L; 
+        Long flowBytes = 0L;
 
         FlowNew currentFlow = new FlowNew();   
 
