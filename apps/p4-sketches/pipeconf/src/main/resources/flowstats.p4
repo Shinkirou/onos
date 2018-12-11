@@ -4,8 +4,11 @@
 
 #define MAX_PORTS 255
 
-#define IP_PROTO_TCP 8w6
-#define IP_PROTO_UDP 8w17
+// #define IP_PROTO_TCP 8w6
+// #define IP_PROTO_UDP 8w17
+
+const bit<8> IP_PROTO_UDP = 17;
+const bit<8> IP_PROTO_UDP = 6;
 
 const bit<16> ETH_TYPE_IPV4 = 0x800;
 const bit<32> MAX_INT = 0xFFFFFFFF;
@@ -59,11 +62,15 @@ header udp_t {
     bit<16> checksum;
 }
 
+// Packet-in header. Prepended to packets sent to the controller and used to
+// carry the original ingress port where the packet was received.
 @controller_header("packet_in")
 header packet_in_header_t {
     bit<9> ingress_port;
 }
 
+// Packet-out header. Prepended to packets received by the controller and used
+// to tell the switch on which port this packet should be forwarded.
 @controller_header("packet_out")
 header packet_out_header_t {
     bit<9> egress_port;
@@ -105,6 +112,10 @@ struct metadata_t {
 
 parser c_parser(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
 
+
+    // A P4 parser is described as a state machine, with initial state "start"
+    // and final one "accept". Each intermediate state can specify the next
+    // state by using a select statement over the header fields extracted.
     state start {
         transition select(standard_metadata.ingress_port) {
             CPU_PORT: parse_packet_out;
@@ -124,7 +135,6 @@ parser c_parser(packet_in packet, out headers_t hdr, inout metadata_t meta, inou
             default: accept;
         }
     }
-
 
     state parse_ipv4 {
         packet.extract(hdr.ipv4);
@@ -164,23 +174,35 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
     register<bit<32>>(65536) bitmap_register0;
     register<bit<32>>(65536) bitmap_register1;
 
+    register<bit<32>>(65536) kary_register0;
+    register<bit<32>>(65536) kary_register1;
+    register<bit<32>>(65536) kary_register2;
+
     bit<32> packet_count_min_hash0;
     bit<32> packet_count_min_hash1;
     bit<32> packet_count_min_hash2;
 
     bit<32> packet_bitmap_hash0;
     bit<32> packet_bitmap_hash1;
-    
-    counter(MAX_PORTS, CounterType.packets_and_bytes) tx_port_counter;
-    counter(MAX_PORTS, CounterType.packets_and_bytes) rx_port_counter;
+
+
+    // We use these counters to count packets/bytes received/sent on each port.
+    // For each counter we instantiate a number of cells equal to MAX_PORTS.
+    // counter(MAX_PORTS, CounterType.packets_and_bytes) tx_port_counter;
+    // counter(MAX_PORTS, CounterType.packets_and_bytes) rx_port_counter;
 
     action send_to_cpu() {
+        // Packets sent to the controller needs to be prepended with the
+        // packet-in header. By setting it valid we make sure it will be
+        // deparsed on the wire (see c_deparser).
         standard_metadata.egress_spec = CPU_PORT;
         hdr.packet_in.setValid();
         hdr.packet_in.ingress_port = standard_metadata.ingress_port;
     }
 
     action set_out_port(port_t port) {
+        // Specifies the output port for this packet by setting the
+        // corresponding metadata.
         standard_metadata.egress_spec = port;
     }
 
@@ -290,6 +312,8 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         meta.my_metadata.bitmap_val1 = tmp1;
     }                            
 
+    // Table counter used to count packets and bytes matched by each entry of
+    // t_l2_fwd table.
     direct_counter(CounterType.packets_and_bytes) l2_fwd_counter;
 
     table t_l2_fwd {
@@ -301,9 +325,6 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             hdr.ipv4.protocol               : ternary;
             hdr.ipv4.src_addr               : ternary;
             hdr.ipv4.dst_addr               : ternary;
-            /*
-            hdr.tcp.ctrl                    : ternary;
-            */
             hdr.tcp.src_port                : ternary;
             hdr.tcp.dst_port                : ternary;
             hdr.udp.src_port                : ternary;
@@ -367,7 +388,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             action_bitmap_hash_1_val;
         }
         default_action = action_bitmap_hash_1_val();
-    }          
+    }
 
     table table_bitmap_check_pair { 
         actions = {
@@ -397,12 +418,20 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
     //     default_action = send_to_cpu();
     // }                 
 
-    apply {
 
+    // Defines the processing applied by this control block. You can see this as
+    // the main function applied to every packet received by the switch.
+    apply {
         if (standard_metadata.ingress_port == CPU_PORT) {
+            // Packet received from CPU_PORT, this is a packet-out sent by the
+            // controller. Skip table processing, set the egress port as
+            // requested by the controller (packet_out header) and remove the
+            // packet_out header.           
             standard_metadata.egress_spec = hdr.packet_out.egress_port;
             hdr.packet_out.setInvalid();   
-        } else { 
+        } else {
+            // Packet received from data plane port.
+            // Applies table t_l2_fwd to the packet.
             if (t_l2_fwd.apply().hit) {
                 
                 // Count-min Sketch 
@@ -415,12 +444,12 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
                 meta.my_metadata.count_min_val = meta.my_metadata.count_min_val0;
                 meta.my_metadata.count_min_hash = meta.my_metadata.count_min_hash_val0;
                 
-                if (meta.my_metadata.count_min_val > meta.my_metadata.count_min_val1) {         
+                if (meta.my_metadata.count_min_val > meta.my_metadata.count_min_val1) {
                     meta.my_metadata.count_min_val = meta.my_metadata.count_min_val1;
                     meta.my_metadata.count_min_hash = meta.my_metadata.count_min_hash_val1;
                 }
                 
-                if (meta.my_metadata.count_min_val > meta.my_metadata.count_min_val2) {           
+                if (meta.my_metadata.count_min_val > meta.my_metadata.count_min_val2) {
                     meta.my_metadata.count_min_val = meta.my_metadata.count_min_val2;
                     meta.my_metadata.count_min_hash = meta.my_metadata.count_min_hash_val2;
                 }
@@ -436,23 +465,29 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
                 table_bitmap_check_pair.apply(); 
                 if (meta.my_metadata.bitmap_val0 == 0) {
                     // if the value is 0, we write the bitmap value on register0 and increase the counter
-                    // for the ip src on register1 (meaning that we have a new pair) 
+                    // for the ip src on register1 (meaning that we have a new pair)
                     table_bitmap_new_pair.apply();
                 } else {
-                    // if the value is 1, we do nothing (the pair is already accounted for) 
+                    // if the value is 1, we do nothing (the pair is already accounted for)
                     table_bitmap_existing_pair.apply();
-                } 
+                }
                 // table_send_to_cpu.apply();
+
+                // Packet hit an entry in t_l2_fwd table. A forwarding action
+                // has already been taken. No need to apply other tables, exit
+                // this control block.                
                 return;
             }
         }
 
+        /*
         if (standard_metadata.egress_spec < MAX_PORTS) {
             tx_port_counter.count((bit<32>) standard_metadata.egress_spec);
         }
         if (standard_metadata.ingress_port < MAX_PORTS) {
             rx_port_counter.count((bit<32>) standard_metadata.ingress_port);
         }
+        */
      }
 }
 

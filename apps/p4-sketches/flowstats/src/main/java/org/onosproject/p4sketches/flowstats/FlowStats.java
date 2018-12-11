@@ -113,13 +113,6 @@ public class FlowStats {
     private static Long globalPackets = 0L;
     private static Long globalPacketsLast = 0L;
 
-    private static Long lastGlobalPackets = 0L;
-    private static Long lastTwoGlobalPackets = 0L;
-
-    private static String lastKeyString = "";
-    private static String secondLastKeyString = "";
-
-
     private static java.nio.file.Path lastTimestamp = null;
     private static java.nio.file.Path lastTwoTimestamp = null;
 
@@ -171,7 +164,7 @@ public class FlowStats {
         log.info("STOPPED");
     }
 
-    private void writeUpdatedFlow(FlowRule flowRule, String eventType) {
+    private void writeUpdatedFlow(FlowRule flowRule) {
 
         String ethSrcString = "";
         String ethDstString = "";
@@ -236,17 +229,22 @@ public class FlowStats {
             return;
         }
 
-        String keyString = ipSrcString + " " + ipDstString;
+        String keyString = "";
+        if (ipProtocol.equals("17")) {
+            keyString = ipSrcString + ipDstString + ipProtocol + udpSrcPort + udpDstPort;
+        } else {
+            keyString = ipSrcString + ipDstString + ipProtocol + tcpSrcPort + tcpDstPort;
+        }
         String flowPacketsString = Long.toString(flowPackets + 1L);
-        String flowCountString = "";
+        // String flowCountString = "";
         String cmSketch = "";
         String bmSketch = "";
-        String flowBytesString = "";
-        if (ipProtocol.equals("17")) {
-            flowBytesString = Long.toString(flowBytes + 28L); 
-        } else {
-            flowBytesString = Long.toString(flowBytes + 40L);
-        }
+        String flowBytesString = Long.toString(flowBytes);;
+        // if (ipProtocol.equals("17")) {
+        //     flowBytesString = Long.toString(flowBytes + 28L); 
+        // } else {
+        //     flowBytesString = Long.toString(flowBytes + 40L);
+        // }
         
 
         if (flowNewMap.containsKey(keyString)) {
@@ -296,14 +294,17 @@ public class FlowStats {
 
         try {
 
-            Timestamp ts = new Timestamp(System.currentTimeMillis());
+            // Timestamp ts = new Timestamp(System.currentTimeMillis());
 
-            long diff = ts.getTime() - tsTimer.getTime();
-            long diffSeconds = diff / 1000;
+            // long diff = ts.getTime() - tsTimer.getTime();
+            // long diffSeconds = diff / 1000;
 
-            if (diffSeconds > 60) {                
 
-                tsTimer = ts;
+            // if (diffSeconds > 10) {  
+            if ((globalPackets - globalPacketsLast >= 100) || (globalPackets % 100 == 0))  {           
+
+                // tsTimer = ts;
+                globalPacketsLast = globalPackets;
                 String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS").format(new Date());
                 String globalPacketsString = Long.toString(globalPackets);
                 java.nio.file.Path txtpath = Paths.get("/home/shinkirou/Documents/thesis-flow-stats/flows-" + timeStamp + "-" + globalPacketsString + ".txt");
@@ -312,7 +313,7 @@ public class FlowStats {
 
                     FlowNew tempFlow    = flowNewMap.get(setKey);                   
 
-                    flowCountString     = Long.toString(tempFlow.getFlowCount());
+                    // flowCountString     = Long.toString(tempFlow.getFlowCount());
                     flowPacketsString   = tempFlow.getFlowPackets();     
                     flowBytesString     = tempFlow.getFlowBytes();               
                     ipSrcString         = tempFlow.getFlowSrcIP();
@@ -335,7 +336,7 @@ public class FlowStats {
                     String flowSketchTotal = "";
 
                     if (ipProtocol.equals("17")) {
-                        flowSketchTotal = flowCountString + "," +
+                        flowSketchTotal = /* flowCountString + "," + */
                                           flowPacketsString + "," +
                                           flowBytesString + "," + 
                                           ipSrcString + "," +
@@ -346,7 +347,7 @@ public class FlowStats {
                                           cmSketch + "," +
                                           bmSketch;
                     } else {
-                        flowSketchTotal = flowCountString + "," +
+                        flowSketchTotal = /* flowCountString + "," + */
                                           flowPacketsString + "," + 
                                           flowBytesString + "," +
                                           ipSrcString + "," +
@@ -596,14 +597,9 @@ public class FlowStats {
         @Override
         public void event(FlowRuleEvent event) {
             FlowRule flowRule = event.subject();
-            if (event.type() == RULE_ADDED) {
-                String typeAdded = "ADDED";                
-                writeUpdatedFlow(flowRule, typeAdded);
-            }
-            if (event.type() == RULE_UPDATED) {
-                String typeUpdated = "UPDATED";
-                writeUpdatedFlow(flowRule, typeUpdated);
-            }        
+            if ((event.type() == RULE_ADDED) || (event.type() == RULE_UPDATED)) {
+                writeUpdatedFlow(flowRule);
+            }  
         }
     }       
 }
