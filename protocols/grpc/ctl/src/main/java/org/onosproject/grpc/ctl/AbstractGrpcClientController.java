@@ -19,14 +19,17 @@ package org.onosproject.grpc.ctl;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.Striped;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
+import io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.NettyChannelBuilder;
+import io.netty.handler.ssl.NotSslRecordException;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
-
 import org.onosproject.event.AbstractListenerManager;
 import org.onosproject.event.Event;
 import org.onosproject.event.EventListener;
@@ -38,12 +41,13 @@ import org.onosproject.grpc.api.GrpcClientKey;
 import org.onosproject.net.DeviceId;
 import org.slf4j.Logger;
 
-import java.io.IOException;
+import javax.net.ssl.SSLException;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -94,49 +98,112 @@ public abstract class AbstractGrpcClientController
     @Override
     public boolean createClient(K clientKey) {
         checkNotNull(clientKey);
-        return withDeviceLock(() -> doCreateClient(clientKey), clientKey.deviceId());
+        /*
+            FIXME we might want to move "useTls" and "fallback" to properties of the netcfg and clientKey
+                  For now, we will first try to connect with TLS (accepting any cert), then fall back to
+                  plaintext for every device
+         */
+        return withDeviceLock(() -> doCreateClient(clientKey, true, true), clientKey.deviceId());
     }
 
-    private boolean doCreateClient(K clientKey) {
-        DeviceId deviceId = clientKey.deviceId();
-        String serverAddr = clientKey.serverAddr();
-        int serverPort = clientKey.serverPort();
+    private boolean doCreateClient(K clientKey, boolean useTls, boolean fallbackToPlainText) {
+        final DeviceId deviceId = clientKey.deviceId();
+        final String serverAddr = clientKey.serverAddr();
+        final int serverPort = clientKey.serverPort();
 
         if (clientKeys.containsKey(deviceId)) {
             final GrpcClientKey existingKey = clientKeys.get(deviceId);
             if (clientKey.equals(existingKey)) {
-                log.debug("Not creating client for {} as it already exists (key={})...",
-                        deviceId, clientKey);
+                log.debug("Not creating {} as it already exists... (key={})",
+                          clientName(clientKey), clientKey);
                 return true;
             } else {
-                log.info("Requested client for {} with new " +
-                                "endpoint, removing old client (key={})...",
-                        deviceId, clientKey);
+                log.info("Requested new {} with updated key, removing old client... (oldKey={})",
+                         clientName(clientKey), existingKey);
                 doRemoveClient(deviceId);
             }
         }
-        log.info("Creating client for {} (server={}:{})...",
-                deviceId, serverAddr, serverPort);
-        GrpcChannelId channelId = GrpcChannelId.of(clientKey.deviceId(), clientKey.toString());
-        ManagedChannelBuilder channelBuilder = NettyChannelBuilder
-                .forAddress(serverAddr, serverPort)
-                .maxInboundMessageSize(DEFAULT_MAX_INBOUND_MSG_SIZE * MEGABYTES)
-                .usePlaintext();
 
-        ManagedChannel channel;
+        log.info("Creating new {}... (key={}, useTls={}, fallbackToPlainText={})",
+                 clientName(clientKey), clientKey, useTls,
+                 fallbackToPlainText);
+
+        final GrpcChannelId channelId = GrpcChannelId.of(
+                clientKey.deviceId(), clientKey.toString());
+        final NettyChannelBuilder channelBuilder = NettyChannelBuilder
+                .forAddress(serverAddr, serverPort)
+                .maxInboundMessageSize(DEFAULT_MAX_INBOUND_MSG_SIZE * MEGABYTES);
+
+        if (useTls) {
+            // FIXME: logic to create/manage SSL properties of a channel builder
+            //  should belong to the GrpcChannelController.
+            log.debug("Using SSL for {}", clientName(clientKey), deviceId);
+            final SslContext sslContext;
+            try {
+                // Accept any server certificate; this is insecure and should
+                // not be used in production
+                sslContext = GrpcSslContexts.forClient()
+                        .trustManager(InsecureTrustManagerFactory.INSTANCE)
+                        .build();
+            } catch (SSLException e) {
+                log.error("Failed to build SSL context for {}", clientName(clientKey), e);
+                return false;
+            }
+            channelBuilder
+                    .sslContext(sslContext)
+                    .useTransportSecurity();
+        } else {
+            log.debug("Using plaintext TCP for {}", clientName(clientKey));
+            channelBuilder.usePlaintext();
+        }
+
+        final ManagedChannel channel;
         try {
             channel = grpcChannelController.connectChannel(channelId, channelBuilder);
-        } catch (IOException e) {
-            log.warn("Unable to connect to gRPC server of {}: {}",
-                    clientKey.deviceId(), e.getMessage());
+        } catch (Throwable e) {
+            for (Throwable cause = e; cause != null; cause = cause.getCause()) {
+                if (useTls && cause instanceof NotSslRecordException) {
+                    // Likely root cause is that server is using plaintext
+                    log.warn("Failed to connect {} using TLS", clientName(clientKey));
+                    log.debug("TLS connection exception", e);
+                    if (fallbackToPlainText) {
+                        log.info("Falling back to plaintext TCP for {}", clientName(clientKey));
+                        return doCreateClient(clientKey, false, false);
+                    }
+                }
+                if (!useTls && "Connection reset by peer".equals(cause.getMessage())) {
+                    // Not a great signal, but could indicate the server is expected a TLS connection
+                    log.warn("Failed to connect {} using plaintext TCP; " +
+                                     "is the server using TLS?",
+                             clientName(clientKey));
+                    break;
+                }
+            }
+            if (e instanceof StatusRuntimeException) {
+                log.warn("Unable to connect {}: {}", clientName(clientKey), e.getMessage());
+                log.debug("Connection exception", e);
+            } else {
+                log.error("Exception while connecting {}", clientName(clientKey), e);
+            }
             return false;
         }
 
-        C client = createClientInstance(clientKey, channel);
-        if (client == null) {
-            log.warn("Cannot create client for {} (key={})", deviceId, clientKey);
+        final C client;
+        try {
+            client = createClientInstance(clientKey, channel);
+        } catch (Throwable e) {
+            log.error("Exception while creating {}", clientName(clientKey), e);
+            grpcChannelController.disconnectChannel(channelId);
             return false;
         }
+
+        if (client == null) {
+            log.error("Unable to create {}, implementation returned null... (key={})",
+                      clientName(clientKey), clientKey);
+            grpcChannelController.disconnectChannel(channelId);
+            return false;
+        }
+
         clientKeys.put(deviceId, clientKey);
         clients.put(clientKey, client);
         channelIds.put(deviceId, channelId);
@@ -152,7 +219,7 @@ public abstract class AbstractGrpcClientController
         return withDeviceLock(() -> doGetClient(deviceId), deviceId);
     }
 
-    protected C doGetClient(DeviceId deviceId) {
+    private C doGetClient(DeviceId deviceId) {
         if (!clientKeys.containsKey(deviceId)) {
             return null;
         }
@@ -183,11 +250,11 @@ public abstract class AbstractGrpcClientController
         return withDeviceLock(() -> doIsReachable(deviceId), deviceId);
     }
 
-    protected boolean doIsReachable(DeviceId deviceId) {
+    private boolean doIsReachable(DeviceId deviceId) {
         // Default behaviour checks only the gRPC channel, should
         // check according to different gRPC service
         if (!clientKeys.containsKey(deviceId)) {
-            log.debug("No client for {}, can't check for reachability", deviceId);
+            log.debug("Missing client for {}, cannot check for reachability", deviceId);
             return false;
         }
         return grpcChannelController.isChannelOpen(channelIds.get(deviceId));
@@ -201,5 +268,9 @@ public abstract class AbstractGrpcClientController
         } finally {
             lock.unlock();
         }
+    }
+
+    private String clientName(GrpcClientKey key) {
+        return format("%s client for %s", key.serviceName(), key.deviceId());
     }
 }

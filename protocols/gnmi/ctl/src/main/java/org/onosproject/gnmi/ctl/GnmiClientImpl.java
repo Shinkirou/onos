@@ -23,14 +23,15 @@ import gnmi.Gnmi.Path;
 import gnmi.Gnmi.PathElem;
 import gnmi.Gnmi.SetRequest;
 import gnmi.Gnmi.SetResponse;
+import gnmi.Gnmi.SubscribeRequest;
 import gnmi.gNMIGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import org.onosproject.gnmi.api.GnmiClient;
 import org.onosproject.gnmi.api.GnmiClientKey;
 import org.onosproject.grpc.ctl.AbstractGrpcClient;
 import org.slf4j.Logger;
-import org.onosproject.gnmi.api.GnmiClient;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -45,10 +46,13 @@ public class GnmiClientImpl extends AbstractGrpcClient implements GnmiClient {
     private static final GetRequest DUMMY_REQUEST = GetRequest.newBuilder().addPath(DUMMY_PATH).build();
     private final Logger log = getLogger(getClass());
     private final gNMIGrpc.gNMIBlockingStub blockingStub;
+    private GnmiSubscriptionManager gnmiSubscriptionManager;
 
-    public GnmiClientImpl(GnmiClientKey clientKey, ManagedChannel managedChannel) {
-        super(clientKey, managedChannel);
+    GnmiClientImpl(GnmiClientKey clientKey, ManagedChannel managedChannel, GnmiControllerImpl controller) {
+        super(clientKey);
         this.blockingStub = gNMIGrpc.newBlockingStub(managedChannel);
+        this.gnmiSubscriptionManager =
+                new GnmiSubscriptionManager(managedChannel, deviceId, controller);
     }
 
     @Override
@@ -67,8 +71,24 @@ public class GnmiClientImpl extends AbstractGrpcClient implements GnmiClient {
     }
 
     @Override
+    public boolean subscribe(SubscribeRequest request) {
+        return gnmiSubscriptionManager.subscribe(request);
+    }
+
+    @Override
+    public void terminateSubscriptionChannel() {
+        gnmiSubscriptionManager.complete();
+    }
+
+    @Override
     public CompletableFuture<Boolean> isServiceAvailable() {
         return supplyInContext(this::doServiceAvailable, "isServiceAvailable");
+    }
+
+    @Override
+    protected Void doShutdown() {
+        gnmiSubscriptionManager.shutdown();
+        return super.doShutdown();
     }
 
     private CapabilityResponse doCapability() {
@@ -77,7 +97,7 @@ public class GnmiClientImpl extends AbstractGrpcClient implements GnmiClient {
             return blockingStub.capabilities(request);
         } catch (StatusRuntimeException e) {
             log.warn("Unable to get capability from {}: {}", deviceId, e.getMessage());
-            return null;
+            return CapabilityResponse.getDefaultInstance();
         }
     }
 
@@ -86,7 +106,7 @@ public class GnmiClientImpl extends AbstractGrpcClient implements GnmiClient {
             return blockingStub.get(request);
         } catch (StatusRuntimeException e) {
             log.warn("Unable to get data from {}: {}", deviceId, e.getMessage());
-            return null;
+            return GetResponse.getDefaultInstance();
         }
     }
 
@@ -95,14 +115,13 @@ public class GnmiClientImpl extends AbstractGrpcClient implements GnmiClient {
             return blockingStub.set(request);
         } catch (StatusRuntimeException e) {
             log.warn("Unable to set data to {}: {}", deviceId, e.getMessage());
-            return null;
+            return SetResponse.getDefaultInstance();
         }
     }
 
     private boolean doServiceAvailable() {
         try {
-            blockingStub.get(DUMMY_REQUEST);
-            return true;
+            return blockingStub.get(DUMMY_REQUEST) != null;
         } catch (StatusRuntimeException e) {
             // This gRPC call should throw INVALID_ARGUMENT status exception
             // since "/onos-gnmi-test" path does not exists in any config model

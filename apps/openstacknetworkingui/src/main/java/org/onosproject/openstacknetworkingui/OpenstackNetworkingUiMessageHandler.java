@@ -43,6 +43,7 @@ import org.onosproject.net.host.HostService;
 import org.onosproject.net.topology.PathService;
 import org.onosproject.openstacknetworking.api.InstancePort;
 import org.onosproject.openstacknetworking.api.InstancePortService;
+import org.onosproject.openstacknetworking.api.OpenstackNetwork.Type;
 import org.onosproject.openstacknetworking.api.OpenstackNetworkService;
 import org.onosproject.openstacknode.api.OpenstackNode;
 import org.onosproject.openstacknode.api.OpenstackNodeService;
@@ -74,6 +75,10 @@ import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.onlab.util.Tools.groupedThreads;
 import static org.onosproject.net.DefaultEdgeLink.createEdgeLink;
 import static org.onosproject.openstacknetworking.api.Constants.DEFAULT_GATEWAY_MAC_STR;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.GENEVE;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.GRE;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.VLAN;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.VXLAN;
 
 /**
  * OpenStack Networking UI message handler.
@@ -103,8 +108,6 @@ public class OpenstackNetworkingUiMessageHandler extends UiMessageHandler {
     private static final String OVS_VERSION_2_7 = "2.7";
     private static final String OVS_VERSION_2_6 = "2.6";
 
-    private static final String VXLAN = "VXLAN";
-    private static final String VLAN = "VLAN";
     private static final String DL_DST = "dl_dst=";
     private static final String NW_DST = "nw_dst=";
     private static final String DEFAULT_REQUEST_STRING = "sudo ovs-appctl ofproto/trace br-int ip";
@@ -467,7 +470,8 @@ public class OpenstackNetworkingUiMessageHandler extends UiMessageHandler {
 
     }
 
-    private String sendTraceRequestToNode(String srcIp, String dstIp, OpenstackNode openstackNode, boolean uplink) {
+    private String sendTraceRequestToNode(String srcIp, String dstIp,
+                                          OpenstackNode openstackNode, boolean uplink) {
 
         Optional<InstancePort> instancePort = instancePortService.instancePorts().stream()
                 .filter(port -> port.ipAddress().getIp4Address().toString().equals(srcIp)
@@ -502,8 +506,9 @@ public class OpenstackNetworkingUiMessageHandler extends UiMessageHandler {
                     .append(srcIp)
                     .append(COMMA);
 
-            if (osNetService.networkType(srcInstancePort.networkId()).equals(VXLAN) ||
-                    osNetService.networkType(srcInstancePort.networkId()).equals(VLAN)) {
+            Type netType = osNetService.networkType(srcInstancePort.networkId());
+
+            if (netType == VXLAN || netType == VLAN || netType == GRE || netType == GENEVE) {
                 if (srcIp.equals(dstIp)) {
                     dstIp = osNetService.gatewayIp(srcInstancePort.portId());
                     requestStringBuilder.append(DL_DST)

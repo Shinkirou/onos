@@ -55,19 +55,18 @@ import org.onosproject.openstacknetworking.api.InstancePortEvent;
 import org.onosproject.openstacknetworking.api.InstancePortListener;
 import org.onosproject.openstacknetworking.api.InstancePortService;
 import org.onosproject.openstacknetworking.api.OpenstackFlowRuleService;
+import org.onosproject.openstacknetworking.api.OpenstackNetwork.Type;
 import org.onosproject.openstacknetworking.api.OpenstackNetworkAdminService;
 import org.onosproject.openstacknetworking.api.OpenstackRouterEvent;
 import org.onosproject.openstacknetworking.api.OpenstackRouterListener;
 import org.onosproject.openstacknetworking.api.OpenstackRouterService;
 import org.onosproject.openstacknetworking.util.RulePopulatorUtil;
 import org.onosproject.openstacknode.api.OpenstackNode;
-import org.onosproject.openstacknode.api.OpenstackNode.NetworkMode;
 import org.onosproject.openstacknode.api.OpenstackNodeEvent;
 import org.onosproject.openstacknode.api.OpenstackNodeListener;
 import org.onosproject.openstacknode.api.OpenstackNodeService;
 import org.openstack4j.model.network.ExternalGateway;
 import org.openstack4j.model.network.Network;
-import org.openstack4j.model.network.NetworkType;
 import org.openstack4j.model.network.Router;
 import org.openstack4j.model.network.RouterInterface;
 import org.openstack4j.model.network.Subnet;
@@ -97,10 +96,15 @@ import static org.onosproject.openstacknetworking.api.Constants.PRIORITY_SWITCHI
 import static org.onosproject.openstacknetworking.api.Constants.ROUTING_TABLE;
 import static org.onosproject.openstacknetworking.api.Constants.STAT_OUTBOUND_TABLE;
 import static org.onosproject.openstacknetworking.api.InstancePort.State.ACTIVE;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.FLAT;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.GENEVE;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.GRE;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.VLAN;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.VXLAN;
+import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.tunnelPortNumByNetType;
 import static org.onosproject.openstacknetworking.util.RulePopulatorUtil.buildExtension;
 import static org.onosproject.openstacknode.api.OpenstackNode.NodeType.COMPUTE;
 import static org.onosproject.openstacknode.api.OpenstackNode.NodeType.GATEWAY;
-import static org.openstack4j.model.network.NetworkType.FLAT;
 
 /**
  * Handles OpenStack router events.
@@ -212,17 +216,24 @@ public class OpenstackRoutingHandler {
     private void routerUpdated(Router osRouter) {
         ExternalGateway exGateway = osRouter.getExternalGatewayInfo();
         osRouterService.routerInterfaces(osRouter.getId()).forEach(iface -> {
-            Network network = osNetworkAdminService.network(osNetworkAdminService.subnet(iface.getSubnetId())
+            Network network = osNetworkAdminService.network(
+                    osNetworkAdminService.subnet(iface.getSubnetId())
                     .getNetworkId());
-            setRouterAdminRules(network.getProviderSegID(), network.getNetworkType(), !osRouter.isAdminStateUp());
+            Type netType = osNetworkAdminService.networkType(
+                    osNetworkAdminService.subnet(iface.getSubnetId())
+                    .getNetworkId());
+            setRouterAdminRules(network.getProviderSegID(),
+                                netType, !osRouter.isAdminStateUp());
         });
 
-        ExternalPeerRouter externalPeerRouter = osNetworkAdminService.externalPeerRouter(exGateway);
+        ExternalPeerRouter externalPeerRouter =
+                            osNetworkAdminService.externalPeerRouter(exGateway);
         VlanId vlanId = externalPeerRouter == null ? VlanId.NONE : externalPeerRouter.vlanId();
 
         if (exGateway == null) {
             deleteUnassociatedExternalPeerRouter();
-            osRouterService.routerInterfaces(osRouter.getId()).forEach(iface -> setSourceNat(iface, false));
+            osRouterService.routerInterfaces(osRouter.getId()).forEach(iface ->
+                    setSourceNat(iface, false));
         } else {
             osNetworkAdminService.deriveExternalPeerRouterMac(exGateway, osRouter, vlanId);
             osRouterService.routerInterfaces(osRouter.getId()).forEach(iface ->
@@ -246,7 +257,8 @@ public class OpenstackRoutingHandler {
                             !routerIps.contains(externalPeerRouter.ipAddress().toString()))
                     .forEach(externalPeerRouter -> {
                         osNetworkAdminService
-                                .deleteExternalPeerRouter(externalPeerRouter.ipAddress().toString());
+                                .deleteExternalPeerRouter(
+                                        externalPeerRouter.ipAddress().toString());
                         log.trace("Deleted unassociated external peer router {}",
                                 externalPeerRouter.ipAddress().toString());
                     });
@@ -257,9 +269,13 @@ public class OpenstackRoutingHandler {
 
     private void routerRemove(Router osRouter) {
         osRouterService.routerInterfaces(osRouter.getId()).forEach(iface -> {
-            Network network = osNetworkAdminService.network(osNetworkAdminService.subnet(iface.getSubnetId())
+            Network network = osNetworkAdminService.network(
+                    osNetworkAdminService.subnet(iface.getSubnetId())
                     .getNetworkId());
-            setRouterAdminRules(network.getProviderSegID(), network.getNetworkType(), false);
+            Type netType = osNetworkAdminService.networkType(
+                    osNetworkAdminService.subnet(iface.getSubnetId())
+                            .getNetworkId());
+            setRouterAdminRules(network.getProviderSegID(), netType, false);
         });
     }
 
@@ -275,7 +291,8 @@ public class OpenstackRoutingHandler {
 
         if (!osRouter.isAdminStateUp()) {
             Network network = osNetworkAdminService.network(osSubnet.getNetworkId());
-            setRouterAdminRules(network.getProviderSegID(), network.getNetworkType(), true);
+            Type netType = osNetworkAdminService.networkType(osSubnet.getNetworkId());
+            setRouterAdminRules(network.getProviderSegID(), netType, true);
         }
 
         setInternalRoutes(osRouter, osSubnet, true);
@@ -299,7 +316,8 @@ public class OpenstackRoutingHandler {
 
         if (!osRouter.isAdminStateUp()) {
             Network network = osNetworkAdminService.network(osSubnet.getNetworkId());
-            setRouterAdminRules(network.getProviderSegID(), network.getNetworkType(), false);
+            Type netType = osNetworkAdminService.networkType(osSubnet.getNetworkId());
+            setRouterAdminRules(network.getProviderSegID(), netType, false);
         }
 
         setInternalRoutes(osRouter, osSubnet, false);
@@ -314,11 +332,11 @@ public class OpenstackRoutingHandler {
     private void setSourceNat(RouterInterface routerIface, boolean install) {
         Subnet osSubnet = osNetworkAdminService.subnet(routerIface.getSubnetId());
         Network osNet = osNetworkAdminService.network(osSubnet.getNetworkId());
+        Type netType = osNetworkAdminService.networkType(osSubnet.getNetworkId());
 
         osNodeService.completeNodes(COMPUTE).forEach(cNode -> {
             setRulesToGateway(cNode, osNet.getProviderSegID(),
-                    IpPrefix.valueOf(osSubnet.getCidr()), osNet.getNetworkType(),
-                    install);
+                    IpPrefix.valueOf(osSubnet.getCidr()), netType, install);
         });
 
         if (useStatefulSnat) {
@@ -334,8 +352,9 @@ public class OpenstackRoutingHandler {
     private void setStatefulSnatRules(RouterInterface routerIface, boolean install) {
         Subnet osSubnet = osNetworkAdminService.subnet(routerIface.getSubnetId());
         Network osNet = osNetworkAdminService.network(osSubnet.getNetworkId());
+        Type netType = osNetworkAdminService.networkType(osSubnet.getNetworkId());
 
-        if (osNet.getNetworkType() == FLAT) {
+        if (netType == FLAT) {
             return;
         }
 
@@ -362,6 +381,7 @@ public class OpenstackRoutingHandler {
                                     Long.parseLong(osNet.getProviderSegID()),
                                     IpPrefix.valueOf(port.ipAddress(), VM_PREFIX),
                                     port.deviceId(),
+                                    netType,
                                     install));
 
                         setOvsNatIngressRule(gwNode.intgBridge(),
@@ -376,13 +396,14 @@ public class OpenstackRoutingHandler {
     private void setReactiveSnatRules(RouterInterface routerIface, boolean install) {
         Subnet osSubnet = osNetworkAdminService.subnet(routerIface.getSubnetId());
         Network osNet = osNetworkAdminService.network(osSubnet.getNetworkId());
+        Type netType = osNetworkAdminService.networkType(osSubnet.getNetworkId());
 
         osNodeService.completeNodes(GATEWAY)
                 .forEach(gwNode -> setRulesToController(
                         gwNode.intgBridge(),
                         osNet.getProviderSegID(),
                         IpPrefix.valueOf(osSubnet.getCidr()),
-                        osNet.getNetworkType(),
+                        netType,
                         install));
     }
 
@@ -391,7 +412,8 @@ public class OpenstackRoutingHandler {
         if (osRouter.getExternalGatewayInfo() == null) {
             return null;
         }
-        String extNetId = osNetworkAdminService.network(osRouter.getExternalGatewayInfo().getNetworkId()).getId();
+        String extNetId = osNetworkAdminService.network(
+                        osRouter.getExternalGatewayInfo().getNetworkId()).getId();
         Optional<Subnet> extSubnet = osNetworkAdminService.subnets().stream()
                 .filter(subnet -> subnet.getNetworkId().equals(extNetId))
                 .findAny();
@@ -437,18 +459,25 @@ public class OpenstackRoutingHandler {
 
         // take ICMP request to a subnet gateway through gateway node group
         Network net = osNetworkAdminService.network(osSubnet.getNetworkId());
+        Type netType = osNetworkAdminService.networkType(osSubnet.getNetworkId());
         Set<Subnet> routableSubnets = routableSubnets(osRouter, osSubnet.getId());
 
-        switch (net.getNetworkType()) {
+        switch (netType) {
             case VXLAN:
                 setGatewayIcmpForVxlan(osSubnet, srcNatGw, net, routableSubnets, install);
+                break;
+            case GRE:
+                setGatewayIcmpForGre(osSubnet, srcNatGw, net, routableSubnets, install);
+                break;
+            case GENEVE:
+                setGatewayIcmpForGeneve(osSubnet, srcNatGw, net, routableSubnets, install);
                 break;
             case VLAN:
                 setGatewayIcmpForVlan(osSubnet, srcNatGw, net, routableSubnets, install);
                 break;
             default:
                 final String error = String.format("%s %s", ERR_UNSUPPORTED_NET_TYPE,
-                                                            net.getNetworkType().toString());
+                                                            netType.toString());
                 throw new IllegalStateException(error);
         }
 
@@ -476,7 +505,41 @@ public class OpenstackRoutingHandler {
                         network.getProviderSegID(),
                         osSubnet,
                         routableSubnets,
-                        NetworkMode.VXLAN,
+                        VXLAN,
+                        install));
+    }
+
+    private void setGatewayIcmpForGre(Subnet osSubnet,
+                                      OpenstackNode srcNatGw,
+                                      Network network,
+                                      Set<Subnet> routableSubnets,
+                                      boolean install) {
+        osNodeService.completeNodes(COMPUTE).stream()
+                .filter(cNode -> cNode.dataIp() != null)
+                .forEach(cNode -> setRulesToGatewayWithRoutableSubnets(
+                        cNode,
+                        srcNatGw,
+                        network.getProviderSegID(),
+                        osSubnet,
+                        routableSubnets,
+                        GRE,
+                        install));
+    }
+
+    private void setGatewayIcmpForGeneve(Subnet osSubnet,
+                                         OpenstackNode srcNatGw,
+                                         Network network,
+                                         Set<Subnet> routableSubnets,
+                                         boolean install) {
+        osNodeService.completeNodes(COMPUTE).stream()
+                .filter(cNode -> cNode.dataIp() != null)
+                .forEach(cNode -> setRulesToGatewayWithRoutableSubnets(
+                        cNode,
+                        srcNatGw,
+                        network.getProviderSegID(),
+                        osSubnet,
+                        routableSubnets,
+                        GENEVE,
                         install));
     }
 
@@ -493,12 +556,12 @@ public class OpenstackRoutingHandler {
                         network.getProviderSegID(),
                         osSubnet,
                         routableSubnets,
-                        NetworkMode.VLAN,
+                        VLAN,
                         install));
     }
 
     private void setInternalRoutes(Router osRouter, Subnet updatedSubnet, boolean install) {
-        Network updatedNetwork = osNetworkAdminService.network(updatedSubnet.getNetworkId());
+        Type netType = osNetworkAdminService.networkType(updatedSubnet.getNetworkId());
         Set<Subnet> routableSubnets = routableSubnets(osRouter, updatedSubnet.getId());
         String updatedSegmentId = getSegmentId(updatedSubnet);
 
@@ -511,7 +574,7 @@ public class OpenstackRoutingHandler {
                     updatedSegmentId,
                     IpPrefix.valueOf(updatedSubnet.getCidr()),
                     IpPrefix.valueOf(updatedSubnet.getCidr()),
-                    updatedNetwork.getNetworkType(),
+                    netType,
                     install
             );
 
@@ -522,7 +585,7 @@ public class OpenstackRoutingHandler {
                         getSegmentId(subnet),
                         IpPrefix.valueOf(updatedSubnet.getCidr()),
                         IpPrefix.valueOf(subnet.getCidr()),
-                        updatedNetwork.getNetworkType(),
+                        netType,
                         install
                 );
                 setInternalRouterRules(
@@ -531,7 +594,7 @@ public class OpenstackRoutingHandler {
                         updatedSegmentId,
                         IpPrefix.valueOf(subnet.getCidr()),
                         IpPrefix.valueOf(updatedSubnet.getCidr()),
-                        updatedNetwork.getNetworkType(),
+                        netType,
                         install
                 );
             });
@@ -581,11 +644,13 @@ public class OpenstackRoutingHandler {
 
     private void setInternalRouterRules(DeviceId deviceId, String srcSegId, String dstSegId,
                                         IpPrefix srcSubnet, IpPrefix dstSubnet,
-                                        NetworkType networkType, boolean install) {
+                                        Type networkType, boolean install) {
 
         switch (networkType) {
             case VXLAN:
-                setInternalRouterRulesForVxlan(deviceId, srcSegId, dstSegId,
+            case GRE:
+            case GENEVE:
+                setInternalRouterRulesForTunnel(deviceId, srcSegId, dstSegId,
                                                 srcSubnet, dstSubnet, install);
                 break;
             case VLAN:
@@ -600,12 +665,12 @@ public class OpenstackRoutingHandler {
 
     }
 
-    private void setInternalRouterRulesForVxlan(DeviceId deviceId,
-                                                String srcSegmentId,
-                                                String dstSegmentId,
-                                                IpPrefix srcSubnet,
-                                                IpPrefix dstSubnet,
-                                                boolean install) {
+    private void setInternalRouterRulesForTunnel(DeviceId deviceId,
+                                                 String srcSegmentId,
+                                                 String dstSegmentId,
+                                                 IpPrefix srcSubnet,
+                                                 IpPrefix dstSubnet,
+                                                 boolean install) {
         TrafficSelector selector;
         TrafficTreatment treatment;
         selector = DefaultTrafficSelector.builder()
@@ -702,9 +767,13 @@ public class OpenstackRoutingHandler {
                 install);
     }
 
-    private void setRulesToGateway(OpenstackNode osNode, String segmentId, IpPrefix srcSubnet,
-                                   NetworkType networkType, boolean install) {
-        OpenstackNode sourceNatGateway = osNodeService.completeNodes(GATEWAY).stream().findFirst().orElse(null);
+    private void setRulesToGateway(OpenstackNode osNode,
+                                   String segmentId,
+                                   IpPrefix srcSubnet,
+                                   Type networkType,
+                                   boolean install) {
+        OpenstackNode sourceNatGateway =
+                osNodeService.completeNodes(GATEWAY).stream().findFirst().orElse(null);
 
         if (sourceNatGateway == null) {
             return;
@@ -717,6 +786,8 @@ public class OpenstackRoutingHandler {
 
         switch (networkType) {
             case VXLAN:
+            case GRE:
+            case GENEVE:
                 sBuilder.matchTunnelId(Long.parseLong(segmentId));
                 break;
             case VLAN:
@@ -733,12 +804,15 @@ public class OpenstackRoutingHandler {
 
         switch (networkType) {
             case VXLAN:
+            case GRE:
+            case GENEVE:
+                PortNumber portNum = tunnelPortNumByNetType(networkType, osNode);
                 tBuilder.extension(buildExtension(
                                 deviceService,
                                 osNode.intgBridge(),
                                 sourceNatGateway.dataIp().getIp4Address()),
                                 osNode.intgBridge())
-                        .setOutput(osNode.tunnelPortNum());
+                        .setOutput(portNum);
                 break;
 
             case VLAN:
@@ -759,13 +833,20 @@ public class OpenstackRoutingHandler {
                 install);
     }
 
-    private void setRulesForSnatIngressRule(DeviceId deviceId, Long vni, IpPrefix destVmIp,
-                                            DeviceId dstDeviceId, boolean install) {
+    private void setRulesForSnatIngressRule(DeviceId deviceId,
+                                            Long vni,
+                                            IpPrefix destVmIp,
+                                            DeviceId dstDeviceId,
+                                            Type networkType,
+                                            boolean install) {
 
         TrafficSelector selector = DefaultTrafficSelector.builder()
                 .matchEthType(Ethernet.TYPE_IPV4)
                 .matchIPDst(destVmIp)
                 .build();
+
+        PortNumber portNum = tunnelPortNumByNetType(networkType,
+                                                    osNodeService.node(deviceId));
 
         TrafficTreatment treatment = DefaultTrafficTreatment.builder()
                 .setTunnelId(vni)
@@ -774,7 +855,7 @@ public class OpenstackRoutingHandler {
                         deviceId,
                         osNodeService.node(dstDeviceId).dataIp().getIp4Address()),
                         deviceId)
-                .setOutput(osNodeService.node(deviceId).tunnelPortNum())
+                .setOutput(portNum)
                 .build();
 
         osFlowRuleService.setRule(
@@ -787,46 +868,56 @@ public class OpenstackRoutingHandler {
                 install);
     }
 
-    private void setRulesToGatewayWithRoutableSubnets(OpenstackNode osNode, OpenstackNode sourceNatGateway,
-                                                      String segmentId, Subnet updatedSubnet,
-                                                      Set<Subnet> routableSubnets, NetworkMode networkMode,
+    private void setRulesToGatewayWithRoutableSubnets(OpenstackNode osNode,
+                                                      OpenstackNode sourceNatGateway,
+                                                      String segmentId,
+                                                      Subnet updatedSubnet,
+                                                      Set<Subnet> routableSubnets,
+                                                      Type networkType,
                                                       boolean install) {
         //At first we install flow rules to gateway with segId and gatewayIp of updated subnet
-        setRulesToGatewayWithDstIp(osNode, sourceNatGateway, segmentId, IpAddress.valueOf(updatedSubnet.getGateway()),
-                networkMode, install);
+        setRulesToGatewayWithDstIp(osNode, sourceNatGateway, segmentId,
+                IpAddress.valueOf(updatedSubnet.getGateway()), networkType, install);
 
         routableSubnets.forEach(subnet -> {
             setRulesToGatewayWithDstIp(osNode, sourceNatGateway,
                     segmentId, IpAddress.valueOf(subnet.getGateway()),
-                    networkMode, install);
+                    networkType, install);
 
             Network network = osNetworkAdminService.network(subnet.getNetworkId());
             setRulesToGatewayWithDstIp(osNode, sourceNatGateway,
                     network.getProviderSegID(), IpAddress.valueOf(updatedSubnet.getGateway()),
-                    networkMode, install);
+                    networkType, install);
         });
     }
 
-    private void setRulesToGatewayWithDstIp(OpenstackNode osNode, OpenstackNode sourceNatGateway,
-                                            String segmentId, IpAddress dstIp,
-                                            NetworkMode networkMode, boolean install) {
+    private void setRulesToGatewayWithDstIp(OpenstackNode osNode,
+                                            OpenstackNode sourceNatGateway,
+                                            String segmentId,
+                                            IpAddress dstIp,
+                                            Type networkType,
+                                            boolean install) {
         TrafficSelector.Builder sBuilder = DefaultTrafficSelector.builder()
                 .matchEthType(Ethernet.TYPE_IPV4)
                 .matchIPDst(dstIp.getIp4Address().toIpPrefix());
 
         TrafficTreatment.Builder tBuilder = DefaultTrafficTreatment.builder();
 
-        switch (networkMode) {
+        switch (networkType) {
             case VXLAN:
+            case GRE:
+            case GENEVE:
                 sBuilder.matchTunnelId(Long.parseLong(segmentId));
+
+                PortNumber portNum = tunnelPortNumByNetType(networkType, osNode);
+
                 tBuilder.extension(buildExtension(
                         deviceService,
                         osNode.intgBridge(),
                         sourceNatGateway.dataIp().getIp4Address()),
                         osNode.intgBridge())
-                        .setOutput(osNode.tunnelPortNum());
+                        .setOutput(portNum);
                 break;
-
             case VLAN:
                 sBuilder.matchVlanId(VlanId.vlanId(segmentId));
                 tBuilder.setOutput(osNode.vlanPortNum());
@@ -846,7 +937,10 @@ public class OpenstackRoutingHandler {
                 install);
     }
 
-    private void setOvsNatIngressRule(DeviceId deviceId, IpPrefix cidr, MacAddress dstMac, boolean install) {
+    private void setOvsNatIngressRule(DeviceId deviceId,
+                                      IpPrefix cidr,
+                                      MacAddress dstMac,
+                                      boolean install) {
 
         TrafficSelector selector = DefaultTrafficSelector.builder()
                 .matchEthType(Ethernet.TYPE_IPV4)
@@ -875,7 +969,10 @@ public class OpenstackRoutingHandler {
                 install);
     }
 
-    private void setOvsNatEgressRule(DeviceId deviceId, IpAddress natAddress, long vni, PortNumber output,
+    private void setOvsNatEgressRule(DeviceId deviceId,
+                                     IpAddress natAddress,
+                                     long vni,
+                                     PortNumber output,
                                      boolean install) {
 
         TrafficSelector selector = DefaultTrafficSelector.builder()
@@ -908,8 +1005,11 @@ public class OpenstackRoutingHandler {
                 install);
     }
 
-    private void setRulesToController(DeviceId deviceId, String segmentId, IpPrefix srcSubnet,
-                                      NetworkType networkType, boolean install) {
+    private void setRulesToController(DeviceId deviceId,
+                                      String segmentId,
+                                      IpPrefix srcSubnet,
+                                      Type networkType,
+                                      boolean install) {
         TrafficSelector.Builder sBuilder = DefaultTrafficSelector.builder()
                 .matchEthType(Ethernet.TYPE_IPV4)
                 .matchIPSrc(srcSubnet)
@@ -917,6 +1017,8 @@ public class OpenstackRoutingHandler {
 
         switch (networkType) {
             case VXLAN:
+            case GRE:
+            case GENEVE:
                 sBuilder.matchTunnelId(Long.parseLong(segmentId));
                 break;
             case VLAN:
@@ -931,7 +1033,7 @@ public class OpenstackRoutingHandler {
 
         TrafficTreatment.Builder tBuilder = DefaultTrafficTreatment.builder();
 
-        if (networkType.equals(NetworkType.VLAN)) {
+        if (networkType == VLAN) {
             tBuilder.popVlan();
         }
 
@@ -947,13 +1049,17 @@ public class OpenstackRoutingHandler {
                 install);
     }
 
-    private void setRouterAdminRules(String segmentId, NetworkType networkType, boolean install) {
+    private void setRouterAdminRules(String segmentId,
+                                     Type networkType,
+                                     boolean install) {
         TrafficTreatment treatment;
         TrafficSelector.Builder sBuilder = DefaultTrafficSelector.builder()
                 .matchEthType(Ethernet.TYPE_IPV4);
 
         switch (networkType) {
             case VXLAN:
+            case GRE:
+            case GENEVE:
                 sBuilder.matchTunnelId(Long.parseLong(segmentId));
                 break;
             case VLAN:
@@ -1217,7 +1323,9 @@ public class OpenstackRoutingHandler {
 
         private void instPortDetected(InstancePort instPort) {
             Network network = osNetworkAdminService.network(instPort.networkId());
-            if (network.getNetworkType() == FLAT) {
+            Type netType = osNetworkAdminService.networkType(instPort.networkId());
+
+            if (netType == FLAT) {
                 return;
             }
 
@@ -1227,13 +1335,15 @@ public class OpenstackRoutingHandler {
                                 gwNode.intgBridge(),
                                 Long.parseLong(network.getProviderSegID()),
                                 IpPrefix.valueOf(instPort.ipAddress(), VM_PREFIX),
-                                instPort.deviceId(), true));
+                                instPort.deviceId(), netType, true));
             }
         }
 
         private void instPortRemoved(InstancePort instPort) {
             Network network = osNetworkAdminService.network(instPort.networkId());
-            if (network.getNetworkType() == FLAT) {
+            Type netType = osNetworkAdminService.networkType(instPort.networkId());
+
+            if (netType == FLAT) {
                 return;
             }
 
@@ -1243,7 +1353,7 @@ public class OpenstackRoutingHandler {
                                 gwNode.intgBridge(),
                                 Long.parseLong(network.getProviderSegID()),
                                 IpPrefix.valueOf(instPort.ipAddress(), VM_PREFIX),
-                                instPort.deviceId(), false));
+                                instPort.deviceId(), netType, false));
             }
         }
     }

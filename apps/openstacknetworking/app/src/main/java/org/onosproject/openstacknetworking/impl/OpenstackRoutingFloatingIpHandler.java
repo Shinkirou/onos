@@ -23,7 +23,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
-
 import org.onlab.packet.Ethernet;
 import org.onlab.packet.IpAddress;
 import org.onlab.packet.MacAddress;
@@ -34,6 +33,7 @@ import org.onosproject.cluster.NodeId;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.core.CoreService;
 import org.onosproject.net.DeviceId;
+import org.onosproject.net.PortNumber;
 import org.onosproject.net.device.DeviceService;
 import org.onosproject.net.flow.DefaultTrafficSelector;
 import org.onosproject.net.flow.DefaultTrafficTreatment;
@@ -47,6 +47,7 @@ import org.onosproject.openstacknetworking.api.InstancePortAdminService;
 import org.onosproject.openstacknetworking.api.InstancePortEvent;
 import org.onosproject.openstacknetworking.api.InstancePortListener;
 import org.onosproject.openstacknetworking.api.OpenstackFlowRuleService;
+import org.onosproject.openstacknetworking.api.OpenstackNetwork.Type;
 import org.onosproject.openstacknetworking.api.OpenstackNetworkEvent;
 import org.onosproject.openstacknetworking.api.OpenstackNetworkListener;
 import org.onosproject.openstacknetworking.api.OpenstackNetworkService;
@@ -60,10 +61,8 @@ import org.onosproject.openstacknode.api.OpenstackNodeListener;
 import org.onosproject.openstacknode.api.OpenstackNodeService;
 import org.openstack4j.model.network.NetFloatingIP;
 import org.openstack4j.model.network.Network;
-import org.openstack4j.model.network.NetworkType;
 import org.openstack4j.model.network.Port;
 import org.openstack4j.openstack.networking.domain.NeutronFloatingIP;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +80,10 @@ import static org.onosproject.openstacknetworking.api.Constants.ROUTING_TABLE;
 import static org.onosproject.openstacknetworking.api.InstancePort.State.REMOVE_PENDING;
 import static org.onosproject.openstacknetworking.api.InstancePortEvent.Type.OPENSTACK_INSTANCE_MIGRATION_ENDED;
 import static org.onosproject.openstacknetworking.api.InstancePortEvent.Type.OPENSTACK_INSTANCE_MIGRATION_STARTED;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.GRE;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.VLAN;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.VXLAN;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.GENEVE;
 import static org.onosproject.openstacknetworking.api.OpenstackNetworkEvent.Type.OPENSTACK_PORT_PRE_REMOVE;
 import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.associatedFloatingIp;
 import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.externalPeerRouterForNetwork;
@@ -89,6 +92,7 @@ import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.g
 import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.isAssociatedWithVM;
 import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.processGarpPacketForFloatingIp;
 import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.swapStaleLocation;
+import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.tunnelPortNumByNetId;
 import static org.onosproject.openstacknetworking.util.RulePopulatorUtil.buildExtension;
 import static org.onosproject.openstacknode.api.OpenstackNode.NodeType.GATEWAY;
 
@@ -140,11 +144,16 @@ public class OpenstackRoutingFloatingIpHandler {
 
     private final ExecutorService eventExecutor = newSingleThreadExecutor(
             groupedThreads(this.getClass().getSimpleName(), "event-handler", log));
-    private final OpenstackRouterListener floatingIpListener = new InternalFloatingIpListener();
-    private final InstancePortListener instancePortListener = new InternalInstancePortListener();
-    private final OpenstackNodeListener osNodeListener = new InternalNodeListener();
-    private final OpenstackNetworkListener osNetworkListener = new InternalOpenstackNetworkListener();
-    private final InstancePortListener instPortListener = new InternalInstancePortListener();
+    private final OpenstackRouterListener
+                            floatingIpListener = new InternalFloatingIpListener();
+    private final InstancePortListener
+                            instancePortListener = new InternalInstancePortListener();
+    private final OpenstackNodeListener
+                            osNodeListener = new InternalNodeListener();
+    private final OpenstackNetworkListener
+                            osNetworkListener = new InternalOpenstackNetworkListener();
+    private final InstancePortListener
+                            instPortListener = new InternalInstancePortListener();
 
     private ApplicationId appId;
     private NodeId localNodeId;
@@ -325,26 +334,36 @@ public class OpenstackRoutingFloatingIpHandler {
 
         TrafficTreatment.Builder tBuilder = DefaultTrafficTreatment.builder();
 
-        OpenstackNode selectedGatewayNode = getGwByComputeDevId(gateways, instPort.deviceId());
+        OpenstackNode selectedGatewayNode =
+                            getGwByComputeDevId(gateways, instPort.deviceId());
 
         if (selectedGatewayNode == null) {
             log.warn(ERR_FLOW + "no gateway node selected");
             return;
         }
 
-        switch (osNet.getNetworkType()) {
+        Type netType = osNetworkService.networkType(osNet.getId());
+
+        switch (netType) {
             case VXLAN:
-                if (osNodeService.node(instPort.deviceId()).tunnelPortNum() == null) {
+            case GRE:
+            case GENEVE:
+                PortNumber portNum = tunnelPortNumByNetId(instPort.networkId(),
+                        osNetworkService, osNodeService.node(instPort.deviceId()));
+
+                if (portNum == null) {
                     log.warn(ERR_FLOW + "no tunnel port");
                     return;
                 }
+
                 sBuilder.matchTunnelId(Long.parseLong(osNet.getProviderSegID()));
+
                 tBuilder.extension(buildExtension(
                         deviceService,
                         instPort.deviceId(),
                         selectedGatewayNode.dataIp().getIp4Address()),
                         instPort.deviceId())
-                        .setOutput(osNodeService.node(instPort.deviceId()).tunnelPortNum());
+                        .setOutput(portNum);
                 break;
             case VLAN:
                 if (osNodeService.node(instPort.deviceId()).vlanPortNum() == null) {
@@ -375,17 +394,28 @@ public class OpenstackRoutingFloatingIpHandler {
                                                   ExternalPeerRouter externalPeerRouter,
                                                   Set<OpenstackNode> gateways, boolean install) {
         OpenstackNode cNode = osNodeService.node(instPort.deviceId());
+        Type netType = osNetworkService.networkType(osNet.getId());
         if (cNode == null) {
             final String error = String.format("Cannot find openstack node for device %s",
                     instPort.deviceId());
             throw new IllegalStateException(error);
         }
-        if (osNet.getNetworkType() == NetworkType.VXLAN && cNode.dataIp() == null) {
+        if (netType == VXLAN && cNode.dataIp() == null) {
             final String errorFormat = ERR_FLOW + "VXLAN mode is not ready for %s";
             final String error = String.format(errorFormat, floatingIp, cNode.hostname());
             throw new IllegalStateException(error);
         }
-        if (osNet.getNetworkType() == NetworkType.VLAN && cNode.vlanIntf() == null) {
+        if (netType == GRE && cNode.dataIp() == null) {
+            final String errorFormat = ERR_FLOW + "GRE mode is not ready for %s";
+            final String error = String.format(errorFormat, floatingIp, cNode.hostname());
+            throw new IllegalStateException(error);
+        }
+        if (netType == GENEVE && cNode.dataIp() == null) {
+            final String errorFormat = ERR_FLOW + "GENEVE mode is not ready for %s";
+            final String error = String.format(errorFormat, floatingIp, cNode.hostname());
+            throw new IllegalStateException(error);
+        }
+        if (netType == VLAN && cNode.vlanIntf() == null) {
             final String errorFormat = ERR_FLOW + "VLAN mode is not ready for %s";
             final String error = String.format(errorFormat, floatingIp, cNode.hostname());
             throw new IllegalStateException(error);
@@ -415,15 +445,19 @@ public class OpenstackRoutingFloatingIpHandler {
             externalTreatmentBuilder.popVlan();
         }
 
-        switch (osNet.getNetworkType()) {
+        switch (netType) {
             case VXLAN:
+            case GRE:
+            case GENEVE:
+                PortNumber portNum = tunnelPortNumByNetId(instPort.networkId(),
+                        osNetworkService, selectedGatewayNode);
                 externalTreatmentBuilder.setTunnelId(Long.valueOf(osNet.getProviderSegID()))
                         .extension(buildExtension(
                                 deviceService,
                                 selectedGatewayNode.intgBridge(),
                                 cNode.dataIp().getIp4Address()),
                                 selectedGatewayNode.intgBridge())
-                        .setOutput(selectedGatewayNode.tunnelPortNum());
+                        .setOutput(portNum);
                 break;
             case VLAN:
                 externalTreatmentBuilder.pushVlan()
@@ -455,8 +489,12 @@ public class OpenstackRoutingFloatingIpHandler {
                 .matchEthType(Ethernet.TYPE_IPV4)
                 .matchIPSrc(instPort.ipAddress().toIpPrefix());
 
-        switch (osNet.getNetworkType()) {
+        Type netType = osNetworkService.networkType(osNet.getId());
+
+        switch (netType) {
             case VXLAN:
+            case GRE:
+            case GENEVE:
                 sBuilder.matchTunnelId(Long.valueOf(osNet.getProviderSegID()));
                 break;
             case VLAN:
@@ -476,7 +514,7 @@ public class OpenstackRoutingFloatingIpHandler {
                     .setEthSrc(instPort.macAddress())
                     .setEthDst(externalPeerRouter.macAddress());
 
-            if (osNet.getNetworkType().equals(NetworkType.VLAN)) {
+            if (netType == VLAN) {
                 tBuilder.popVlan();
             }
 

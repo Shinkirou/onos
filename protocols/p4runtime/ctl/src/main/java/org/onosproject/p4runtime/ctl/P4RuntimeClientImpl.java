@@ -138,7 +138,7 @@ final class P4RuntimeClientImpl extends AbstractGrpcClient implements P4RuntimeC
     P4RuntimeClientImpl(P4RuntimeClientKey clientKey, ManagedChannel channel,
                         P4RuntimeControllerImpl controller) {
 
-        super(clientKey, channel);
+        super(clientKey);
         this.p4DeviceId = clientKey.p4DeviceId();
         this.controller = controller;
 
@@ -379,12 +379,60 @@ final class P4RuntimeClientImpl extends AbstractGrpcClient implements P4RuntimeC
         }
         if (!resp.getConfig().hasCookie()) {
             log.warn("{} returned GetForwardingPipelineConfigResponse " +
-                             "with 'cookie' field unset",
+                             "with 'cookie' field unset. " +
+                             "Will try by comparing 'device_data'...",
                      deviceId);
-            return false;
+            return doIsPipelineConfigSetWithData(pipeconf, deviceData);
         }
 
         return resp.getConfig().getCookie().getCookie() == pipeconf.fingerprint();
+    }
+
+    private boolean doIsPipelineConfigSetWithData(PiPipeconf pipeconf, ByteBuffer deviceData) {
+
+        GetForwardingPipelineConfigRequest request = GetForwardingPipelineConfigRequest
+                .newBuilder()
+                .setDeviceId(p4DeviceId)
+                .build();
+
+        GetForwardingPipelineConfigResponse resp;
+        try {
+            resp = this.blockingStub
+                    .getForwardingPipelineConfig(request);
+        } catch (StatusRuntimeException ex) {
+            checkGrpcException(ex);
+            return false;
+        }
+
+        ForwardingPipelineConfig expectedConfig = getPipelineConfig(
+                pipeconf, deviceData);
+
+        if (expectedConfig == null) {
+            return false;
+        }
+        if (!resp.hasConfig()) {
+            log.warn("{} returned GetForwardingPipelineConfigResponse " +
+                             "with 'config' field unset",
+                     deviceId);
+            return false;
+        }
+        if (resp.getConfig().getP4DeviceConfig().isEmpty()
+                && !expectedConfig.getP4DeviceConfig().isEmpty()) {
+            // Don't bother with a warn or error since we don't really allow
+            // updating the pipeline to a different one. So the P4Info should be
+            // enough for us.
+            log.debug("{} returned GetForwardingPipelineConfigResponse " +
+                              "with empty 'p4_device_config' field, " +
+                              "equality will be based only on P4Info",
+                      deviceId);
+            return resp.getConfig().getP4Info().equals(
+                    expectedConfig.getP4Info());
+        } else {
+            return resp.getConfig().getP4DeviceConfig()
+                    .equals(expectedConfig.getP4DeviceConfig())
+                    && resp.getConfig().getP4Info()
+                    .equals(expectedConfig.getP4Info());
+        }
     }
 
     private boolean doSetPipelineConfig(PiPipeconf pipeconf, ByteBuffer deviceData) {
@@ -1115,7 +1163,7 @@ final class P4RuntimeClientImpl extends AbstractGrpcClient implements P4RuntimeC
             }
             return okEntities;
         } else {
-            log.warn("Unable to reconcile error details to updates " +
+            log.warn("Unable to reconcile error details to {} updates " +
                              "(sent {} updates, but device returned {} errors)",
                      entryType, writeEntities.size(), errors.size());
             errors.stream()

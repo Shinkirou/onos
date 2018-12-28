@@ -50,7 +50,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -62,6 +61,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * Default implementation of the GrpcChannelController.
@@ -71,17 +71,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class GrpcChannelControllerImpl implements GrpcChannelController {
 
     // FIXME: Should use message size to determine whether it needs to log the message or not.
-    private  static final String SET_FORWARDING_PIPELINE_CONFIG_METHOD = "p4.P4Runtime/SetForwardingPipelineConfig";
+    private static final String SET_FORWARDING_PIPELINE_CONFIG_METHOD = "p4.P4Runtime/SetForwardingPipelineConfig";
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
     protected ComponentConfigService componentConfigService;
 
     // Hint: set to true to log all gRPC messages received/sent on all channels
     // Does not enable log on existing channels
-    private static final boolean DEFAULT_LOG_LEVEL = false;
-    @Property(name = "enableMessageLog", boolValue =  DEFAULT_LOG_LEVEL,
-            label = "Indicates whether to log all gRPC messages sent and received on all channels")
-    public static boolean enableMessageLog = DEFAULT_LOG_LEVEL;
+    private static final boolean ENABLE_MESSAGE_LOG_DEFAULT = false;
+    private static final String ENABLE_MESSAGE_LOG = "enableMessageLog";
+    @Property(name = ENABLE_MESSAGE_LOG, boolValue = ENABLE_MESSAGE_LOG_DEFAULT,
+            label = "Indicates whether to log all gRPC messages on new chanels")
+    public static boolean enableMessageLog = ENABLE_MESSAGE_LOG_DEFAULT;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -99,24 +100,24 @@ public class GrpcChannelControllerImpl implements GrpcChannelController {
     public void modified(ComponentContext context) {
         if (context != null) {
             Dictionary<?, ?> properties = context.getProperties();
-            enableMessageLog = Tools.isPropertyEnabled(properties, "enableMessageLog",
-                    DEFAULT_LOG_LEVEL);
-            log.info("Configured. Log of gRPC messages is {}", enableMessageLog ? "enabled" : "disabled");
+            enableMessageLog = Tools.isPropertyEnabled(
+                    properties, ENABLE_MESSAGE_LOG, ENABLE_MESSAGE_LOG_DEFAULT);
+            log.info("Configured. Log of gRPC messages is {} for new channels",
+                     enableMessageLog ? "enabled" : "disabled");
         }
     }
 
     @Deactivate
     public void deactivate() {
         componentConfigService.unregisterProperties(getClass(), false);
-        channels.values().forEach(ManagedChannel::shutdown);
+        channels.values().forEach(ManagedChannel::shutdownNow);
         channels.clear();
         log.info("Stopped");
     }
 
     @Override
     public ManagedChannel connectChannel(GrpcChannelId channelId,
-                                         ManagedChannelBuilder<?> channelBuilder)
-            throws IOException {
+                                         ManagedChannelBuilder<?> channelBuilder) {
         checkNotNull(channelId);
         checkNotNull(channelBuilder);
 
@@ -124,11 +125,23 @@ public class GrpcChannelControllerImpl implements GrpcChannelController {
         lock.lock();
 
         try {
-            channelBuilder.intercept(new InternalLogChannelInterceptor(channelId));
+            if (channels.containsKey(channelId)) {
+                throw new IllegalArgumentException(format(
+                        "A channel with ID '%s' already exists", channelId));
+            }
+            if (enableMessageLog) {
+                channelBuilder.intercept(new InternalLogChannelInterceptor(channelId));
+            }
             ManagedChannel channel = channelBuilder.build();
-            // Forced connection not yet implemented. Use workaround...
+            // Forced connection API is still experimental. Use workaround...
             // channel.getState(true);
-            doDummyMessage(channel);
+            try {
+                doDummyMessage(channel);
+            } catch (StatusRuntimeException e) {
+                shutdownNowAndWait(channel, channelId);
+                throw e;
+            }
+            // If here, channel is open.
             channels.put(channelId, channel);
             return channel;
         } finally {
@@ -136,18 +149,20 @@ public class GrpcChannelControllerImpl implements GrpcChannelController {
         }
     }
 
-    private void doDummyMessage(ManagedChannel channel) throws IOException {
+    private boolean doDummyMessage(ManagedChannel channel) throws StatusRuntimeException {
         DummyServiceGrpc.DummyServiceBlockingStub dummyStub = DummyServiceGrpc
                 .newBlockingStub(channel)
                 .withDeadlineAfter(CONNECTION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         try {
-            dummyStub.sayHello(Dummy.DummyMessageThatNoOneWouldReallyUse
-                                       .getDefaultInstance());
+            return dummyStub.sayHello(Dummy.DummyMessageThatNoOneWouldReallyUse
+                                              .getDefaultInstance()) != null;
         } catch (StatusRuntimeException e) {
-            if (e.getStatus() != Status.UNIMPLEMENTED) {
+            if (e.getStatus().equals(Status.UNIMPLEMENTED)) {
                 // UNIMPLEMENTED means that the server received our message but
                 // doesn't know how to handle it. Hence, channel is open.
-                throw new IOException(e);
+                return true;
+            } else {
+                throw e;
             }
         }
     }
@@ -161,16 +176,15 @@ public class GrpcChannelControllerImpl implements GrpcChannelController {
 
         try {
             if (!channels.containsKey(channelId)) {
-                log.warn("Can't check if channel open for unknown channel ID {}",
+                log.warn("Unknown channel ID '{}', can't check if channel is open",
                          channelId);
                 return false;
             }
             try {
-                doDummyMessage(channels.get(channelId));
-                return true;
-            } catch (IOException e) {
+                return doDummyMessage(channels.get(channelId));
+            } catch (StatusRuntimeException e) {
                 log.debug("Unable to send dummy message to {}: {}",
-                          channelId, e.getCause().getMessage());
+                          channelId, e.toString());
                 return false;
             }
         } finally {
@@ -184,25 +198,27 @@ public class GrpcChannelControllerImpl implements GrpcChannelController {
 
         Lock lock = channelLocks.get(channelId);
         lock.lock();
-
         try {
-            if (!channels.containsKey(channelId)) {
-                // Nothing to do.
-                return;
+            final ManagedChannel channel = channels.remove(channelId);
+            if (channel != null) {
+                shutdownNowAndWait(channel, channelId);
             }
-            ManagedChannel channel = channels.get(channelId);
-
-            try {
-                channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                log.warn("Channel {} didn't shut down in time.");
-                channel.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
-
-            channels.remove(channelId);
         } finally {
             lock.unlock();
+        }
+    }
+
+    private void shutdownNowAndWait(ManagedChannel channel, GrpcChannelId channelId) {
+        try {
+            if (!channel.shutdownNow()
+                    .awaitTermination(5, TimeUnit.SECONDS)) {
+                log.error("Channel '{}' didn't terminate, although we " +
+                                  "triggered a shutdown and waited",
+                          channelId);
+            }
+        } catch (InterruptedException e) {
+            log.warn("Channel {} didn't shutdown in time", channelId);
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -261,8 +277,8 @@ public class GrpcChannelControllerImpl implements GrpcChannelController {
                     if (enableMessageLog && !methodDescriptor.getFullMethodName()
                             .startsWith(SET_FORWARDING_PIPELINE_CONFIG_METHOD)) {
                         log.info("*** SENDING GRPC MESSAGE [{}]\n{}:\n{}",
-                                channelId, methodDescriptor.getFullMethodName(),
-                                message.toString());
+                                 channelId, methodDescriptor.getFullMethodName(),
+                                 message.toString());
                     }
                     super.sendMessage(message);
                 }
@@ -280,8 +296,8 @@ public class GrpcChannelControllerImpl implements GrpcChannelController {
                         public void onMessage(RespT message) {
                             if (enableMessageLog) {
                                 log.info("*** RECEIVED GRPC MESSAGE [{}]\n{}:\n{}",
-                                        channelId, methodDescriptor.getFullMethodName(),
-                                        message.toString());
+                                         channelId, methodDescriptor.getFullMethodName(),
+                                         message.toString());
                             }
                             super.onMessage(message);
                         }

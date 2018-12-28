@@ -53,6 +53,7 @@ import org.onosproject.openstacknetworking.api.InstancePortEvent;
 import org.onosproject.openstacknetworking.api.InstancePortListener;
 import org.onosproject.openstacknetworking.api.InstancePortService;
 import org.onosproject.openstacknetworking.api.OpenstackFlowRuleService;
+import org.onosproject.openstacknetworking.api.OpenstackNetwork.Type;
 import org.onosproject.openstacknetworking.api.OpenstackNetworkEvent;
 import org.onosproject.openstacknetworking.api.OpenstackNetworkListener;
 import org.onosproject.openstacknetworking.api.OpenstackNetworkService;
@@ -61,7 +62,6 @@ import org.onosproject.openstacknode.api.OpenstackNodeEvent;
 import org.onosproject.openstacknode.api.OpenstackNodeListener;
 import org.onosproject.openstacknode.api.OpenstackNodeService;
 import org.openstack4j.model.network.Network;
-import org.openstack4j.model.network.NetworkType;
 import org.openstack4j.model.network.Subnet;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -88,8 +88,14 @@ import static org.onosproject.openstacknetworking.api.Constants.PRIORITY_ARP_GAT
 import static org.onosproject.openstacknetworking.api.Constants.PRIORITY_ARP_REPLY_RULE;
 import static org.onosproject.openstacknetworking.api.Constants.PRIORITY_ARP_REQUEST_RULE;
 import static org.onosproject.openstacknetworking.api.InstancePort.State.ACTIVE;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.FLAT;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.GENEVE;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.GRE;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.VLAN;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.VXLAN;
 import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.getPropertyValue;
 import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.swapStaleLocation;
+import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.tunnelPortNumByNetId;
 import static org.onosproject.openstacknetworking.util.RulePopulatorUtil.buildExtension;
 import static org.onosproject.openstacknode.api.OpenstackNode.NodeType.COMPUTE;
 
@@ -296,6 +302,8 @@ public class OpenstackSwitchingArpHandler {
 
         if (ARP_BROADCAST_MODE.equals(getArpMode())) {
 
+            Type netType = osNetworkService.networkType(network.getId());
+
             String gateway = osSubnet.getGateway();
             if (gateway == null) {
                 return;
@@ -304,10 +312,10 @@ public class OpenstackSwitchingArpHandler {
             TrafficSelector.Builder sBuilder = DefaultTrafficSelector.builder();
             TrafficTreatment.Builder tBuilder = DefaultTrafficTreatment.builder();
 
-            if (NetworkType.VLAN == network.getNetworkType()) {
+            if (netType == VLAN) {
                 sBuilder.matchVlanId(VlanId.vlanId(network.getProviderSegID()));
                 tBuilder.popVlan();
-            } else if (NetworkType.VXLAN == network.getNetworkType()) {
+            } else if (netType == VXLAN || netType == GRE || netType == GENEVE) {
                 // do not remove fake gateway ARP rules, if there is another gateway
                 // which has the same subnet that to be removed
                 // this only occurs if we have duplicated subnets associated with
@@ -367,11 +375,13 @@ public class OpenstackSwitchingArpHandler {
      * @param install   installation flag
      */
     private void setArpRequestRule(InstancePort port, boolean install) {
-        NetworkType type = osNetworkService.network(port.networkId()).getNetworkType();
+        Type netType = osNetworkService.networkType(port.networkId());
 
-        switch (type) {
+        switch (netType) {
             case VXLAN:
-                setRemoteArpRequestRuleForVxlan(port, install);
+            case GRE:
+            case GENEVE:
+                setRemoteArpRequestRuleForTunnel(port, install);
                 break;
             case VLAN:
                 setArpRequestRuleForVlan(port, install);
@@ -388,11 +398,17 @@ public class OpenstackSwitchingArpHandler {
      * @param install   installation flag
      */
     private void setArpReplyRule(InstancePort port, boolean install) {
-        NetworkType type = osNetworkService.network(port.networkId()).getNetworkType();
+        Type netType = osNetworkService.networkType(port.networkId());
 
-        switch (type) {
+        switch (netType) {
             case VXLAN:
                 setArpReplyRuleForVxlan(port, install);
+                break;
+            case GRE:
+                setArpReplyRuleForGre(port, install);
+                break;
+            case GENEVE:
+                setArpReplyRuleForGeneve(port, install);
                 break;
             case VLAN:
                 setArpReplyRuleForVlan(port, install);
@@ -408,7 +424,7 @@ public class OpenstackSwitchingArpHandler {
      * @param port      instance port
      * @param install   installation flag
      */
-    private void setRemoteArpRequestRuleForVxlan(InstancePort port, boolean install) {
+    private void setRemoteArpRequestRuleForTunnel(InstancePort port, boolean install) {
 
         OpenstackNode localNode = osNodeService.node(port.deviceId());
 
@@ -421,7 +437,7 @@ public class OpenstackSwitchingArpHandler {
                 .matchTunnelId(Long.valueOf(segId))
                 .build();
 
-        setRemoteArpTreatmentForVxlan(selector, port, localNode, install);
+        setRemoteArpTreatmentForTunnel(selector, port, localNode, install);
     }
 
     /**
@@ -467,7 +483,39 @@ public class OpenstackSwitchingArpHandler {
         TrafficSelector selector = getArpReplySelectorForVxlan(port);
 
         setLocalArpReplyTreatmentForVxlan(selector, port, install);
-        setRemoteArpTreatmentForVxlan(selector, port, localNode, install);
+        setRemoteArpTreatmentForTunnel(selector, port, localNode, install);
+    }
+
+    /**
+     * Installs flow rules to match ARP reply packets only for GRE.
+     *
+     * @param port      instance port
+     * @param install   installation flag
+     */
+    private void setArpReplyRuleForGre(InstancePort port, boolean install) {
+
+        OpenstackNode localNode = osNodeService.node(port.deviceId());
+
+        TrafficSelector selector = getArpReplySelectorForGre(port);
+
+        setLocalArpReplyTreatmentForGre(selector, port, install);
+        setRemoteArpTreatmentForTunnel(selector, port, localNode, install);
+    }
+
+    /**
+     * Installs flow rules to match ARP reply packets only for GENEVE.
+     *
+     * @param port      instance port
+     * @param install   installation flag
+     */
+    private void setArpReplyRuleForGeneve(InstancePort port, boolean install) {
+
+        OpenstackNode localNode = osNodeService.node(port.deviceId());
+
+        TrafficSelector selector = getArpReplySelectorForGeneve(port);
+
+        setLocalArpReplyTreatmentForGeneve(selector, port, install);
+        setRemoteArpTreatmentForTunnel(selector, port, localNode, install);
     }
 
     /**
@@ -486,21 +534,31 @@ public class OpenstackSwitchingArpHandler {
 
     // a helper method
     private TrafficSelector getArpReplySelectorForVxlan(InstancePort port) {
-        return getArpReplySelectorForVnet(port, NetworkType.VXLAN);
+        return getArpReplySelectorForVnet(port, VXLAN);
+    }
+
+    // a helper method
+    private TrafficSelector getArpReplySelectorForGre(InstancePort port) {
+        return getArpReplySelectorForVnet(port, GRE);
+    }
+
+    // a helper method
+    private TrafficSelector getArpReplySelectorForGeneve(InstancePort port) {
+        return getArpReplySelectorForVnet(port, GENEVE);
     }
 
     // a helper method
     private TrafficSelector getArpReplySelectorForVlan(InstancePort port) {
-        return getArpReplySelectorForVnet(port, NetworkType.VLAN);
+        return getArpReplySelectorForVnet(port, VLAN);
     }
 
     // a helper method
     private TrafficSelector getArpReplySelectorForVnet(InstancePort port,
-                                                       NetworkType type) {
+                                                       Type type) {
 
         TrafficSelector.Builder sBuilder = DefaultTrafficSelector.builder();
 
-        if (type == NetworkType.VLAN) {
+        if (type == VLAN) {
             String segId = osNetworkService.network(port.networkId()).getProviderSegID();
             sBuilder.matchVlanId(VlanId.vlanId(segId));
         }
@@ -517,24 +575,38 @@ public class OpenstackSwitchingArpHandler {
     private void setLocalArpReplyTreatmentForVxlan(TrafficSelector selector,
                                                    InstancePort port,
                                                    boolean install) {
-        setLocalArpReplyTreatmentForVnet(selector, port, NetworkType.VXLAN, install);
+        setLocalArpReplyTreatmentForVnet(selector, port, VXLAN, install);
+    }
+
+    // a helper method
+    private void setLocalArpReplyTreatmentForGre(TrafficSelector selector,
+                                                 InstancePort port,
+                                                 boolean install) {
+        setLocalArpReplyTreatmentForVnet(selector, port, GRE, install);
+    }
+
+    // a helper method
+    private void setLocalArpReplyTreatmentForGeneve(TrafficSelector selector,
+                                                    InstancePort port,
+                                                    boolean install) {
+        setLocalArpReplyTreatmentForVnet(selector, port, GENEVE, install);
     }
 
     // a helper method
     private void setLocalArpReplyTreatmentForVlan(TrafficSelector selector,
                                                   InstancePort port,
                                                   boolean install) {
-        setLocalArpReplyTreatmentForVnet(selector, port, NetworkType.VLAN, install);
+        setLocalArpReplyTreatmentForVnet(selector, port, VLAN, install);
     }
 
     // a helper method
     private void setLocalArpReplyTreatmentForVnet(TrafficSelector selector,
                                                   InstancePort port,
-                                                  NetworkType type,
+                                                  Type type,
                                                   boolean install) {
         TrafficTreatment.Builder tBuilder = DefaultTrafficTreatment.builder();
 
-        if (type == NetworkType.VLAN) {
+        if (type == VLAN) {
             tBuilder.popVlan();
         }
 
@@ -572,20 +644,24 @@ public class OpenstackSwitchingArpHandler {
     }
 
     // a helper method
-    private void setRemoteArpTreatmentForVxlan(TrafficSelector selector,
-                                               InstancePort port,
-                                               OpenstackNode localNode,
-                                               boolean install) {
+    private void setRemoteArpTreatmentForTunnel(TrafficSelector selector,
+                                                InstancePort port,
+                                                OpenstackNode localNode,
+                                                boolean install) {
         for (OpenstackNode remoteNode : osNodeService.completeNodes(COMPUTE)) {
             if (!remoteNode.intgBridge().equals(port.deviceId())) {
+
+                PortNumber portNum = tunnelPortNumByNetId(port.networkId(),
+                        osNetworkService, remoteNode);
+
                 TrafficTreatment treatmentToRemote = DefaultTrafficTreatment.builder()
-                        .extension(buildExtension(
-                                deviceService,
-                                remoteNode.intgBridge(),
-                                localNode.dataIp().getIp4Address()),
-                                remoteNode.intgBridge())
-                        .setOutput(remoteNode.tunnelPortNum())
-                        .build();
+                .extension(buildExtension(
+                        deviceService,
+                        remoteNode.intgBridge(),
+                        localNode.dataIp().getIp4Address()),
+                        remoteNode.intgBridge())
+                .setOutput(portNum)
+                .build();
 
                 osFlowRuleService.setRule(
                         appId,
@@ -632,7 +708,8 @@ public class OpenstackSwitchingArpHandler {
         }
 
         for (OpenstackNode remoteNode : osNodeService.completeNodes(COMPUTE)) {
-            if (!remoteNode.intgBridge().equals(port.deviceId()) && remoteNode.vlanIntf() != null) {
+            if (!remoteNode.intgBridge().equals(port.deviceId()) &&
+                    remoteNode.vlanIntf() != null) {
                 TrafficTreatment treatmentToRemote = DefaultTrafficTreatment.builder()
                         .setOutput(remoteNode.vlanPortNum())
                         .build();
@@ -698,7 +775,7 @@ public class OpenstackSwitchingArpHandler {
                 log.warn("Network is not specified.");
                 return false;
             } else {
-                return network.getNetworkType() != NetworkType.FLAT;
+                return network.getProviderSegID() != null;
             }
         }
 
@@ -824,8 +901,7 @@ public class OpenstackSwitchingArpHandler {
             // delegated to switch to handle
             osNetworkService.subnets().stream().filter(subnet ->
                     osNetworkService.network(subnet.getNetworkId()) != null &&
-                            osNetworkService.network(subnet.getNetworkId())
-                                    .getNetworkType() != NetworkType.FLAT)
+                            osNetworkService.networkType(subnet.getNetworkId()) != FLAT)
                     .forEach(subnet -> {
                         String netId = subnet.getNetworkId();
                         Network net = osNetworkService.network(netId);

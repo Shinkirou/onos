@@ -22,7 +22,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
-
 import org.onlab.packet.Ethernet;
 import org.onlab.packet.VlanId;
 import org.onosproject.cfg.ComponentConfigService;
@@ -45,13 +44,13 @@ import org.onosproject.openstacknetworking.api.InstancePortEvent;
 import org.onosproject.openstacknetworking.api.InstancePortListener;
 import org.onosproject.openstacknetworking.api.InstancePortService;
 import org.onosproject.openstacknetworking.api.OpenstackFlowRuleService;
+import org.onosproject.openstacknetworking.api.OpenstackNetwork.Type;
 import org.onosproject.openstacknetworking.api.OpenstackNetworkEvent;
 import org.onosproject.openstacknetworking.api.OpenstackNetworkListener;
 import org.onosproject.openstacknetworking.api.OpenstackNetworkService;
 import org.onosproject.openstacknode.api.OpenstackNode;
 import org.onosproject.openstacknode.api.OpenstackNodeService;
 import org.openstack4j.model.network.Network;
-import org.openstack4j.model.network.NetworkType;
 import org.openstack4j.model.network.Port;
 import org.slf4j.Logger;
 
@@ -80,6 +79,7 @@ import static org.onosproject.openstacknetworking.api.Constants.VTAG_TABLE;
 import static org.onosproject.openstacknetworking.api.InstancePortEvent.Type.OPENSTACK_INSTANCE_MIGRATION_STARTED;
 import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.getPropertyValue;
 import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.swapStaleLocation;
+import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.tunnelPortNumByNetId;
 import static org.onosproject.openstacknetworking.util.RulePopulatorUtil.buildExtension;
 import static org.onosproject.openstacknode.api.OpenstackNode.NodeType.COMPUTE;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -292,7 +292,7 @@ public class OpenstackSwitchingHandler {
      * @param instPort instance port object
      * @param install install flag, add the rule if true, remove it otherwise
      */
-    private void setForwardingRulesForVxlan(InstancePort instPort, boolean install) {
+    private void setForwardingRulesForTunnel(InstancePort instPort, boolean install) {
         // switching rules for the instPorts in the same node
         TrafficSelector selector = DefaultTrafficSelector.builder()
                 // TODO: need to handle IPv6 in near future
@@ -326,13 +326,15 @@ public class OpenstackSwitchingHandler {
         osNodeService.completeNodes(COMPUTE).stream()
                 .filter(remoteNode -> !remoteNode.intgBridge().equals(localNode.intgBridge()))
                 .forEach(remoteNode -> {
+                    PortNumber portNum = tunnelPortNumByNetId(instPort.networkId(),
+                            osNetworkService, remoteNode);
                     TrafficTreatment treatmentToRemote = DefaultTrafficTreatment.builder()
                             .extension(buildExtension(
                                     deviceService,
                                     remoteNode.intgBridge(),
                                     localNode.dataIp().getIp4Address()),
                                     remoteNode.intgBridge())
-                            .setOutput(remoteNode.tunnelPortNum())
+                            .setOutput(portNum)
                             .build();
 
                     osFlowRuleService.setRule(
@@ -408,7 +410,7 @@ public class OpenstackSwitchingHandler {
     }
 
     /**
-     * Configures the flow rule which is for using VXLAN to tag the packet
+     * Configures the flow rule which is for using VXLAN/GRE to tag the packet
      * based on the in_port number of a virtual instance.
      * Note that this rule will be inserted in vTag table.
      *
@@ -489,14 +491,16 @@ public class OpenstackSwitchingHandler {
 
     private void setNetworkBlockRules(Network network, boolean install) {
 
-        NetworkType type = network.getNetworkType();
+        Type type = osNetworkService.networkType(network.getId());
 
         // TODO: we block a network traffic by referring to segment ID for now
         // we might need to find a better way to block the traffic of a network
-        // in case the segment ID is overlapped in different types network (VXLAN, VLAN)
+        // in case the segment ID is overlapped in different types network (VXLAN, GRE, VLAN)
         switch (type) {
             case VXLAN:
-                setNetworkBlockRulesForVxlan(network.getProviderSegID(), install);
+            case GRE:
+            case GENEVE:
+                setNetworkBlockRulesForTunnel(network.getProviderSegID(), install);
                 break;
             case VLAN:
                 setNetworkBlockRulesForVlan(network.getProviderSegID(), install);
@@ -509,7 +513,7 @@ public class OpenstackSwitchingHandler {
         }
     }
 
-    private void setNetworkBlockRulesForVxlan(String segmentId, boolean install) {
+    private void setNetworkBlockRulesForTunnel(String segmentId, boolean install) {
         TrafficSelector selector = DefaultTrafficSelector.builder()
                 .matchTunnelId(Long.valueOf(segmentId))
                 .build();
@@ -595,7 +599,7 @@ public class OpenstackSwitchingHandler {
      * Obtains the VNI from the given instance port.
      *
      * @param instPort instance port object
-     * @return VXLAN Network Identifier (VNI)
+     * @return Virtual Network Identifier (VNI)
      */
     private Long getVni(InstancePort instPort) {
         Network osNet = osNetworkService.network(instPort.networkId());
@@ -730,18 +734,19 @@ public class OpenstackSwitchingHandler {
 
         /**
          * Configures L2 forwarding rules.
-         * Currently, SONA supports Flat, VXLAN and VLAN modes.
+         * Currently, SONA supports Flat, VXLAN, GRE, GENEVE and VLAN modes.
          *
          * @param instPort instance port object
          * @param install install flag, add the rule if true, remove it otherwise
          */
         private void setNetworkRules(InstancePort instPort, boolean install) {
-            Network network = osNetworkService.network(instPort.networkId());
-            NetworkType type = network.getNetworkType();
+            Type type = osNetworkService.networkType(instPort.networkId());
 
             switch (type) {
                 case VXLAN:
-                    setNetworkRulesForVxlan(instPort, install);
+                case GRE:
+                case GENEVE:
+                    setNetworkRulesForTunnel(instPort, install);
                     break;
                 case VLAN:
                     setNetworkRulesForVlan(instPort, install);
@@ -755,9 +760,9 @@ public class OpenstackSwitchingHandler {
             }
         }
 
-        private void setNetworkRulesForVxlan(InstancePort instPort, boolean install) {
+        private void setNetworkRulesForTunnel(InstancePort instPort, boolean install) {
             setTunnelTagIpFlowRules(instPort, install);
-            setForwardingRulesForVxlan(instPort, install);
+            setForwardingRulesForTunnel(instPort, install);
 
             if (ARP_BROADCAST_MODE.equals(getArpMode())) {
                 setTunnelTagArpFlowRules(instPort, install);
@@ -785,12 +790,13 @@ public class OpenstackSwitchingHandler {
          * @param instPort instance port
          */
         private void removeVportRules(InstancePort instPort) {
-            Network network = osNetworkService.network(instPort.networkId());
-            NetworkType type = network.getNetworkType();
+            Type type = osNetworkService.networkType(instPort.networkId());
 
             switch (type) {
                 case VXLAN:
-                    removeVportRulesForVxlan(instPort);
+                case GRE:
+                case GENEVE:
+                    removeVportRulesForTunnel(instPort);
                     break;
                 case VLAN:
                     removeVportRulesForVlan(instPort);
@@ -804,7 +810,7 @@ public class OpenstackSwitchingHandler {
             }
         }
 
-        private void removeVportRulesForVxlan(InstancePort instPort) {
+        private void removeVportRulesForTunnel(InstancePort instPort) {
             setTunnelTagIpFlowRules(instPort, false);
 
             if (ARP_BROADCAST_MODE.equals(getArpMode())) {

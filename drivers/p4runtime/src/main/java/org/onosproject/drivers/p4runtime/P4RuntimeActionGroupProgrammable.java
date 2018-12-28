@@ -96,7 +96,7 @@ public class P4RuntimeActionGroupProgrammable
         groupMirror = this.handler().get(P4RuntimeGroupMirror.class);
         memberMirror = this.handler().get(P4RuntimeActionProfileMemberMirror.class);
         groupStore = handler().get(GroupStore.class);
-        groupTranslator = piTranslationService.groupTranslator();
+        groupTranslator = translationService.groupTranslator();
         return true;
     }
 
@@ -272,7 +272,7 @@ public class P4RuntimeActionGroupProgrammable
             return null;
         }
         if (!translatedEntity.get().translated().equals(piGroup)) {
-            log.warn("Group obtained from device {} is different from the one in" +
+            log.warn("Group obtained from device {} is different from the one in " +
                              "translation store: device={}, store={}",
                      deviceId, piGroup, translatedEntity.get().translated());
             return null;

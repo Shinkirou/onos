@@ -47,13 +47,13 @@ import org.onosproject.net.host.HostService;
 import org.onosproject.net.provider.AbstractProvider;
 import org.onosproject.net.provider.ProviderId;
 import org.onosproject.openstacknetworking.api.Constants;
+import org.onosproject.openstacknetworking.api.OpenstackNetwork.Type;
 import org.onosproject.openstacknetworking.api.OpenstackNetworkService;
 import org.onosproject.openstacknode.api.OpenstackNode;
 import org.onosproject.openstacknode.api.OpenstackNodeEvent;
 import org.onosproject.openstacknode.api.OpenstackNodeListener;
 import org.onosproject.openstacknode.api.OpenstackNodeService;
 import org.openstack4j.model.network.Network;
-import org.openstack4j.model.network.NetworkType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +73,7 @@ import static org.onosproject.openstacknetworking.api.Constants.OPENSTACK_NETWOR
 import static org.onosproject.openstacknetworking.api.Constants.PORT_NAME_PREFIX_VM;
 import static org.onosproject.openstacknetworking.api.Constants.PORT_NAME_VHOST_USER_PREFIX_VM;
 import static org.onosproject.openstacknetworking.api.Constants.portNamePrefixMap;
+import static org.onosproject.openstacknetworking.api.OpenstackNetwork.Type.FLAT;
 import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.vnicType;
 import static org.onosproject.openstacknode.api.OpenstackNode.NodeType.CONTROLLER;
 
@@ -109,8 +110,8 @@ public class OpenstackSwitchingHostProvider
 
     private HostProviderService hostProviderService;
 
-    private final ExecutorService executor =
-            Executors.newSingleThreadExecutor(groupedThreads(this.getClass().getSimpleName(), "device-event"));
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(
+            groupedThreads(this.getClass().getSimpleName(), "device-event"));
     private final InternalDeviceListener internalDeviceListener =
             new InternalDeviceListener();
     private final InternalOpenstackNodeListener internalNodeListener =
@@ -232,7 +233,8 @@ public class OpenstackSwitchingHostProvider
                 .set(ANNOTATION_CREATE_TIME, String.valueOf(createTime));
 
         // FLAT typed network does not require segment ID
-        if (osNet.getNetworkType() != NetworkType.FLAT) {
+        Type netType = osNetworkService.networkType(osNet.getId());
+        if (netType != FLAT) {
             annotations.set(ANNOTATION_SEGMENT_ID, osNet.getProviderSegID());
         }
 

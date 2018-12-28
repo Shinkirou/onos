@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -92,7 +91,7 @@ public final class PiMulticastGroupEntry implements PiPreEntry {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("groupId", groupId)
+                .add("groupId", "0x" + Integer.toHexString(groupId))
                 .add("replicas", replicas)
                 .toString();
     }
@@ -161,7 +160,6 @@ public final class PiMulticastGroupEntry implements PiPreEntry {
         public PiMulticastGroupEntry build() {
             checkNotNull(groupId, "Multicast group ID must be set");
             final ImmutableSet<PiPreReplica> replicas = replicaSetBuilder.build();
-            checkArgument(!replicas.isEmpty(), "At least one replica must be defined");
             return new PiMulticastGroupEntry(groupId, replicas);
         }
     }
