@@ -113,6 +113,8 @@ public class FlowStats {
     private static Long globalPackets = 0L;
     private static Long globalPacketsLast = 0L;
 
+    private static Long globalMinValue = 1L;
+
     private static java.nio.file.Path lastTimestamp = null;
     private static java.nio.file.Path lastTwoTimestamp = null;
 
@@ -178,6 +180,8 @@ public class FlowStats {
 
         Long flowPackets = 0L;
         Long flowBytes = 0L;
+
+        int counterTemp = 0;
 
         FlowNew currentFlow = new FlowNew();   
 
@@ -280,120 +284,55 @@ public class FlowStats {
                 // currentFlow.setFlowTcpFlags(tcpFlags);
                 currentFlow.setFlowTcpSrcPort(tcpSrcPort);
                 currentFlow.setFlowTcpDstPort(tcpDstPort);
-            }      
+            }
 
-            globalPackets = globalPackets + newPacketsLong;      
+            while (newPacketsLong > 0L) {
+                globalPackets = globalPackets + 1;
+                if (globalPackets % 10000 == 0) {
+                    counterTemp = 1;
+                }
+                newPacketsLong--;
+            }
+
+
+            // globalPackets = globalPackets + newPacketsLong;      
 
             // Generate the CM and BM sketch hash, if not done already.
             if (currentFlow.getBMHash() == null) {
                 flowSketchHash(currentFlow);                  
-            }                    
+            }        
         } else {
             return;
-        }       
-
-        try {
-
-            // Timestamp ts = new Timestamp(System.currentTimeMillis());
-
-            // long diff = ts.getTime() - tsTimer.getTime();
-            // long diffSeconds = diff / 1000;
-
-
-            // if (diffSeconds > 10) {  
-            if ((globalPackets - globalPacketsLast >= 100) || (globalPackets % 100 == 0))  {           
-
-                // tsTimer = ts;
-                globalPacketsLast = globalPackets;
-                String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS").format(new Date());
-                String globalPacketsString = Long.toString(globalPackets);
-                java.nio.file.Path txtpath = Paths.get("/home/shinkirou/Documents/thesis-flow-stats/flows-" + timeStamp + "-" + globalPacketsString + ".txt");
-
-                for (String setKey : flowNewMap.keySet()) {    
-
-                    FlowNew tempFlow    = flowNewMap.get(setKey);                   
-
-                    // flowCountString     = Long.toString(tempFlow.getFlowCount());
-                    flowPacketsString   = tempFlow.getFlowPackets();     
-                    flowBytesString     = tempFlow.getFlowBytes();               
-                    ipSrcString         = tempFlow.getFlowSrcIP();
-                    ipDstString         = tempFlow.getFlowDstIP();
-                    ipProtocol          = tempFlow.getFlowIPProtocol();
-                    
-                    if (ipProtocol.equals("17")) {
-                        udpSrcPort   = tempFlow.getFlowUdpSrcPort();
-                        udpDstPort   = tempFlow.getFlowUdpDstPort();
-                    } else {
-                        tcpSrcPort   = tempFlow.getFlowTcpSrcPort();
-                        tcpDstPort   = tempFlow.getFlowTcpDstPort();
-                    }
-
-                    cmSketch = tempFlow.getCMHash();
-                    bmSketch = tempFlow.getBMHash();                    
-
-                    // Write to file
-
-                    String flowSketchTotal = "";
-
-                    if (ipProtocol.equals("17")) {
-                        flowSketchTotal = /* flowCountString + "," + */
-                                          flowPacketsString + "," +
-                                          flowBytesString + "," + 
-                                          ipSrcString + "," +
-                                          ipDstString + "," + 
-                                          ipProtocol + "," +
-                                          udpSrcPort + "," +
-                                          udpDstPort + "," +
-                                          cmSketch + "," +
-                                          bmSketch;
-                    } else {
-                        flowSketchTotal = /* flowCountString + "," + */
-                                          flowPacketsString + "," + 
-                                          flowBytesString + "," +
-                                          ipSrcString + "," +
-                                          ipDstString + "," + 
-                                          ipProtocol + "," + 
-                                          tcpSrcPort + "," +
-                                          tcpDstPort + "," +
-                                          cmSketch + "," +
-                                          bmSketch;
-                    }
-
-                    Files.write(txtpath, Arrays.asList(flowSketchTotal), StandardCharsets.UTF_8,
-                    Files.exists(txtpath) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);                
-                }               
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }    
-    }
-
-    private byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-        data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                         + Character.digit(s.charAt(i+1), 16));
-        }
-        return data;
-    }
-
-    private String getMax() {
-        
-        String minKey = null;
-        Long minValue = Long.MAX_VALUE;
-        
-        for (String key : flowNewMap.keySet()) {
-            FlowNew tempFlow = flowNewMap.get(key);
-            Long value = tempFlow.getFlowCount();
-            if (value < minValue) {
-                minValue = value;
-                minKey = key;
-            }
         }
 
-        return minKey;
+        // Timestamp ts = new Timestamp(System.currentTimeMillis());
+
+        // long diff = ts.getTime() - tsTimer.getTime();
+        // long diffSeconds = diff / 1000;
+
+        // if (diffSeconds > 60) {
+        //     tsTimer = ts;
+        //     Thread threadWriteToFile = new Thread(runnable);
+        //     threadWriteToFile.start();
+        // }
+
+
+        // (globalPackets % 100000 == 0)
+        // (globalPackets - globalPacketsLast >= 1000) ||
+        // Long globalPacketsTemp = globalPackets - globalPacketsLast;
+        // if ((globalPacketsTemp).compareTo(9999L) >= 0) {
+        //     globalPacketsLast = globalPackets;
+        //     while ((globalPacketsLast % 10000) != 0) {
+        //         globalPacketsLast--;
+        //     }
+        //     Thread threadWriteToFile = new Thread(runnable);
+        //     threadWriteToFile.start();
+        // }
+
+        if (counterTemp == 1) {
+            Thread threadWriteToFile = new Thread(runnable);
+            threadWriteToFile.start();
+        }        
     }
 
     private Long checkFlowUpdate(Long flowPackets, FlowNew currentFlow) {
@@ -434,9 +373,9 @@ public class FlowStats {
             } else {
                 String minKey = getMax();
                 FlowNew tempFlow = flowNewMap.get(minKey);
-                Long minFlowCount = tempFlow.getFlowCount();
                 FlowRule minFlowRule = tempFlow.getFlowRule();
                 flowRuleService.removeFlowRules(minFlowRule);
+                Long minFlowCount = tempFlow.getFlowCount();
                 flowNewMap.remove(minKey);
                 currentFlow.setFlowCount(minFlowCount + newPackets);
                 flowNewMap.put(keyString, currentFlow);
@@ -446,11 +385,21 @@ public class FlowStats {
 
     private void flowSketchHash(FlowNew currentFlow) {
 
-        String cmSketch = "";
-        String bmSketch = "";
-
         String ipSrcString = currentFlow.getFlowSrcIP();
         String ipDstString = currentFlow.getFlowDstIP();
+
+        int ipProtoInt = Integer.parseInt(currentFlow.getFlowIPProtocol());
+
+        int srcPortInt = 0;
+        int dstPortInt = 0;
+
+        if (ipProtoInt == 6) {
+            srcPortInt = Integer.parseInt(currentFlow.getFlowTcpSrcPort());
+            dstPortInt = Integer.parseInt(currentFlow.getFlowTcpDstPort());
+        } else {
+            srcPortInt = Integer.parseInt(currentFlow.getFlowUdpSrcPort());
+            dstPortInt = Integer.parseInt(currentFlow.getFlowUdpDstPort());            
+        }
 
         int ipSrc1Int = 0;
         int ipSrc2Int = 0;
@@ -460,7 +409,7 @@ public class FlowStats {
         int ipDst1Int = 0;
         int ipDst2Int = 0;
         int ipDst3Int = 0;
-        int ipDst4Int = 0; 
+        int ipDst4Int = 0;
 
         Pattern ppSrc = Pattern.compile("\\d+");
         Matcher mSrc = ppSrc.matcher(ipSrcString);
@@ -485,7 +434,7 @@ public class FlowStats {
             if (j == 2) ipDst3Int = Integer.parseInt(mDst.group());
             if (j == 3) ipDst4Int = Integer.parseInt(mDst.group());
             j++;                        
-        } 
+        }
 
         String ipSrc1String = Integer.toHexString(ipSrc1Int);
         String ipSrc2String = Integer.toHexString(ipSrc2Int);
@@ -495,9 +444,14 @@ public class FlowStats {
         String ipDst1String = Integer.toHexString(ipDst1Int);
         String ipDst2String = Integer.toHexString(ipDst2Int);
         String ipDst3String = Integer.toHexString(ipDst3Int);
-        String ipDst4String = Integer.toHexString(ipDst4Int);  
+        String ipDst4String = Integer.toHexString(ipDst4Int);
 
-        ipSrc1String = ("00" + ipSrc1String).substring(ipSrc1String.length());   
+        String ipProtoString = Integer.toHexString(ipProtoInt);
+
+        String srcPortString = Integer.toHexString(srcPortInt);
+        String dstPortString = Integer.toHexString(dstPortInt);
+
+        ipSrc1String = ("00" + ipSrc1String).substring(ipSrc1String.length());
         ipSrc2String = ("00" + ipSrc2String).substring(ipSrc2String.length());  
         ipSrc3String = ("00" + ipSrc3String).substring(ipSrc3String.length());  
         ipSrc4String = ("00" + ipSrc4String).substring(ipSrc4String.length());
@@ -507,77 +461,177 @@ public class FlowStats {
         ipDst3String = ("00" + ipDst3String).substring(ipDst3String.length());  
         ipDst4String = ("00" + ipDst4String).substring(ipDst4String.length());
 
-        byte[] ipSrcByteArray = hexStringToByteArray(ipSrc1String + ipSrc2String + ipSrc3String + ipSrc4String);
-        byte[] ipDstByteArray = hexStringToByteArray(ipDst1String + ipDst2String + ipDst3String + ipDst4String); 
-            
-        CRC32 ipSrcDstCRC32 = new CRC32();
-        ipSrcDstCRC32.update(ipSrcByteArray);
-        ipSrcDstCRC32.update(ipDstByteArray);
-        long ipSrcDstHashModulo = ipSrcDstCRC32.getValue() % 65536L; 
+        ipProtoString = ("00000000" + ipProtoString).substring(ipProtoString.length());
 
-        String ipSrcDstHashString = Long.toString(ipSrcDstHashModulo);
+        srcPortString = ("00000000" + srcPortString).substring(srcPortString.length());
+        dstPortString = ("00000000" + dstPortString).substring(dstPortString.length());
+
+        byte[] ipSrcByteArray = hexStringToByteArray(ipSrc1String + ipSrc2String + ipSrc3String + ipSrc4String);
+        byte[] ipDstByteArray = hexStringToByteArray(ipDst1String + ipDst2String + ipDst3String + ipDst4String);
+
+        byte[] ipProtoByteArray = hexStringToByteArray(ipProtoString);
+
+        byte[] srcPortByteArray = hexStringToByteArray(srcPortString);
+        byte[] dstPortByteArray = hexStringToByteArray(dstPortString);
+            
+        CRC32 ip5tupleCRC32 = new CRC32();
+        ip5tupleCRC32.update(ipSrcByteArray);
+        ip5tupleCRC32.update(ipDstByteArray);
+        ip5tupleCRC32.update(ipProtoByteArray);
+        ip5tupleCRC32.update(srcPortByteArray);
+        ip5tupleCRC32.update(dstPortByteArray);
+        long ip5tupleModulo = ip5tupleCRC32.getValue() % 65536L;
+
+        String ip5tupleHashString = Long.toString(ip5tupleModulo);
 
         CRC32 ipSrcCRC32 = new CRC32();
         ipSrcCRC32.update(ipSrcByteArray);
-        long ipSrcHashModulo = ipSrcCRC32.getValue() % 65536L; 
+        long ipSrcHashModulo = ipSrcCRC32.getValue() % 65536L;
 
         String ipSrcHashString = Long.toString(ipSrcHashModulo);  
 
-        currentFlow.setCMHash(ipSrcDstHashString);
+        currentFlow.setCMHash(ip5tupleHashString);
         currentFlow.setBMHash(ipSrcHashString);
     }
 
-    private void flowSketchRead(FlowNew currentFlow) {
-
-        String ipSrcDstHashString = currentFlow.getCMHash();
-        String ipSrcHashString = currentFlow.getBMHash();
-
-        String cmSketch = "";
-        String bmSketch = "";        
-
-        // Count-Min Sketch 
-
+    Runnable runnable = () -> {
         try {
+            String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS").format(new Date());
+            String globalPacketsString = Long.toString(globalPackets);
+            java.nio.file.Path txtpath = Paths.get("/home/shinkirou/Documents/thesis-flow-stats/flows-" + timeStamp + "-" + globalPacketsString + ".txt");
 
-            String cmdCM = "echo \"register_read count_register_final \"" + ipSrcDstHashString + " | /home/shinkirou/p4tools/bmv2/targets/simple_switch/sswitch_CLI /home/shinkirou/onos/apps/p4-sketches/pipeconf/src/main/resources/flowstats.json 1";  
-            ProcessBuilder pbCM = new ProcessBuilder("/bin/bash", "-c", cmdCM); 
-            Process pCM = pbCM.start(); 
-            pCM.waitFor();
-            BufferedReader cmReader = new BufferedReader(new InputStreamReader(pCM.getInputStream()));
-            StringBuilder cmBuilder = new StringBuilder();
-            String cmLine = null;
-            while ((cmLine = cmReader.readLine()) != null) {
-                cmBuilder.append(cmLine);
-                cmBuilder.append(System.getProperty("line.separator"));
-            }
-            cmSketch = cmBuilder.toString().replaceAll("[^\\d.]", "");                
-        } catch (IOException|InterruptedException e) {
+            for (String setKey : flowNewMap.keySet()) {
+
+                FlowNew tempFlow    = flowNewMap.get(setKey);
+
+                String flowPacketsString   = tempFlow.getFlowPackets();
+                String flowBytesString     = tempFlow.getFlowBytes();
+                String ipSrcString         = tempFlow.getFlowSrcIP();
+                String ipDstString         = tempFlow.getFlowDstIP();
+                String ipProtocol          = tempFlow.getFlowIPProtocol();
+                String srcPort = "";
+                String dstPort = "";
+                    
+                if (ipProtocol.equals("17")) {
+                    srcPort   = tempFlow.getFlowUdpSrcPort();
+                    dstPort   = tempFlow.getFlowUdpDstPort();
+                } else {
+                    srcPort   = tempFlow.getFlowTcpSrcPort();
+                    dstPort   = tempFlow.getFlowTcpDstPort();
+                }
+
+                String cmSketch = tempFlow.getCMHash();
+                String bmSketch = tempFlow.getBMHash();                    
+
+                // Write to file
+
+                String flowSketchTotal = "";
+
+                if (ipProtocol.equals("17")) {
+                    flowSketchTotal = flowPacketsString + "," +
+                                      flowBytesString + "," + 
+                                      ipSrcString + "," +
+                                      ipDstString + "," + 
+                                      ipProtocol + "," +
+                                      srcPort + "," +
+                                      dstPort + "," +
+                                      cmSketch + "," +
+                                      bmSketch;
+                } else {
+                    flowSketchTotal = flowPacketsString + "," + 
+                                      flowBytesString + "," +
+                                      ipSrcString + "," +
+                                      ipDstString + "," + 
+                                      ipProtocol + "," + 
+                                      srcPort + "," +
+                                      dstPort + "," +
+                                      cmSketch + "," +
+                                      bmSketch;
+                }
+
+                Files.write(txtpath, Arrays.asList(flowSketchTotal), StandardCharsets.UTF_8,
+                Files.exists(txtpath) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);                
+            }   
+
+            // String flowSketchTotal = "1";
+
+            // Files.write(txtpath, Arrays.asList(flowSketchTotal), StandardCharsets.UTF_8,
+            // Files.exists(txtpath) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);    
+        } catch (IOException e) {
             e.printStackTrace();
         }
+    };
 
-        // Bitmap Sketch 
+    // private void flowWriteToFile() {
 
-        try {
+    //     try {
 
-            String cmdBM = "echo \"register_read bitmap_register1 \"" + ipSrcHashString + " | /home/shinkirou/p4tools/bmv2/targets/simple_switch/sswitch_CLI /home/shinkirou/onos/apps/p4-sketches/pipeconf/src/main/resources/flowstats.json 1";  
-            ProcessBuilder pbBM = new ProcessBuilder("/bin/bash", "-c", cmdBM); 
-            Process pBM = pbBM.start(); 
-            pBM.waitFor();
-            BufferedReader bmReader = new BufferedReader(new InputStreamReader(pBM.getInputStream()));
-            StringBuilder bmBuilder = new StringBuilder();
-            String bmLine = null;
-            while ( (bmLine = bmReader.readLine()) != null) {
-                bmBuilder.append(bmLine);
-                bmBuilder.append(System.getProperty("line.separator"));
-            }
-            bmSketch = bmBuilder.toString().replaceAll("[^\\d.]", "");                 
-        } catch (IOException|InterruptedException e) {
-            e.printStackTrace();
-        }
-        
-        currentFlow.setCMSketch(cmSketch);
-        currentFlow.setBMSketch(bmSketch);                              
-    }            
+    //         if ((globalPackets - globalPacketsLast >= 10000) || (globalPackets % 50000 == 0))  {           
+
+    //             // tsTimer = ts;
+    //             globalPacketsLast = globalPackets;
+    //             String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS").format(new Date());
+    //             String globalPacketsString = Long.toString(globalPackets);
+    //             java.nio.file.Path txtpath = Paths.get("/home/shinkirou/Documents/thesis-flow-stats/flows-" + timeStamp + "-" + globalPacketsString + ".txt");
+
+    //             for (String setKey : flowNewMap.keySet()) {    
+
+    //                 FlowNew tempFlow    = flowNewMap.get(setKey);                   
+
+    //                 String flowPacketsString   = tempFlow.getFlowPackets();     
+    //                 String flowBytesString     = tempFlow.getFlowBytes();               
+    //                 String ipSrcString         = tempFlow.getFlowSrcIP();
+    //                 String ipDstString         = tempFlow.getFlowDstIP();
+    //                 String ipProtocol          = tempFlow.getFlowIPProtocol();
+    //                 String srcPort = "";
+    //                 String dstPort = "";
+                    
+    //                 if (ipProtocol.equals("17")) {
+    //                     srcPort   = tempFlow.getFlowUdpSrcPort();
+    //                     dstPort   = tempFlow.getFlowUdpDstPort();
+    //                 } else {
+    //                     srcPort   = tempFlow.getFlowTcpSrcPort();
+    //                     dstPort   = tempFlow.getFlowTcpDstPort();
+    //                 }
+
+    //                 String cmSketch = tempFlow.getCMHash();
+    //                 String bmSketch = tempFlow.getBMHash();                    
+
+    //                 // Write to file
+
+    //                 String flowSketchTotal = "";
+
+    //                 if (ipProtocol.equals("17")) {
+    //                     flowSketchTotal = flowPacketsString + "," +
+    //                                       flowBytesString + "," + 
+    //                                       ipSrcString + "," +
+    //                                       ipDstString + "," + 
+    //                                       ipProtocol + "," +
+    //                                       srcPort + "," +
+    //                                       dstPort + "," +
+    //                                       cmSketch + "," +
+    //                                       bmSketch;
+    //                 } else {
+    //                     flowSketchTotal = flowPacketsString + "," + 
+    //                                       flowBytesString + "," +
+    //                                       ipSrcString + "," +
+    //                                       ipDstString + "," + 
+    //                                       ipProtocol + "," + 
+    //                                       srcPort + "," +
+    //                                       dstPort + "," +
+    //                                       cmSketch + "," +
+    //                                       bmSketch;
+    //                 }
+
+    //                 Files.write(txtpath, Arrays.asList(flowSketchTotal), StandardCharsets.UTF_8,
+    //                 Files.exists(txtpath) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);                
+    //             }               
+    //         }
+
+    //     } catch (IOException e) {
+    //         e.printStackTrace();
+    //     }
+    // }
 
     private FlowEntry getFlowEntry(FlowRule flowRule) {
         Iterable<FlowEntry> flowEntries =
@@ -591,6 +645,40 @@ public class FlowStats {
             }
         }
         return null;
+    }
+
+    private byte[] hexStringToByteArray(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+        data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                         + Character.digit(s.charAt(i+1), 16));
+        }
+        return data;
+    }
+
+    private String getMax() {
+        
+        String minKey = null;
+        Long minValue = Long.MAX_VALUE;
+        
+        for (String key : flowNewMap.keySet()) {
+            FlowNew tempFlow = flowNewMap.get(key);
+            Long value = tempFlow.getFlowCount();
+            if (value == globalMinValue) {
+                minValue = value;
+                minKey = key;
+                return minKey;
+            }
+            if (value < minValue) {
+                minValue = value;
+                minKey = key;
+            }
+        }
+        if (minValue > globalMinValue) {
+            globalMinValue = minValue;
+        }
+        return minKey;
     }    
 
     private class InternalFlowListener implements FlowRuleListener {
@@ -599,7 +687,7 @@ public class FlowStats {
             FlowRule flowRule = event.subject();
             if ((event.type() == RULE_ADDED) || (event.type() == RULE_UPDATED)) {
                 writeUpdatedFlow(flowRule);
-            }  
+            }
         }
-    }       
+    }
 }

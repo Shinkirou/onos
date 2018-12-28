@@ -30,7 +30,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class ListenerRegistry<E extends Event, L extends EventListener<E>>
         implements ListenerService<E, L>, EventSink<E> {
 
-    private static final long LIMIT = 1_800; // ms
+    private static final long LIMIT = 30000; // ms
 
     private final Logger log = getLogger(getClass());
 

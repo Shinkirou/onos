@@ -8,7 +8,7 @@
 // #define IP_PROTO_UDP 8w17
 
 const bit<8> IP_PROTO_UDP = 17;
-const bit<8> IP_PROTO_UDP = 6;
+const bit<8> IP_PROTO_TCP = 6;
 
 const bit<16> ETH_TYPE_IPV4 = 0x800;
 const bit<32> MAX_INT = 0xFFFFFFFF;
@@ -98,6 +98,7 @@ header my_metadata_header {
     bit<32> bitmap_hash_val1;
     bit<32> bitmap_val0;
     bit<32> bitmap_val1;
+    // bit<32> ip_proto;
     bit<16> l4_src_port;
     bit<16> l4_dst_port;
 }
@@ -214,7 +215,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         hash(packet_count_min_hash0, 
             HashAlgorithm.crc32, 
             (bit<32>)0, 
-            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, hdr.ethernet.src_addr, hdr.ethernet.dst_addr, hdr.ipv4.protocol}, 
+            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, hdr.ipv4.protocol, hdr.ethernet.src_addr}, 
             (bit<32>)65536);
         meta.my_metadata.count_min_hash_val0 = packet_count_min_hash0;
     }
@@ -223,7 +224,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         hash(packet_count_min_hash1, 
             HashAlgorithm.crc32, 
             (bit<32>)0, 
-            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, hdr.ipv4.protocol}, 
+            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, hdr.ipv4.protocol, hdr.ethernet.dst_addr}, 
             (bit<32>)65536);
         meta.my_metadata.count_min_hash_val1 = packet_count_min_hash1;
     }  
@@ -232,43 +233,43 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         hash(packet_count_min_hash2, 
             HashAlgorithm.crc32, 
             (bit<32>)0, 
-            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr}, 
+            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.my_metadata.l4_src_port, (bit<32>)meta.my_metadata.l4_dst_port},
             (bit<32>)65536);
         meta.my_metadata.count_min_hash_val2 = packet_count_min_hash2;
     }      
 
-    action action_count_min_sketch_incr() {     
+    action action_count_min_sketch_incr() {
         
         bit<32> tmp0;
         bit<32> tmp1;
         bit<32> tmp2;
-        
+
         count_min_register0.read(tmp0, (bit<32>)meta.my_metadata.count_min_hash_val0);
         count_min_register1.read(tmp1, (bit<32>)meta.my_metadata.count_min_hash_val1);
         count_min_register2.read(tmp2, (bit<32>)meta.my_metadata.count_min_hash_val2);
-        
+
         meta.my_metadata.count_min_val0 = tmp0;
         meta.my_metadata.count_min_val1 = tmp1;
         meta.my_metadata.count_min_val2 = tmp2;
-        
+
         meta.my_metadata.count_min_val0 = meta.my_metadata.count_min_val0 + 1;
         meta.my_metadata.count_min_val1 = meta.my_metadata.count_min_val1 + 1;
         meta.my_metadata.count_min_val2 = meta.my_metadata.count_min_val2 + 1;
-        
+
         count_min_register0.write((bit<32>)meta.my_metadata.count_min_hash_val0, meta.my_metadata.count_min_val0);
         count_min_register1.write((bit<32>)meta.my_metadata.count_min_hash_val1, meta.my_metadata.count_min_val1);
         count_min_register2.write((bit<32>)meta.my_metadata.count_min_hash_val2, meta.my_metadata.count_min_val2);
-    }  
+    }
 
-    action action_count_min_register_write() {     
+    action action_count_min_register_write() {
         count_register_final.write((bit<32>)meta.my_metadata.count_min_hash_val2, meta.my_metadata.count_min_val);
     }
 
     action action_bitmap_hash_0_val() {
-        hash(packet_bitmap_hash0, 
-            HashAlgorithm.crc32, 
-            (bit<32>)0, 
-            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr}, 
+        hash(packet_bitmap_hash0,
+            HashAlgorithm.crc32,
+            (bit<32>)0,
+            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr},
             (bit<32>)65536);
         meta.my_metadata.bitmap_hash_val0 = packet_bitmap_hash0;
     }

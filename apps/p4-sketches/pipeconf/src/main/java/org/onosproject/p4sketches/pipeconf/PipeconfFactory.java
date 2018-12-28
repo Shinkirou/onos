@@ -84,7 +84,7 @@ public final class PipeconfFactory {
                 .withId(PIPECONF_ID)
                 .withPipelineModel(pipelineModel)
                 .addBehaviour(PiPipelineInterpreter.class, PipelineInterpreterImpl.class)
-                .addBehaviour(PortStatisticsDiscovery.class, PortStatisticsDiscoveryImpl.class)
+                // .addBehaviour(PortStatisticsDiscovery.class, PortStatisticsDiscoveryImpl.class)
                 // Since mytunnel.p4 defines only 1 table, we re-use the existing single-table pipeliner.
                 .addBehaviour(Pipeliner.class, DefaultSingleTablePipeline.class)
                 .addExtension(P4_INFO_TEXT, P4INFO_URL)

@@ -85,8 +85,8 @@ public class CoreEventDispatcher extends DefaultEventSinkRegistry
                 .build();
 
     // Default number of millis a sink can take to process an event.
-    private static final long DEFAULT_EXECUTE_MS = 5_000; // ms
-    private static final long WATCHDOG_MS = 250; // ms
+    private static final long DEFAULT_EXECUTE_MS = 30000; // ms
+    private static final long WATCHDOG_MS = 500; // ms
 
     @SuppressWarnings("unchecked")
     private static final Event KILL_PILL = new AbstractEvent(null, 0) {

@@ -309,28 +309,6 @@ actions {
     alias: "action_bitmap_existing_pair"
   }
 }
-counters {
-  preamble {
-    id: 302003196
-    name: "c_ingress.tx_port_counter"
-    alias: "tx_port_counter"
-  }
-  spec {
-    unit: BOTH
-  }
-  size: 255
-}
-counters {
-  preamble {
-    id: 302045227
-    name: "c_ingress.rx_port_counter"
-    alias: "rx_port_counter"
-  }
-  spec {
-    unit: BOTH
-  }
-  size: 255
-}
 direct_counters {
   preamble {
     id: 318778805
@@ -446,6 +424,51 @@ registers {
     id: 369158962
     name: "c_ingress.bitmap_register1"
     alias: "bitmap_register1"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 65536
+}
+registers {
+  preamble {
+    id: 369107219
+    name: "c_ingress.kary_register0"
+    alias: "kary_register0"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 65536
+}
+registers {
+  preamble {
+    id: 369118697
+    name: "c_ingress.kary_register1"
+    alias: "kary_register1"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 65536
+}
+registers {
+  preamble {
+    id: 369159092
+    name: "c_ingress.kary_register2"
+    alias: "kary_register2"
   }
   type_spec {
     bitstring {

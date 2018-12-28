@@ -32,7 +32,7 @@ public class FlowNew {
 
 	public void setFlowBytes(String flowBytes) {
 		this.flowBytes = flowBytes;
-	}
+	}	
 
 	public String getFlowBytes() {
 		return this.flowBytes;
