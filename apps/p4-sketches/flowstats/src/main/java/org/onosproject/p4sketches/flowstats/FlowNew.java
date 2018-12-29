@@ -15,9 +15,8 @@ public class FlowNew {
 	public String flowUdpSrcPort;
 	public String flowUdpDstPort;
 	public String cmHash;
-	public String bmHash;
-	public String cmSketch;
-	public String bmSketch;
+	public String bm1Hash;
+	public String bm2Hash;
 	public String flowStatsTotal;
 	public Long flowCount = 0L;
 	public FlowRule flowRule;
@@ -110,29 +109,21 @@ public class FlowNew {
 		return this.cmHash;
 	}
 
-	public void setBMHash(String bmHash) {
-		this.bmHash = bmHash;
+	public void setBM1Hash(String bm1Hash) {
+		this.bm1Hash = bm1Hash;
 	}
 
-	public String getBMHash() {
-		return this.bmHash;
+	public String getBM1Hash() {
+		return this.bm1Hash;
 	}
 
-	public void setCMSketch(String cmSketch) {
-		this.cmSketch = cmSketch;
+	public void setBM2Hash(String bm2Hash) {
+		this.bm2Hash = bm2Hash;
 	}
 
-	public String getCMSketch() {
-		return this.cmSketch;
-	}
-
-	public void setBMSketch(String bmSketch) {
-		this.bmSketch = bmSketch;
-	}
-
-	public String getBMSketch() {
-		return this.bmSketch;
-	}
+	public String getBM2Hash() {
+		return this.bm2Hash;
+	}	
 
 	public void setFlowCount(Long flowCount) {
 		this.flowCount = flowCount;

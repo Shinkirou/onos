@@ -273,7 +273,7 @@ public class FlowStats {
             }    
 
             // Generate the CM and BM sketch hash, if not done already.
-            if (currentFlow.getBMHash() == null) {
+            if (currentFlow.getBM1Hash() == null) {
                 flowSketchHash(currentFlow);                  
             }
         } else {
@@ -434,10 +434,17 @@ public class FlowStats {
         ipSrcCRC32.update(ipSrcByteArray);
         long ipSrcHashModulo = ipSrcCRC32.getValue() % 65536L;
 
-        String ipSrcHashString = Long.toString(ipSrcHashModulo);  
+        String ipSrcHashString = Long.toString(ipSrcHashModulo);
+
+        CRC32 ipDstCRC32 = new CRC32();
+        ipDstCRC32.update(ipDstByteArray);
+        long ipDstHashModulo = ipDstCRC32.getValue() % 65536L;
+
+        String ipDstHashString = Long.toString(ipDstHashModulo);        
 
         currentFlow.setCMHash(ip5tupleHashString);
-        currentFlow.setBMHash(ipSrcHashString);
+        currentFlow.setBM1Hash(ipSrcHashString);
+        currentFlow.setBM2Hash(ipDstHashString);
     }
 
     Runnable runnable = () -> {
@@ -466,7 +473,8 @@ public class FlowStats {
                 }
 
                 String cmHash = tempFlow.getCMHash();
-                String bmHash = tempFlow.getBMHash();                    
+                String bm1Hash = tempFlow.getBM1Hash();
+                String bm2Hash = tempFlow.getBM2Hash();                    
 
                 // Write to file
 
@@ -478,7 +486,8 @@ public class FlowStats {
                                             srcPort + "," +
                                             dstPort + "," +
                                             cmHash + "," +
-                                            bmHash;
+                                            bm1Hash + "," +
+                                            bm2Hash;
 
                 Files.write(txtpath, Arrays.asList(flowSketchTotal), StandardCharsets.UTF_8,
                 Files.exists(txtpath) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);                

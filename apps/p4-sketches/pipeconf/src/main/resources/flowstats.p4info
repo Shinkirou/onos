@@ -172,6 +172,18 @@ tables {
 }
 tables {
   preamble {
+    id: 33577640
+    name: "c_ingress.table_bitmap_hash_2_val"
+    alias: "table_bitmap_hash_2_val"
+  }
+  action_refs {
+    id: 16790643
+  }
+  size: 1024
+  idle_timeout_behavior: NO_TIMEOUT
+}
+tables {
+  preamble {
     id: 33618219
     name: "c_ingress.table_bitmap_check_pair"
     alias: "table_bitmap_check_pair"
@@ -286,6 +298,13 @@ actions {
     id: 16820028
     name: "c_ingress.action_bitmap_hash_1_val"
     alias: "action_bitmap_hash_1_val"
+  }
+}
+actions {
+  preamble {
+    id: 16790643
+    name: "c_ingress.action_bitmap_hash_2_val"
+    alias: "action_bitmap_hash_2_val"
   }
 }
 actions {
@@ -436,39 +455,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369107219
-    name: "c_ingress.kary_register0"
-    alias: "kary_register0"
-  }
-  type_spec {
-    bitstring {
-      bit {
-        bitwidth: 32
-      }
-    }
-  }
-  size: 65536
-}
-registers {
-  preamble {
-    id: 369118697
-    name: "c_ingress.kary_register1"
-    alias: "kary_register1"
-  }
-  type_spec {
-    bitstring {
-      bit {
-        bitwidth: 32
-      }
-    }
-  }
-  size: 65536
-}
-registers {
-  preamble {
-    id: 369159092
-    name: "c_ingress.kary_register2"
-    alias: "kary_register2"
+    id: 369141249
+    name: "c_ingress.bitmap_register2"
+    alias: "bitmap_register2"
   }
   type_spec {
     bitstring {

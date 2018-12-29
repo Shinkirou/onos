@@ -4,9 +4,6 @@
 
 #define MAX_PORTS 255
 
-// #define IP_PROTO_TCP 8w6
-// #define IP_PROTO_UDP 8w17
-
 const bit<8> IP_PROTO_UDP = 17;
 const bit<8> IP_PROTO_TCP = 6;
 
@@ -96,8 +93,10 @@ header my_metadata_header {
     bit<32> count_min_hash;
     bit<32> bitmap_hash_val0;
     bit<32> bitmap_hash_val1;
+    bit<32> bitmap_hash_val2;
     bit<32> bitmap_val0;
     bit<32> bitmap_val1;
+    bit<32> bitmap_val2;
     // bit<32> ip_proto;
     bit<16> l4_src_port;
     bit<16> l4_dst_port;
@@ -173,18 +172,20 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
     register<bit<32>>(65536) count_register_final;  
 
     register<bit<32>>(65536) bitmap_register0;
+    // Bitmap register for the source address.
     register<bit<32>>(65536) bitmap_register1;
-
-    register<bit<32>>(65536) kary_register0;
-    register<bit<32>>(65536) kary_register1;
-    register<bit<32>>(65536) kary_register2;
+    // Bitmap register for the destination address.
+    register<bit<32>>(65536) bitmap_register2;
 
     bit<32> packet_count_min_hash0;
     bit<32> packet_count_min_hash1;
     bit<32> packet_count_min_hash2;
 
     bit<32> packet_bitmap_hash0;
+    // Bitmap hash for the source address.
     bit<32> packet_bitmap_hash1;
+    // Bitmap hash for the destination address.
+    bit<32> packet_bitmap_hash2;
 
 
     // We use these counters to count packets/bytes received/sent on each port.
@@ -281,9 +282,18 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             {hdr.ipv4.src_addr}, 
             (bit<32>)65536);
         meta.my_metadata.bitmap_hash_val1 = packet_bitmap_hash1;
-    }       
+    }
 
-    action action_bitmap_check_pair() {     
+    action action_bitmap_hash_2_val() {
+        hash(packet_bitmap_hash2, 
+            HashAlgorithm.crc32, 
+            (bit<32>)0, 
+            {hdr.ipv4.dst_addr}, 
+            (bit<32>)65536);
+        meta.my_metadata.bitmap_hash_val2 = packet_bitmap_hash2;
+    }          
+
+    action action_bitmap_check_pair() {
 
         bit<32> tmp0;
 
@@ -292,25 +302,37 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         meta.my_metadata.bitmap_val0 = tmp0;
     }
 
-    action action_bitmap_new_pair() {     
-        
+    action action_bitmap_new_pair() {
+
         bit<32> tmp1;
+        bit<32> tmp2;
 
         meta.my_metadata.bitmap_val0 = meta.my_metadata.bitmap_val0 + 1;
+        
         bitmap_register1.read(tmp1, (bit<32>)meta.my_metadata.bitmap_hash_val1);
+        bitmap_register2.read(tmp2, (bit<32>)meta.my_metadata.bitmap_hash_val2);
 
         meta.my_metadata.bitmap_val1 = tmp1;
+        meta.my_metadata.bitmap_val2 = tmp2;
+
         meta.my_metadata.bitmap_val1 = meta.my_metadata.bitmap_val1 + 1;
+        meta.my_metadata.bitmap_val2 = meta.my_metadata.bitmap_val2 + 1;
+
         bitmap_register0.write((bit<32>)meta.my_metadata.bitmap_hash_val0, meta.my_metadata.bitmap_val0);
         bitmap_register1.write((bit<32>)meta.my_metadata.bitmap_hash_val1, meta.my_metadata.bitmap_val1);
+        bitmap_register2.write((bit<32>)meta.my_metadata.bitmap_hash_val2, meta.my_metadata.bitmap_val2);
     }
 
     action action_bitmap_existing_pair() {     
 
         bit<32> tmp1;
+        bit<32> tmp2;
 
         bitmap_register1.read(tmp1, (bit<32>)meta.my_metadata.bitmap_hash_val1);
         meta.my_metadata.bitmap_val1 = tmp1;
+
+        bitmap_register2.read(tmp2, (bit<32>)meta.my_metadata.bitmap_hash_val2);
+        meta.my_metadata.bitmap_val2 = tmp2;        
     }                            
 
     // Table counter used to count packets and bytes matched by each entry of
@@ -391,6 +413,13 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         default_action = action_bitmap_hash_1_val();
     }
 
+    table table_bitmap_hash_2_val { 
+        actions = {
+            action_bitmap_hash_2_val;
+        }
+        default_action = action_bitmap_hash_2_val();
+    }
+
     table table_bitmap_check_pair { 
         actions = {
             action_bitmap_check_pair;
@@ -410,15 +439,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             action_bitmap_existing_pair;
         }
         default_action = action_bitmap_existing_pair();
-    }
-
-    // table table_send_to_cpu { 
-    //     actions = {
-    //         send_to_cpu;
-    //     }
-    //     default_action = send_to_cpu();
-    // }                 
-
+    }             
 
     // Defines the processing applied by this control block. You can see this as
     // the main function applied to every packet received by the switch.
@@ -461,6 +482,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
                 
                 table_bitmap_hash_0_val.apply();
                 table_bitmap_hash_1_val.apply();
+                table_bitmap_hash_2_val.apply();
      
                 // Check the bitmap value for the (ip src, ip dst) pair
                 table_bitmap_check_pair.apply(); 
@@ -472,7 +494,6 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
                     // if the value is 1, we do nothing (the pair is already accounted for)
                     table_bitmap_existing_pair.apply();
                 }
-                // table_send_to_cpu.apply();
 
                 // Packet hit an entry in t_l2_fwd table. A forwarding action
                 // has already been taken. No need to apply other tables, exit
@@ -480,15 +501,6 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
                 return;
             }
         }
-
-        /*
-        if (standard_metadata.egress_spec < MAX_PORTS) {
-            tx_port_counter.count((bit<32>) standard_metadata.egress_spec);
-        }
-        if (standard_metadata.ingress_port < MAX_PORTS) {
-            rx_port_counter.count((bit<32>) standard_metadata.ingress_port);
-        }
-        */
      }
 }
 
