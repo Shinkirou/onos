@@ -8,6 +8,19 @@
         ["tmp_1", 32, false],
         ["tmp_2", 32, false],
         ["tmp_3", 32, false],
+        ["tmp_4", 32, false],
+        ["tmp_5", 32, false],
+        ["tmp_6", 32, false],
+        ["tmp_7", 32, false],
+        ["tmp_8", 32, false],
+        ["tmp_9", 32, false],
+        ["tmp_10", 32, false],
+        ["tmp_11", 32, false],
+        ["tmp_12", 32, false],
+        ["tmp_13", 32, false],
+        ["tmp_14", 32, false],
+        ["tmp_15", 32, false],
+        ["tmp_16", 32, false],
         ["packet_count_min_hash0", 32, false],
         ["packet_count_min_hash1", 32, false],
         ["packet_count_min_hash2", 32, false],
@@ -490,10 +503,10 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 169,
-        "column" : 29,
+        "column" : 30,
         "source_fragment" : "count_min_register0"
       },
-      "size" : 65536,
+      "size" : 131072,
       "bitwidth" : 32
     },
     {
@@ -502,10 +515,10 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 170,
-        "column" : 29,
+        "column" : 30,
         "source_fragment" : "count_min_register1"
       },
-      "size" : 65536,
+      "size" : 131072,
       "bitwidth" : 32
     },
     {
@@ -514,10 +527,10 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 171,
-        "column" : 29,
+        "column" : 30,
         "source_fragment" : "count_min_register2"
       },
-      "size" : 65536,
+      "size" : 131072,
       "bitwidth" : 32
     },
     {
@@ -526,10 +539,10 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 172,
-        "column" : 29,
+        "column" : 30,
         "source_fragment" : "count_register_final"
       },
-      "size" : 65536,
+      "size" : 131072,
       "bitwidth" : 32
     },
     {
@@ -538,10 +551,10 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 174,
-        "column" : 29,
+        "column" : 30,
         "source_fragment" : "bitmap_register0"
       },
-      "size" : 65536,
+      "size" : 131072,
       "bitwidth" : 32
     },
     {
@@ -550,10 +563,10 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 176,
-        "column" : 29,
+        "column" : 30,
         "source_fragment" : "bitmap_register1"
       },
-      "size" : 65536,
+      "size" : 131072,
       "bitwidth" : 32
     },
     {
@@ -562,10 +575,10 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 178,
-        "column" : 29,
+        "column" : 30,
         "source_fragment" : "bitmap_register2"
       },
-      "size" : 65536,
+      "size" : 131072,
       "bitwidth" : 32
     }
   ],
@@ -585,11 +598,19 @@
         },
         {
           "type" : "field",
-          "value" : ["ipv4", "protocol"]
+          "value" : ["scalars", "tmp"]
         },
         {
           "type" : "field",
           "value" : ["ethernet", "src_addr"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_1"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_2"]
         }
       ]
     },
@@ -608,11 +629,19 @@
         },
         {
           "type" : "field",
-          "value" : ["ipv4", "protocol"]
+          "value" : ["scalars", "tmp_3"]
         },
         {
           "type" : "field",
           "value" : ["ethernet", "dst_addr"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_4"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_5"]
         }
       ]
     },
@@ -631,15 +660,15 @@
         },
         {
           "type" : "field",
-          "value" : ["scalars", "tmp"]
+          "value" : ["scalars", "tmp_6"]
         },
         {
           "type" : "field",
-          "value" : ["scalars", "tmp_1"]
+          "value" : ["scalars", "tmp_7"]
         },
         {
           "type" : "field",
-          "value" : ["scalars", "tmp_2"]
+          "value" : ["scalars", "tmp_8"]
         }
       ]
     },
@@ -655,6 +684,18 @@
         {
           "type" : "field",
           "value" : ["ipv4", "dst_addr"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_10"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_11"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_12"]
         }
       ]
     },
@@ -666,6 +707,14 @@
         {
           "type" : "field",
           "value" : ["ipv4", "src_addr"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_13"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_14"]
         }
       ]
     },
@@ -677,6 +726,14 @@
         {
           "type" : "field",
           "value" : ["ipv4", "dst_addr"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_15"]
+        },
+        {
+          "type" : "field",
+          "value" : ["scalars", "tmp_16"]
         }
       ]
     }
@@ -803,6 +860,102 @@
       "runtime_data" : [],
       "primitives" : [
         {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["ipv4", "protocol"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 219,
+            "column" : 51,
+            "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_1"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["userMetadata.my_metadata", "l4_src_port"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 219,
+            "column" : 102,
+            "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_2"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["userMetadata.my_metadata", "l4_dst_port"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 219,
+            "column" : 141,
+            "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
+          }
+        },
+        {
           "op" : "modify_field_with_hash_based_offset",
           "parameters" : [
             {
@@ -819,7 +972,7 @@
             },
             {
               "type" : "hexstr",
-              "value" : "0x00010000"
+              "value" : "0x00020000"
             }
           ],
           "source_info" : {
@@ -856,6 +1009,102 @@
       "runtime_data" : [],
       "primitives" : [
         {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_3"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["ipv4", "protocol"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 228,
+            "column" : 51,
+            "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_4"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["userMetadata.my_metadata", "l4_src_port"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 228,
+            "column" : 102,
+            "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_5"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["userMetadata.my_metadata", "l4_dst_port"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 228,
+            "column" : 141,
+            "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
+          }
+        },
+        {
           "op" : "modify_field_with_hash_based_offset",
           "parameters" : [
             {
@@ -872,7 +1121,7 @@
             },
             {
               "type" : "hexstr",
-              "value" : "0x00010000"
+              "value" : "0x00020000"
             }
           ],
           "source_info" : {
@@ -913,7 +1162,7 @@
           "parameters" : [
             {
               "type" : "field",
-              "value" : ["scalars", "tmp"]
+              "value" : ["scalars", "tmp_6"]
             },
             {
               "type" : "expression",
@@ -945,7 +1194,7 @@
           "parameters" : [
             {
               "type" : "field",
-              "value" : ["scalars", "tmp_1"]
+              "value" : ["scalars", "tmp_7"]
             },
             {
               "type" : "expression",
@@ -977,7 +1226,7 @@
           "parameters" : [
             {
               "type" : "field",
-              "value" : ["scalars", "tmp_2"]
+              "value" : ["scalars", "tmp_8"]
             },
             {
               "type" : "expression",
@@ -1021,7 +1270,7 @@
             },
             {
               "type" : "hexstr",
-              "value" : "0x00010000"
+              "value" : "0x00020000"
             }
           ],
           "source_info" : {
@@ -1314,7 +1563,7 @@
           "parameters" : [
             {
               "type" : "field",
-              "value" : ["scalars", "tmp_3"]
+              "value" : ["scalars", "tmp_9"]
             },
             {
               "type" : "expression",
@@ -1364,7 +1613,7 @@
             },
             {
               "type" : "field",
-              "value" : ["scalars", "tmp_3"]
+              "value" : ["scalars", "tmp_9"]
             }
           ],
           "source_info" : {
@@ -1458,6 +1707,102 @@
       "runtime_data" : [],
       "primitives" : [
         {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_10"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["ipv4", "protocol"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 273,
+            "column" : 51,
+            "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_11"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["userMetadata.my_metadata", "l4_src_port"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 273,
+            "column" : 79,
+            "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_12"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["userMetadata.my_metadata", "l4_dst_port"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 273,
+            "column" : 118,
+            "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
+          }
+        },
+        {
           "op" : "modify_field_with_hash_based_offset",
           "parameters" : [
             {
@@ -1474,7 +1819,7 @@
             },
             {
               "type" : "hexstr",
-              "value" : "0x00010000"
+              "value" : "0x00020000"
             }
           ],
           "source_info" : {
@@ -1511,6 +1856,70 @@
       "runtime_data" : [],
       "primitives" : [
         {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_13"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["ipv4", "protocol"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 282,
+            "column" : 32,
+            "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_14"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["userMetadata.my_metadata", "l4_src_port"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 282,
+            "column" : 60,
+            "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
+          }
+        },
+        {
           "op" : "modify_field_with_hash_based_offset",
           "parameters" : [
             {
@@ -1527,7 +1936,7 @@
             },
             {
               "type" : "hexstr",
-              "value" : "0x00010000"
+              "value" : "0x00020000"
             }
           ],
           "source_info" : {
@@ -1564,6 +1973,70 @@
       "runtime_data" : [],
       "primitives" : [
         {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_15"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["ipv4", "protocol"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 291,
+            "column" : 32,
+            "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_16"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["userMetadata.my_metadata", "l4_dst_port"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 291,
+            "column" : 60,
+            "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
+          }
+        },
+        {
           "op" : "modify_field_with_hash_based_offset",
           "parameters" : [
             {
@@ -1580,7 +2053,7 @@
             },
             {
               "type" : "hexstr",
-              "value" : "0x00010000"
+              "value" : "0x00020000"
             }
           ],
           "source_info" : {

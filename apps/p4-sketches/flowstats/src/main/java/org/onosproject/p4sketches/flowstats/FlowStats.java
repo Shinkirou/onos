@@ -426,19 +426,23 @@ public class FlowStats {
         ip5tupleCRC32.update(ipProtoByteArray);
         ip5tupleCRC32.update(srcPortByteArray);
         ip5tupleCRC32.update(dstPortByteArray);
-        long ip5tupleModulo = ip5tupleCRC32.getValue() % 65536L;
+        long ip5tupleModulo = ip5tupleCRC32.getValue() % 131072L;
 
         String ip5tupleHashString = Long.toString(ip5tupleModulo);
 
         CRC32 ipSrcCRC32 = new CRC32();
         ipSrcCRC32.update(ipSrcByteArray);
-        long ipSrcHashModulo = ipSrcCRC32.getValue() % 65536L;
+        ipSrcCRC32.update(ipProtoByteArray);
+        ipSrcCRC32.update(srcPortByteArray);
+        long ipSrcHashModulo = ipSrcCRC32.getValue() % 131072L;
 
         String ipSrcHashString = Long.toString(ipSrcHashModulo);
 
         CRC32 ipDstCRC32 = new CRC32();
         ipDstCRC32.update(ipDstByteArray);
-        long ipDstHashModulo = ipDstCRC32.getValue() % 65536L;
+        ipDstCRC32.update(ipProtoByteArray);
+        ipDstCRC32.update(dstPortByteArray);
+        long ipDstHashModulo = ipDstCRC32.getValue() % 131072L;
 
         String ipDstHashString = Long.toString(ipDstHashModulo);        
 

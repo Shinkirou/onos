@@ -166,16 +166,16 @@ parser c_parser(packet_in packet, out headers_t hdr, inout metadata_t meta, inou
 
 control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
 
-    register<bit<32>>(65536) count_min_register0;
-    register<bit<32>>(65536) count_min_register1;  
-    register<bit<32>>(65536) count_min_register2;  
-    register<bit<32>>(65536) count_register_final;  
+    register<bit<32>>(131072) count_min_register0;
+    register<bit<32>>(131072) count_min_register1;  
+    register<bit<32>>(131072) count_min_register2;  
+    register<bit<32>>(131072) count_register_final;  
 
-    register<bit<32>>(65536) bitmap_register0;
+    register<bit<32>>(131072) bitmap_register0;
     // Bitmap register for the source address.
-    register<bit<32>>(65536) bitmap_register1;
+    register<bit<32>>(131072) bitmap_register1;
     // Bitmap register for the destination address.
-    register<bit<32>>(65536) bitmap_register2;
+    register<bit<32>>(131072) bitmap_register2;
 
     bit<32> packet_count_min_hash0;
     bit<32> packet_count_min_hash1;
@@ -216,8 +216,8 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         hash(packet_count_min_hash0, 
             HashAlgorithm.crc32, 
             (bit<32>)0, 
-            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, hdr.ipv4.protocol, hdr.ethernet.src_addr}, 
-            (bit<32>)65536);
+            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, hdr.ethernet.src_addr, (bit<32>)meta.my_metadata.l4_src_port, (bit<32>)meta.my_metadata.l4_dst_port}, 
+            (bit<32>)131072);
         meta.my_metadata.count_min_hash_val0 = packet_count_min_hash0;
     }
 
@@ -225,8 +225,8 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         hash(packet_count_min_hash1, 
             HashAlgorithm.crc32, 
             (bit<32>)0, 
-            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, hdr.ipv4.protocol, hdr.ethernet.dst_addr}, 
-            (bit<32>)65536);
+            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, hdr.ethernet.dst_addr, (bit<32>)meta.my_metadata.l4_src_port, (bit<32>)meta.my_metadata.l4_dst_port}, 
+            (bit<32>)131072);
         meta.my_metadata.count_min_hash_val1 = packet_count_min_hash1;
     }  
 
@@ -235,7 +235,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             HashAlgorithm.crc32, 
             (bit<32>)0, 
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.my_metadata.l4_src_port, (bit<32>)meta.my_metadata.l4_dst_port},
-            (bit<32>)65536);
+            (bit<32>)131072);
         meta.my_metadata.count_min_hash_val2 = packet_count_min_hash2;
     }      
 
@@ -270,8 +270,8 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         hash(packet_bitmap_hash0,
             HashAlgorithm.crc32,
             (bit<32>)0,
-            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr},
-            (bit<32>)65536);
+            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.my_metadata.l4_src_port, (bit<32>)meta.my_metadata.l4_dst_port},
+            (bit<32>)131072);
         meta.my_metadata.bitmap_hash_val0 = packet_bitmap_hash0;
     }
 
@@ -279,8 +279,8 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         hash(packet_bitmap_hash1, 
             HashAlgorithm.crc32, 
             (bit<32>)0, 
-            {hdr.ipv4.src_addr}, 
-            (bit<32>)65536);
+            {hdr.ipv4.src_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.my_metadata.l4_src_port}, 
+            (bit<32>)131072);
         meta.my_metadata.bitmap_hash_val1 = packet_bitmap_hash1;
     }
 
@@ -288,8 +288,8 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         hash(packet_bitmap_hash2, 
             HashAlgorithm.crc32, 
             (bit<32>)0, 
-            {hdr.ipv4.dst_addr}, 
-            (bit<32>)65536);
+            {hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.my_metadata.l4_dst_port}, 
+            (bit<32>)131072);
         meta.my_metadata.bitmap_hash_val2 = packet_bitmap_hash2;
     }          
 

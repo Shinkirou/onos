@@ -376,7 +376,7 @@ registers {
       }
     }
   }
-  size: 65536
+  size: 131072
 }
 registers {
   preamble {
@@ -391,7 +391,7 @@ registers {
       }
     }
   }
-  size: 65536
+  size: 131072
 }
 registers {
   preamble {
@@ -406,7 +406,7 @@ registers {
       }
     }
   }
-  size: 65536
+  size: 131072
 }
 registers {
   preamble {
@@ -421,7 +421,7 @@ registers {
       }
     }
   }
-  size: 65536
+  size: 131072
 }
 registers {
   preamble {
@@ -436,7 +436,7 @@ registers {
       }
     }
   }
-  size: 65536
+  size: 131072
 }
 registers {
   preamble {
@@ -451,7 +451,7 @@ registers {
       }
     }
   }
-  size: 65536
+  size: 131072
 }
 registers {
   preamble {
@@ -466,7 +466,7 @@ registers {
       }
     }
   }
-  size: 65536
+  size: 131072
 }
 type_info {
 }
