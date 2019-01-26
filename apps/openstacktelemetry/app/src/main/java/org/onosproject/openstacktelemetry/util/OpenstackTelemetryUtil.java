@@ -18,9 +18,11 @@ package org.onosproject.openstacktelemetry.util;
 import com.google.common.base.Strings;
 import org.onlab.packet.IPv4;
 import org.onosproject.cfg.ConfigProperty;
-import org.onosproject.openstacktelemetry.api.TelemetryAdminService;
-import org.onosproject.openstacktelemetry.api.config.TelemetryConfig;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.Dictionary;
 import java.util.Optional;
 import java.util.Set;
@@ -36,6 +38,7 @@ public final class OpenstackTelemetryUtil {
     private static final String PROTOCOL_NAME_UDP = "udp";
     private static final String PROTOCOL_NAME_ANY = "any";
     private static final int ARBITRARY_PROTOCOL = 0x0;
+    private static final int TIMEOUT = 2000;
 
     /**
      * Prevents object instantiation from external.
@@ -114,25 +117,24 @@ public final class OpenstackTelemetryUtil {
     }
 
     /**
-     * Initializes the telemetry service due tue configuration changes.
+     * Tests the connectivity with the given address and port.
      *
-     *
-     * @param adminService  telemetry admin service
-     * @param config        telemetry configuration
-     * @param enable        service enable flag
+     * @param address address
+     * @param port port number
+     * @return true if the given address and port is accessible, false otherwise
      */
-    public static void initTelemetryService(TelemetryAdminService adminService,
-                                            TelemetryConfig config, boolean enable) {
-        if (enable) {
-            if (adminService.isRunning()) {
-                adminService.restart(config);
-            } else {
-                adminService.start(config);
-            }
-        } else {
-            if (adminService.isRunning()) {
-                adminService.stop();
-            }
+    public static boolean testConnectivity(String address, int port) {
+
+        boolean isConnected = false;
+        SocketAddress socketAddress = new InetSocketAddress(address, port);
+        Socket socket = new Socket();
+        try {
+            socket.connect(socketAddress, TIMEOUT);
+            socket.close();
+            isConnected = true;
+        } catch (IOException ignored) {
         }
+
+        return isConnected;
     }
 }

@@ -15,6 +15,7 @@
  */
 package org.onosproject.openstacktelemetry.impl;
 
+import com.google.common.collect.Maps;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.apache.felix.scr.annotations.Activate;
@@ -25,10 +26,19 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
 import org.onosproject.openstacktelemetry.api.GrpcTelemetryAdminService;
 import org.onosproject.openstacktelemetry.api.OpenstackTelemetryService;
+import org.onosproject.openstacktelemetry.api.TelemetryConfigService;
 import org.onosproject.openstacktelemetry.api.config.GrpcTelemetryConfig;
 import org.onosproject.openstacktelemetry.api.config.TelemetryConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+
+import static org.onosproject.openstacktelemetry.api.Constants.GRPC_SCHEME;
+import static org.onosproject.openstacktelemetry.api.config.TelemetryConfig.ConfigType.GRPC;
+import static org.onosproject.openstacktelemetry.api.config.TelemetryConfig.Status.ENABLED;
+import static org.onosproject.openstacktelemetry.config.DefaultGrpcTelemetryConfig.fromTelemetryConfig;
+import static org.onosproject.openstacktelemetry.util.OpenstackTelemetryUtil.testConnectivity;
 
 /**
  * gRPC telemetry manager.
@@ -42,7 +52,10 @@ public class GrpcTelemetryManager implements GrpcTelemetryAdminService {
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
     protected OpenstackTelemetryService openstackTelemetryService;
 
-    private ManagedChannel channel = null;
+    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
+    protected TelemetryConfigService telemetryConfigService;
+
+    private Map<String, ManagedChannel> channels = Maps.newConcurrentMap();
 
     @Activate
     protected void activate() {
@@ -54,7 +67,7 @@ public class GrpcTelemetryManager implements GrpcTelemetryAdminService {
 
     @Deactivate
     protected void deactivate() {
-        stop();
+        stopAll();
 
         openstackTelemetryService.removeTelemetryService(this);
 
@@ -62,43 +75,70 @@ public class GrpcTelemetryManager implements GrpcTelemetryAdminService {
     }
 
     @Override
-    public void start(TelemetryConfig config) {
-        if (channel != null) {
-            log.info("gRPC producer has already been started");
-            return;
+    public boolean start(String name) {
+        boolean success = false;
+        TelemetryConfig config = telemetryConfigService.getConfig(name);
+        GrpcTelemetryConfig grpcConfig = fromTelemetryConfig(config);
+
+        if (grpcConfig != null && !config.name().equals(GRPC_SCHEME) &&
+                config.status() == ENABLED) {
+            ManagedChannel channel = ManagedChannelBuilder
+                    .forAddress(grpcConfig.address(), grpcConfig.port())
+                    .maxInboundMessageSize(grpcConfig.maxInboundMsgSize())
+                    .usePlaintext(grpcConfig.usePlaintext())
+                    .build();
+
+            if (testConnectivity(grpcConfig.address(), grpcConfig.port())) {
+                channels.put(name, channel);
+                success = true;
+            } else {
+                log.warn("Unable to connect to {}:{}, " +
+                                "please check the connectivity manually",
+                                grpcConfig.address(), grpcConfig.port());
+            }
         }
+        return success;
+    }
 
-        GrpcTelemetryConfig grpcConfig = (GrpcTelemetryConfig) config;
-        channel = ManagedChannelBuilder
-                .forAddress(grpcConfig.address(), grpcConfig.port())
-                .maxInboundMessageSize(grpcConfig.maxInboundMsgSize())
-                .usePlaintext(grpcConfig.usePlaintext())
-                .build();
+    @Override
+    public void stop(String name) {
+        ManagedChannel channel = channels.get(name);
 
+        if (channel != null) {
+            channel.shutdown();
+            channels.remove(name);
+        }
+    }
+
+    @Override
+    public boolean restart(String name) {
+        stop(name);
+        return start(name);
+    }
+
+    @Override
+    public void startAll() {
+        telemetryConfigService.getConfigsByType(GRPC).forEach(c -> start(c.name()));
         log.info("gRPC producer has Started");
     }
 
     @Override
-    public void stop() {
-        if (channel != null) {
-            channel.shutdown();
-            channel = null;
-        }
-
+    public void stopAll() {
+        channels.values().forEach(ManagedChannel::shutdown);
         log.info("gRPC producer has Stopped");
     }
 
     @Override
-    public void restart(TelemetryConfig config) {
-        stop();
-        start(config);
+    public void restartAll() {
+        stopAll();
+        startAll();
     }
 
     @Override
     public Object publish(Object record) {
         // TODO: need to find a way to invoke gRPC endpoint using channel
 
-        if (channel == null) {
+        if (channels.isEmpty()) {
             log.debug("gRPC telemetry service has not been enabled!");
         }
 
@@ -107,6 +147,6 @@ public class GrpcTelemetryManager implements GrpcTelemetryAdminService {
 
     @Override
     public boolean isRunning() {
-        return channel != null;
+        return !channels.isEmpty();
     }
 }
