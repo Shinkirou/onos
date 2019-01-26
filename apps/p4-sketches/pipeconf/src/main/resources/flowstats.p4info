@@ -60,12 +60,30 @@ tables {
   }
   match_fields {
     id: 10
+    name: "hdr.tcp.res"
+    bitwidth: 3
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 11
+    name: "hdr.tcp.ecn"
+    bitwidth: 3
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 12
+    name: "hdr.tcp.ctrl"
+    bitwidth: 6
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 13
     name: "hdr.udp.src_port"
     bitwidth: 16
     match_type: TERNARY
   }
   match_fields {
-    id: 11
+    id: 14
     name: "hdr.udp.dst_port"
     bitwidth: 16
     match_type: TERNARY

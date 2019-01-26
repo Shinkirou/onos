@@ -97,7 +97,6 @@ header my_metadata_header {
     bit<32> bitmap_val0;
     bit<32> bitmap_val1;
     bit<32> bitmap_val2;
-    // bit<32> ip_proto;
     bit<16> l4_src_port;
     bit<16> l4_dst_port;
 }
@@ -169,8 +168,8 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
     register<bit<32>>(131072) count_min_register0;
     register<bit<32>>(131072) count_min_register1;  
     register<bit<32>>(131072) count_min_register2;  
-    register<bit<32>>(131072) count_register_final;  
-
+    register<bit<32>>(131072) count_register_final;
+    
     register<bit<32>>(131072) bitmap_register0;
     // Bitmap register for the source address.
     register<bit<32>>(131072) bitmap_register1;
@@ -209,30 +208,29 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
     }
 
     action _drop() {
-        mark_to_drop();
     }
 
     action action_get_count_min_hash_0_val() {
         hash(packet_count_min_hash0, 
-            HashAlgorithm.crc32, 
+            HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
-            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, hdr.ethernet.src_addr, (bit<32>)meta.my_metadata.l4_src_port, (bit<32>)meta.my_metadata.l4_dst_port}, 
+            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.my_metadata.l4_src_port, (bit<32>)meta.my_metadata.l4_dst_port}, 
             (bit<32>)131072);
         meta.my_metadata.count_min_hash_val0 = packet_count_min_hash0;
     }
 
     action action_get_count_min_hash_1_val() {
         hash(packet_count_min_hash1, 
-            HashAlgorithm.crc32, 
+            HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
-            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, hdr.ethernet.dst_addr, (bit<32>)meta.my_metadata.l4_src_port, (bit<32>)meta.my_metadata.l4_dst_port}, 
+            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.my_metadata.l4_src_port, (bit<32>)meta.my_metadata.l4_dst_port}, 
             (bit<32>)131072);
         meta.my_metadata.count_min_hash_val1 = packet_count_min_hash1;
     }  
 
     action action_get_count_min_hash_2_val() {
         hash(packet_count_min_hash2, 
-            HashAlgorithm.crc32, 
+            HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.my_metadata.l4_src_port, (bit<32>)meta.my_metadata.l4_dst_port},
             (bit<32>)131072);
@@ -268,7 +266,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 
     action action_bitmap_hash_0_val() {
         hash(packet_bitmap_hash0,
-            HashAlgorithm.crc32,
+            HashAlgorithm.crc32_custom,
             (bit<32>)0,
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.my_metadata.l4_src_port, (bit<32>)meta.my_metadata.l4_dst_port},
             (bit<32>)131072);
@@ -277,7 +275,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 
     action action_bitmap_hash_1_val() {
         hash(packet_bitmap_hash1, 
-            HashAlgorithm.crc32, 
+            HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
             {hdr.ipv4.src_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.my_metadata.l4_src_port}, 
             (bit<32>)131072);
@@ -286,7 +284,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 
     action action_bitmap_hash_2_val() {
         hash(packet_bitmap_hash2, 
-            HashAlgorithm.crc32, 
+            HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
             {hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.my_metadata.l4_dst_port}, 
             (bit<32>)131072);
@@ -350,6 +348,9 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             hdr.ipv4.dst_addr               : ternary;
             hdr.tcp.src_port                : ternary;
             hdr.tcp.dst_port                : ternary;
+            hdr.tcp.res                     : ternary;
+            hdr.tcp.ecn                     : ternary;
+            hdr.tcp.ctrl                    : ternary;
             hdr.udp.src_port                : ternary;
             hdr.udp.dst_port                : ternary;
         }

@@ -168,11 +168,11 @@ public class ReactiveForwarding {
 
     @Property(name = "matchIpv4Address", boolValue = true,
             label = "Enable matching IPv4 Addresses; default is false")
-    private boolean matchIpv4Address = false;
+    private boolean matchIpv4Address = true;
 
     @Property(name = "matchIpv4Dscp", boolValue = false,
             label = "Enable matching IPv4 DSCP and ECN; default is false")
-    private boolean matchIpv4Dscp = false;
+    private boolean matchIpv4Dscp = true;
 
     @Property(name = "matchIpv6Address", boolValue = false,
             label = "Enable matching IPv6 Addresses; default is false")
@@ -184,7 +184,7 @@ public class ReactiveForwarding {
 
     @Property(name = "matchTcpUdpPorts", boolValue = true,
             label = "Enable matching TCP/UDP ports; default is false")
-    private boolean matchTcpUdpPorts = false;
+    private boolean matchTcpUdpPorts = true;
 
     @Property(name = "matchIcmpFields", boolValue = false,
             label = "Enable matching ICMPv4 and ICMPv6 fields; " +

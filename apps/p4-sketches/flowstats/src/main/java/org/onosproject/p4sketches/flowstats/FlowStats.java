@@ -95,6 +95,7 @@ import java.util.regex.Matcher;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.ConcurrentHashMap;
+import java.io.File;
 
 import java.util.zip.CRC32;
 import javax.xml.bind.DatatypeConverter;
@@ -164,18 +165,19 @@ public class FlowStats {
 
     private void writeUpdatedFlow(FlowRule flowRule) {
 
-        String ethSrcString = "";
-        String ethDstString = "";
-        String ipSrcString  = "";
-        String ipDstString  = "";  
-        String ipProtocol   = "";
-        String tcpSrcPort   = "";
-        String tcpDstPort   = "";
-        String udpSrcPort   = "";
-        String udpDstPort   = "";
+        String ethSrcString     = "";
+        String ethDstString     = "";
+        String ipSrcString      = "";
+        String ipDstString      = "";  
+        String ipProtocol       = "";
+        String tcpSrcPort       = "";
+        String tcpDstPort       = "";
+        String tcpFlags         = "";
+        String udpSrcPort       = "";
+        String udpDstPort       = "";
 
-        Long flowPackets = 0L;
-        Long flowBytes = 0L;
+        Long flowPackets    = 0L;
+        Long flowBytes      = 0L;
 
         FlowNew currentFlow = new FlowNew();
 
@@ -184,15 +186,15 @@ public class FlowStats {
             ethDstString    = ((EthCriterion) flowRule.selector().getCriterion(Type.ETH_DST)).mac().toString(); 
             ipSrcString     = ((IPCriterion) flowRule.selector().getCriterion(Type.IPV4_SRC)).ip().address().toString();  
             ipDstString     = ((IPCriterion) flowRule.selector().getCriterion(Type.IPV4_DST)).ip().address().toString();
-            short s         = ((IPProtocolCriterion) flowRule.selector().getCriterion(Type.IP_PROTO)).protocol();
-            ipProtocol      = Short.toString(s);
+            ipProtocol      = Short.toString(((IPProtocolCriterion) flowRule.selector().getCriterion(Type.IP_PROTO)).protocol());
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
 
         try {
             tcpSrcPort      = ((TcpPortCriterion) flowRule.selector().getCriterion(Type.TCP_SRC)).tcpPort().toString();
-            tcpDstPort      = ((TcpPortCriterion) flowRule.selector().getCriterion(Type.TCP_DST)).tcpPort().toString();  
+            tcpDstPort      = ((TcpPortCriterion) flowRule.selector().getCriterion(Type.TCP_DST)).tcpPort().toString();
+            tcpFlags        = Integer.toString(((TcpFlagsCriterion) flowRule.selector().getCriterion(Type.TCP_FLAGS)).flags());
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
@@ -233,7 +235,7 @@ public class FlowStats {
         if (ipProtocol.equals("17")) {
             keyString = ipSrcString + ipDstString + ipProtocol + udpSrcPort + udpDstPort;
         } else {
-            keyString = ipSrcString + ipDstString + ipProtocol + tcpSrcPort + tcpDstPort;
+            keyString = ipSrcString + ipDstString + ipProtocol + tcpSrcPort + tcpDstPort + tcpFlags;
         }
         String flowPacketsString = Long.toString(flowPackets + 1L);
         String flowBytesString = Long.toString(flowBytes);
@@ -251,6 +253,7 @@ public class FlowStats {
             } else {
                 currentFlow.setFlowTcpSrcPort(tcpSrcPort);
                 currentFlow.setFlowTcpDstPort(tcpDstPort);
+                currentFlow.setFlowTcpFlags(tcpFlags);
             }
         }
 
@@ -264,18 +267,19 @@ public class FlowStats {
 
             currentFlow.setFlowPackets(flowPacketsString);
             currentFlow.setFlowBytes(flowBytesString);
-            if (ipProtocol.equals("17")) {
-                currentFlow.setFlowUdpSrcPort(udpSrcPort);
-                currentFlow.setFlowUdpDstPort(udpDstPort);
-            } else {
-                currentFlow.setFlowTcpSrcPort(tcpSrcPort);
-                currentFlow.setFlowTcpDstPort(tcpDstPort);
-            }    
+            
+            // if (ipProtocol.equals("17")) {
+            //     currentFlow.setFlowUdpSrcPort(udpSrcPort);
+            //     currentFlow.setFlowUdpDstPort(udpDstPort);
+            // } else {
+            //     currentFlow.setFlowTcpSrcPort(tcpSrcPort);
+            //     currentFlow.setFlowTcpDstPort(tcpDstPort);
+            // }
 
             // Generate the CM and BM sketch hash, if not done already.
-            if (currentFlow.getBM1Hash() == null) {
-                flowSketchHash(currentFlow);                  
-            }
+            // if (currentFlow.getBM1Hash() == null) {
+            //     flowSketchHash(currentFlow);                  
+            // }
         } else {
             return;
         }
@@ -454,7 +458,9 @@ public class FlowStats {
     Runnable runnable = () -> {
         try {
             String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS").format(new Date());
-            java.nio.file.Path txtpath = Paths.get("/home/shinkirou/Documents/thesis-flow-stats/flows-" + timeStamp + ".txt");
+            String currentUsersHomeDir = System.getProperty("user.home");
+            String otherFolder = currentUsersHomeDir + File.separator + "Documents" + File.separator + "flow-stats" + File.separator;
+            java.nio.file.Path txtpath = Paths.get(otherFolder + timeStamp + ".txt");
 
             for (String setKey : flowNewMap.keySet()) {
 
@@ -465,8 +471,9 @@ public class FlowStats {
                 String ipSrcString         = tempFlow.getFlowSrcIP();
                 String ipDstString         = tempFlow.getFlowDstIP();
                 String ipProtocol          = tempFlow.getFlowIPProtocol();
-                String srcPort = "";
-                String dstPort = "";
+                String srcPort  = "";
+                String dstPort  = "";
+                String tcpFlags = "";
                     
                 if (ipProtocol.equals("17")) {
                     srcPort   = tempFlow.getFlowUdpSrcPort();
@@ -474,6 +481,7 @@ public class FlowStats {
                 } else {
                     srcPort   = tempFlow.getFlowTcpSrcPort();
                     dstPort   = tempFlow.getFlowTcpDstPort();
+                    tcpFlags  = tempFlow.getFlowTcpFlags();
                 }
 
                 String cmHash = tempFlow.getCMHash();
@@ -488,13 +496,14 @@ public class FlowStats {
                                             ipDstString + "," + 
                                             ipProtocol + "," +
                                             srcPort + "," +
-                                            dstPort + "," +
-                                            cmHash + "," +
-                                            bm1Hash + "," +
-                                            bm2Hash;
+                                            dstPort;
+                                            // tcpFlags + "," +
+                                            // cmHash + "," +
+                                            // bm1Hash + "," +
+                                            // bm2Hash;
 
                 Files.write(txtpath, Arrays.asList(flowSketchTotal), StandardCharsets.UTF_8,
-                Files.exists(txtpath) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);                
+                Files.exists(txtpath) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);
             }
         } catch (IOException e) {
             e.printStackTrace();

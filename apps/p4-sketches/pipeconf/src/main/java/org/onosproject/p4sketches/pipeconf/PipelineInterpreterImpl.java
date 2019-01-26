@@ -87,40 +87,40 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour implements PiPipelineInterpreter {
 
-    private static final String DOT = ".";
-    private static final String HDR = "hdr";
-    private static final String C_INGRESS = "c_ingress";
-    private static final String T_L2_FWD = "t_l2_fwd";
-    private static final String EGRESS_PORT = "egress_port";
-    private static final String INGRESS_PORT = "ingress_port";
-    private static final String ETHERNET = "ethernet";
-    private static final String IPV4 = "ipv4";
-    private static final String STANDARD_METADATA = "standard_metadata";
-    private static final int PORT_FIELD_BITWIDTH = 9;
+    private static final String DOT                 = ".";
+    private static final String HDR                 = "hdr";
+    private static final String C_INGRESS           = "c_ingress";
+    private static final String T_L2_FWD            = "t_l2_fwd";
+    private static final String EGRESS_PORT         = "egress_port";
+    private static final String INGRESS_PORT        = "ingress_port";
+    private static final String ETHERNET            = "ethernet";
+    private static final String IPV4                = "ipv4";
+    private static final String STANDARD_METADATA   = "standard_metadata";
+    private static final int PORT_FIELD_BITWIDTH    = 9;
 
     private static final String TCP = "tcp";
     private static final String UDP = "udp";
 
     private static final PiMatchFieldId INGRESS_PORT_ID = PiMatchFieldId.of(STANDARD_METADATA + DOT + "ingress_port");
-    private static final PiMatchFieldId ETH_DST_ID = PiMatchFieldId.of(HDR + DOT + ETHERNET + DOT + "dst_addr");
-    private static final PiMatchFieldId ETH_SRC_ID = PiMatchFieldId.of(HDR + DOT + ETHERNET + DOT + "src_addr");
-    private static final PiMatchFieldId IPV4_SRC_ID = PiMatchFieldId.of(HDR + DOT + IPV4 + DOT + "src_addr");
-    private static final PiMatchFieldId IPV4_DST_ID = PiMatchFieldId.of(HDR + DOT + IPV4 + DOT + "dst_addr");
-    
-    private static final PiMatchFieldId IPV4_PROTO_ID = PiMatchFieldId.of(HDR + DOT + IPV4 + DOT + "protocol");
-    private static final PiMatchFieldId TCP_SRC_ID = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "src_port");
-    private static final PiMatchFieldId TCP_DST_ID = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "dst_port");
-    private static final PiMatchFieldId UDP_SRC_ID = PiMatchFieldId.of(HDR + DOT + UDP + DOT + "src_port");
-    private static final PiMatchFieldId UDP_DST_ID = PiMatchFieldId.of(HDR + DOT + UDP + DOT + "dst_port");
-
-
-    private static final PiMatchFieldId ETH_TYPE_ID = PiMatchFieldId.of(HDR + DOT + ETHERNET + DOT + "ether_type");
+    private static final PiMatchFieldId ETH_DST_ID      = PiMatchFieldId.of(HDR + DOT + ETHERNET + DOT + "dst_addr");
+    private static final PiMatchFieldId ETH_SRC_ID      = PiMatchFieldId.of(HDR + DOT + ETHERNET + DOT + "src_addr");
+    private static final PiMatchFieldId IPV4_SRC_ID     = PiMatchFieldId.of(HDR + DOT + IPV4 + DOT + "src_addr");
+    private static final PiMatchFieldId IPV4_DST_ID     = PiMatchFieldId.of(HDR + DOT + IPV4 + DOT + "dst_addr");
+    private static final PiMatchFieldId IPV4_PROTO_ID   = PiMatchFieldId.of(HDR + DOT + IPV4 + DOT + "protocol");
+    private static final PiMatchFieldId TCP_SRC_ID      = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "src_port");
+    private static final PiMatchFieldId TCP_DST_ID      = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "dst_port");
+    private static final PiMatchFieldId TCP_RES_ID      = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "res");
+    private static final PiMatchFieldId TCP_ECN_ID      = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "ecn");
+    private static final PiMatchFieldId TCP_CTRL_ID     = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "ctrl");
+    private static final PiMatchFieldId UDP_SRC_ID      = PiMatchFieldId.of(HDR + DOT + UDP + DOT + "src_port");
+    private static final PiMatchFieldId UDP_DST_ID      = PiMatchFieldId.of(HDR + DOT + UDP + DOT + "dst_port");
+    private static final PiMatchFieldId ETH_TYPE_ID     = PiMatchFieldId.of(HDR + DOT + ETHERNET + DOT + "ether_type");
 
     private static final PiTableId TABLE_L2_FWD_ID = PiTableId.of(C_INGRESS + DOT + T_L2_FWD);
 
-    private static final PiActionId ACT_ID_NOP = PiActionId.of("NoAction");
-    private static final PiActionId ACT_ID_SEND_TO_CPU = PiActionId.of(C_INGRESS + DOT + "send_to_cpu");
-    private static final PiActionId ACT_ID_SET_EGRESS_PORT = PiActionId.of(C_INGRESS + DOT + "set_out_port");
+    private static final PiActionId ACT_ID_NOP              = PiActionId.of("NoAction");
+    private static final PiActionId ACT_ID_SEND_TO_CPU      = PiActionId.of(C_INGRESS + DOT + "send_to_cpu");
+    private static final PiActionId ACT_ID_SET_EGRESS_PORT  = PiActionId.of(C_INGRESS + DOT + "set_out_port");
 
     private static final PiActionParamId ACT_PARAM_ID_PORT = PiActionParamId.of("port");
 
@@ -139,6 +139,9 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                     .put(Criterion.Type.IP_PROTO, IPV4_PROTO_ID)
                     .put(Criterion.Type.TCP_SRC, TCP_SRC_ID)
                     .put(Criterion.Type.TCP_DST, TCP_DST_ID)
+                    // .put(Criterion.Type.TCP_FLAGS, TCP_RES_ID)
+                    // .put(Criterion.Type.TCP_FLAGS, TCP_ECN_ID)
+                    // .put(Criterion.Type.TCP_FLAGS, TCP_CTRL_ID)
                     .put(Criterion.Type.UDP_SRC, UDP_SRC_ID)
                     .put(Criterion.Type.UDP_DST, UDP_DST_ID)
                     .build();
