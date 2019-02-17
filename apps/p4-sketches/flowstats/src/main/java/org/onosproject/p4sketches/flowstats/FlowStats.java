@@ -194,7 +194,7 @@ public class FlowStats {
         try {
             tcpSrcPort      = ((TcpPortCriterion) flowRule.selector().getCriterion(Type.TCP_SRC)).tcpPort().toString();
             tcpDstPort      = ((TcpPortCriterion) flowRule.selector().getCriterion(Type.TCP_DST)).tcpPort().toString();
-            tcpFlags        = Integer.toString(((TcpFlagsCriterion) flowRule.selector().getCriterion(Type.TCP_FLAGS)).flags());
+            // tcpFlags        = Integer.toString(((TcpFlagsCriterion) flowRule.selector().getCriterion(Type.TCP_FLAGS)).flags());
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
@@ -235,7 +235,7 @@ public class FlowStats {
         if (ipProtocol.equals("17")) {
             keyString = ipSrcString + ipDstString + ipProtocol + udpSrcPort + udpDstPort;
         } else {
-            keyString = ipSrcString + ipDstString + ipProtocol + tcpSrcPort + tcpDstPort + tcpFlags;
+            keyString = ipSrcString + ipDstString + ipProtocol + tcpSrcPort + tcpDstPort;
         }
         String flowPacketsString = Long.toString(flowPackets + 1L);
         String flowBytesString = Long.toString(flowBytes);
@@ -253,7 +253,7 @@ public class FlowStats {
             } else {
                 currentFlow.setFlowTcpSrcPort(tcpSrcPort);
                 currentFlow.setFlowTcpDstPort(tcpDstPort);
-                currentFlow.setFlowTcpFlags(tcpFlags);
+                // currentFlow.setFlowTcpFlags(tcpFlags);
             }
         }
 
@@ -473,7 +473,7 @@ public class FlowStats {
                 String ipProtocol          = tempFlow.getFlowIPProtocol();
                 String srcPort  = "";
                 String dstPort  = "";
-                String tcpFlags = "";
+                // String tcpFlags = "";
                     
                 if (ipProtocol.equals("17")) {
                     srcPort   = tempFlow.getFlowUdpSrcPort();
@@ -481,12 +481,12 @@ public class FlowStats {
                 } else {
                     srcPort   = tempFlow.getFlowTcpSrcPort();
                     dstPort   = tempFlow.getFlowTcpDstPort();
-                    tcpFlags  = tempFlow.getFlowTcpFlags();
+                    // tcpFlags  = tempFlow.getFlowTcpFlags();
                 }
 
-                String cmHash = tempFlow.getCMHash();
-                String bm1Hash = tempFlow.getBM1Hash();
-                String bm2Hash = tempFlow.getBM2Hash();                    
+                // String cmHash = tempFlow.getCMHash();
+                // String bm1Hash = tempFlow.getBM1Hash();
+                // String bm2Hash = tempFlow.getBM2Hash();                    
 
                 // Write to file
 

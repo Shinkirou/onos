@@ -109,9 +109,9 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     private static final PiMatchFieldId IPV4_PROTO_ID   = PiMatchFieldId.of(HDR + DOT + IPV4 + DOT + "protocol");
     private static final PiMatchFieldId TCP_SRC_ID      = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "src_port");
     private static final PiMatchFieldId TCP_DST_ID      = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "dst_port");
-    private static final PiMatchFieldId TCP_RES_ID      = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "res");
-    private static final PiMatchFieldId TCP_ECN_ID      = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "ecn");
-    private static final PiMatchFieldId TCP_CTRL_ID     = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "ctrl");
+    // private static final PiMatchFieldId TCP_RES_ID      = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "res");
+    // private static final PiMatchFieldId TCP_ECN_ID      = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "ecn");
+    // private static final PiMatchFieldId TCP_CTRL_ID     = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "ctrl");
     private static final PiMatchFieldId UDP_SRC_ID      = PiMatchFieldId.of(HDR + DOT + UDP + DOT + "src_port");
     private static final PiMatchFieldId UDP_DST_ID      = PiMatchFieldId.of(HDR + DOT + UDP + DOT + "dst_port");
     private static final PiMatchFieldId ETH_TYPE_ID     = PiMatchFieldId.of(HDR + DOT + ETHERNET + DOT + "ether_type");
@@ -139,9 +139,8 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                     .put(Criterion.Type.IP_PROTO, IPV4_PROTO_ID)
                     .put(Criterion.Type.TCP_SRC, TCP_SRC_ID)
                     .put(Criterion.Type.TCP_DST, TCP_DST_ID)
-                    // .put(Criterion.Type.TCP_FLAGS, TCP_RES_ID)
                     // .put(Criterion.Type.TCP_FLAGS, TCP_ECN_ID)
-                    // .put(Criterion.Type.TCP_FLAGS, TCP_CTRL_ID)
+                    // .put(Criterion.TCP_FLAGS, TCP_CTRL_ID)
                     .put(Criterion.Type.UDP_SRC, UDP_SRC_ID)
                     .put(Criterion.Type.UDP_DST, UDP_DST_ID)
                     .build();

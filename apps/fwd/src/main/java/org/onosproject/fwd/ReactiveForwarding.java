@@ -172,7 +172,7 @@ public class ReactiveForwarding {
 
     @Property(name = "matchIpv4Dscp", boolValue = false,
             label = "Enable matching IPv4 DSCP and ECN; default is false")
-    private boolean matchIpv4Dscp = true;
+    private boolean matchIpv4Dscp = false;
 
     @Property(name = "matchIpv6Address", boolValue = false,
             label = "Enable matching IPv6 Addresses; default is false")

@@ -60,30 +60,12 @@ tables {
   }
   match_fields {
     id: 10
-    name: "hdr.tcp.res"
-    bitwidth: 3
-    match_type: TERNARY
-  }
-  match_fields {
-    id: 11
-    name: "hdr.tcp.ecn"
-    bitwidth: 3
-    match_type: TERNARY
-  }
-  match_fields {
-    id: 12
-    name: "hdr.tcp.ctrl"
-    bitwidth: 6
-    match_type: TERNARY
-  }
-  match_fields {
-    id: 13
     name: "hdr.udp.src_port"
     bitwidth: 16
     match_type: TERNARY
   }
   match_fields {
-    id: 14
+    id: 11
     name: "hdr.udp.dst_port"
     bitwidth: 16
     match_type: TERNARY
@@ -102,138 +84,6 @@ tables {
   }
   direct_resource_ids: 318778805
   size: 524288
-  idle_timeout_behavior: NO_TIMEOUT
-}
-tables {
-  preamble {
-    id: 33561990
-    name: "c_ingress.table_get_count_min_hash_0_val"
-    alias: "table_get_count_min_hash_0_val"
-  }
-  action_refs {
-    id: 16791868
-  }
-  size: 1024
-  idle_timeout_behavior: NO_TIMEOUT
-}
-tables {
-  preamble {
-    id: 33588804
-    name: "c_ingress.table_get_count_min_hash_1_val"
-    alias: "table_get_count_min_hash_1_val"
-  }
-  action_refs {
-    id: 16817652
-  }
-  size: 1024
-  idle_timeout_behavior: NO_TIMEOUT
-}
-tables {
-  preamble {
-    id: 33588495
-    name: "c_ingress.table_get_count_min_hash_2_val"
-    alias: "table_get_count_min_hash_2_val"
-  }
-  action_refs {
-    id: 16799134
-  }
-  size: 1024
-  idle_timeout_behavior: NO_TIMEOUT
-}
-tables {
-  preamble {
-    id: 33581734
-    name: "c_ingress.table_count_min_sketch_incr"
-    alias: "table_count_min_sketch_incr"
-  }
-  action_refs {
-    id: 16818081
-  }
-  size: 1024
-  idle_timeout_behavior: NO_TIMEOUT
-}
-tables {
-  preamble {
-    id: 33593046
-    name: "c_ingress.table_count_min_register_write"
-    alias: "table_count_min_register_write"
-  }
-  action_refs {
-    id: 16790822
-  }
-  size: 1024
-  idle_timeout_behavior: NO_TIMEOUT
-}
-tables {
-  preamble {
-    id: 33610753
-    name: "c_ingress.table_bitmap_hash_0_val"
-    alias: "table_bitmap_hash_0_val"
-  }
-  action_refs {
-    id: 16784852
-  }
-  size: 1024
-  idle_timeout_behavior: NO_TIMEOUT
-}
-tables {
-  preamble {
-    id: 33571882
-    name: "c_ingress.table_bitmap_hash_1_val"
-    alias: "table_bitmap_hash_1_val"
-  }
-  action_refs {
-    id: 16820028
-  }
-  size: 1024
-  idle_timeout_behavior: NO_TIMEOUT
-}
-tables {
-  preamble {
-    id: 33577640
-    name: "c_ingress.table_bitmap_hash_2_val"
-    alias: "table_bitmap_hash_2_val"
-  }
-  action_refs {
-    id: 16790643
-  }
-  size: 1024
-  idle_timeout_behavior: NO_TIMEOUT
-}
-tables {
-  preamble {
-    id: 33618219
-    name: "c_ingress.table_bitmap_check_pair"
-    alias: "table_bitmap_check_pair"
-  }
-  action_refs {
-    id: 16806113
-  }
-  size: 1024
-  idle_timeout_behavior: NO_TIMEOUT
-}
-tables {
-  preamble {
-    id: 33592113
-    name: "c_ingress.table_bitmap_new_pair"
-    alias: "table_bitmap_new_pair"
-  }
-  action_refs {
-    id: 16818664
-  }
-  size: 1024
-  idle_timeout_behavior: NO_TIMEOUT
-}
-tables {
-  preamble {
-    id: 33606752
-    name: "c_ingress.table_bitmap_existing_pair"
-    alias: "table_bitmap_existing_pair"
-  }
-  action_refs {
-    id: 16780342
-  }
-  size: 1024
   idle_timeout_behavior: NO_TIMEOUT
 }
 actions {
@@ -344,6 +194,62 @@ actions {
     id: 16780342
     name: "c_ingress.action_bitmap_existing_pair"
     alias: "action_bitmap_existing_pair"
+  }
+}
+actions {
+  preamble {
+    id: 16796473
+    name: "c_ingress.action_get_k_ary_hash_0_val"
+    alias: "action_get_k_ary_hash_0_val"
+  }
+}
+actions {
+  preamble {
+    id: 16818797
+    name: "c_ingress.action_get_k_ary_hash_1_val"
+    alias: "action_get_k_ary_hash_1_val"
+  }
+}
+actions {
+  preamble {
+    id: 16830986
+    name: "c_ingress.action_get_k_ary_hash_2_val"
+    alias: "action_get_k_ary_hash_2_val"
+  }
+}
+actions {
+  preamble {
+    id: 16824789
+    name: "c_ingress.action_get_k_ary_hash_3_val"
+    alias: "action_get_k_ary_hash_3_val"
+  }
+}
+actions {
+  preamble {
+    id: 16796186
+    name: "c_ingress.action_get_k_ary_hash_4_val"
+    alias: "action_get_k_ary_hash_4_val"
+  }
+}
+actions {
+  preamble {
+    id: 16800110
+    name: "c_ingress.action_k_ary_sketch_incr"
+    alias: "action_k_ary_sketch_incr"
+  }
+}
+actions {
+  preamble {
+    id: 16792639
+    name: "c_ingress.action_k_ary_sketch_estimate_F2"
+    alias: "action_k_ary_sketch_estimate_F2"
+  }
+}
+actions {
+  preamble {
+    id: 16823093
+    name: "c_ingress.action_get_ping_hash_val"
+    alias: "action_get_ping_hash_val"
   }
 }
 direct_counters {
@@ -485,6 +391,96 @@ registers {
     }
   }
   size: 131072
+}
+registers {
+  preamble {
+    id: 369113997
+    name: "c_ingress.k_ary_register0"
+    alias: "k_ary_register0"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 131072
+}
+registers {
+  preamble {
+    id: 369110976
+    name: "c_ingress.k_ary_register1"
+    alias: "k_ary_register1"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 131072
+}
+registers {
+  preamble {
+    id: 369148980
+    name: "c_ingress.k_ary_register2"
+    alias: "k_ary_register2"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 131072
+}
+registers {
+  preamble {
+    id: 369125562
+    name: "c_ingress.k_ary_register3"
+    alias: "k_ary_register3"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 131072
+}
+registers {
+  preamble {
+    id: 369134879
+    name: "c_ingress.k_ary_register4"
+    alias: "k_ary_register4"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 131072
+}
+registers {
+  preamble {
+    id: 369145590
+    name: "c_ingress.k_ary_register_estimate_F2"
+    alias: "k_ary_register_estimate_F2"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 7
 }
 type_info {
 }
