@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.onosproject.p4sketches.flowstats;
+package org.onosproject.p4univmon.univmon;
 
 import com.google.common.collect.Lists;
 import org.apache.felix.scr.annotations.Activate;
@@ -85,29 +85,24 @@ import java.text.SimpleDateFormat;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.File;
 
-import org.onosproject.p4sketches.flowstats.FlowNew;
+import org.onosproject.p4univmon.univmon.FlowNew;
 
 @Component(immediate = true)
-public class FlowStats {
+public class UnivMon {
 
-    private static final String APP_NAME = "org.onosproject.p4sketches.flowstats";
+    private static final String APP_NAME = "org.onosproject.p4univmon.univmon";
 
-    private static Map<String,FlowNew> flowNewMap = new ConcurrentHashMap<String,FlowNew>();
-
-    // Minimum value for the flow count used in the space-saving algorithm.
-    private static Long globalMinValue = 1L;
+    private static Map<String,FlowNew> flowNewMap       = new ConcurrentHashMap<String,FlowNew>();
+    private static Map<String,Long> flowPacketsTempMap  = new ConcurrentHashMap<String,Long>();
 
     // Default priority used for flow rules installed by this app.
     private static final int FLOW_RULE_PRIORITY = 100;
-
-    // Size of the ONOS flow table.
-    private static final int FLOW_TABLE_SIZE = 500;
 
     private final FlowRuleListener flowListener = new InternalFlowListener();
 
     private ApplicationId appId;
 
-    private static final Logger log = getLogger(FlowStats.class);
+    private static final Logger log = getLogger(UnivMon.class);
 
     //--------------------------------------------------------------------------
     // ONOS services needed by this application.
@@ -155,6 +150,7 @@ public class FlowStats {
         String ipProtocol       = "";
         String tcpSrcPort       = "";
         String tcpDstPort       = "";
+        String tcpFlags         = "";
         String udpSrcPort       = "";
         String udpDstPort       = "";
 
@@ -192,21 +188,17 @@ public class FlowStats {
         }
 
         if ((ipSrcString.equals("10.0.0.1")) && (ipDstString.equals("10.0.0.2"))) {
-            Thread threadWriteToFile = new Thread(runnable);
-            threadWriteToFile.start();
-            flowRuleService.removeFlowRules(flowRule);
             return;
         }
 
         if ((ipSrcString.equals("10.0.0.2")) && (ipDstString.equals("10.0.0.1"))) {
-            flowRuleService.removeFlowRules(flowRule);
             return;
-        }
+        }           
 
         FlowEntry flowEntry = getFlowEntry(flowRule);
 
         try {
-           flowPackets  = flowEntry.packets(); 
+           flowPackets  = flowEntry.packets() + 1L;
            flowBytes    = flowEntry.bytes();
         } catch (NullPointerException e) {
             e.printStackTrace();
@@ -219,15 +211,28 @@ public class FlowStats {
         } else {
             keyString = ipSrcString + ipDstString + ipProtocol + tcpSrcPort + tcpDstPort;
         }
-        String flowPacketsString = Long.toString(flowPackets + 1L);
+        String flowPacketsString = Long.toString(flowPackets);
         String flowBytesString = Long.toString(flowBytes);
         
+        // If flow already exists, retrieve info from the hashmap
+        // Else, generate a new FlowNew object and save it
         if (flowNewMap.containsKey(keyString)) {
             currentFlow = flowNewMap.get(keyString);
+            Long tempFlowPackets = flowPacketsTempMap.get(keyString);
+            // If the current flow packet value is bigger than the stored one,
+            // then the flow was updated with new packets.
+            // Else, the event was a regular ONOS flow table update with no new packets.  
+            if (flowPackets > tempFlowPackets) {
+                flowPacketsTempMap.put(keyString, flowPackets);
+                currentFlow.addFlowPackets(flowPackets - tempFlowPackets);
+            } else {
+                return;
+            }
         } else {
+            currentFlow.setFlowPackets(flowPackets);
+            flowPacketsTempMap.put(keyString,flowPackets);
             currentFlow.setFlowSrcIP(ipSrcString);
             currentFlow.setFlowDstIP(ipDstString);
-            currentFlow.setFlowRule(flowRule);
             currentFlow.setFlowIPProtocol(ipProtocol);
             if (ipProtocol.equals("17")) {
                 currentFlow.setFlowUdpSrcPort(udpSrcPort);
@@ -236,83 +241,87 @@ public class FlowStats {
                 currentFlow.setFlowTcpSrcPort(tcpSrcPort);
                 currentFlow.setFlowTcpDstPort(tcpDstPort);
             }
+            flowNewMap.put(keyString, currentFlow);
+        }
+    }
+
+    private void updateRemovedFlowInfo(FlowRule flowRule) {
+
+        String ethSrcString     = "";
+        String ethDstString     = "";
+        String ipSrcString      = "";
+        String ipDstString      = "";  
+        String ipProtocol       = "";
+        String tcpSrcPort       = "";
+        String tcpDstPort       = "";
+        String tcpFlags         = "";
+        String udpSrcPort       = "";
+        String udpDstPort       = "";
+
+        try {
+            ethSrcString    = ((EthCriterion) flowRule.selector().getCriterion(Type.ETH_SRC)).mac().toString();     
+            ethDstString    = ((EthCriterion) flowRule.selector().getCriterion(Type.ETH_DST)).mac().toString(); 
+            ipSrcString     = ((IPCriterion) flowRule.selector().getCriterion(Type.IPV4_SRC)).ip().address().toString();  
+            ipDstString     = ((IPCriterion) flowRule.selector().getCriterion(Type.IPV4_DST)).ip().address().toString();
+            ipProtocol      = Short.toString(((IPProtocolCriterion) flowRule.selector().getCriterion(Type.IP_PROTO)).protocol());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
 
-        Long newPacketsLong = checkFlowUpdate(flowPackets, currentFlow);
+        try {
+            tcpSrcPort      = ((TcpPortCriterion) flowRule.selector().getCriterion(Type.TCP_SRC)).tcpPort().toString();
+            tcpDstPort      = ((TcpPortCriterion) flowRule.selector().getCriterion(Type.TCP_DST)).tcpPort().toString();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
 
-        // Check if the flow update refers to new packets.         
-        if (!newPacketsLong.equals(0L)) {
-            
-            // Remove flows, if the limit is exceeded.
-            flowRemoval(flowPackets, newPacketsLong, keyString, currentFlow);
+        try {
+            udpSrcPort      = ((UdpPortCriterion) flowRule.selector().getCriterion(Type.UDP_SRC)).udpPort().toString();
+            udpDstPort      = ((UdpPortCriterion) flowRule.selector().getCriterion(Type.UDP_DST)).udpPort().toString();                     
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
 
-            currentFlow.setFlowPackets(flowPacketsString);
-            currentFlow.setFlowBytes(flowBytesString);
-        } else {
+        if (ethSrcString.equals("") || ethDstString.equals("") || ipSrcString.equals("")  || ipDstString.equals("")) {
             return;
         }
-    }
 
-    private Long checkFlowUpdate(Long flowPackets, FlowNew currentFlow) {
-
-        Long flowPacketsLong = Long.parseLong(currentFlow.getFlowPackets());
-        
-        if ((flowPackets.equals(0L)) && (flowPacketsLong.equals(0L))) {
-            return 1L;
+        if ((ipSrcString.equals("10.0.0.1")) && (ipDstString.equals("10.0.0.2"))) {
+            Thread threadWriteToFile = new Thread(runnable);
+            threadWriteToFile.start();
+            // flowRuleService.removeFlowRules(flowRule);
+            return;
         }
 
-        Long flowPacketsIncr = flowPackets + 1L;
+        if ((ipSrcString.equals("10.0.0.2")) && (ipDstString.equals("10.0.0.1"))) {
+            // flowRuleService.removeFlowRules(flowRule);
+            return;
+        }        
 
-        if ((flowPacketsIncr).equals(flowPacketsLong)) {
-            return 0L;
+        String keyString = "";
+        if (ipProtocol.equals("17")) {
+            keyString = ipSrcString + ipDstString + ipProtocol + udpSrcPort + udpDstPort;
         } else {
-            Long newPacketsLong = flowPacketsIncr - flowPacketsLong;
-            if (newPacketsLong.compareTo(0L) < 0) {
-                return 0L;
-            }
-            return newPacketsLong;
+            keyString = ipSrcString + ipDstString + ipProtocol + tcpSrcPort + tcpDstPort;
         }
-    }
 
-    private void flowRemoval(Long flowPackets, Long newPackets, String keyString, FlowNew currentFlow) {
-
-        Long flowCountLong = currentFlow.getFlowCount();
-        Long flowPacketsIncr = flowPackets + 1L;
-
-        if (flowCountLong > 0L) {
-            while ((flowCountLong.compareTo(flowPacketsIncr)) < 0) {
-                flowCountLong++;
-                currentFlow.incrementFlowCount();
-            }
-        } else {
-            if (flowNewMap.size() < FLOW_TABLE_SIZE) {
-                currentFlow.setFlowCount(newPackets);
-                flowNewMap.put(keyString, currentFlow);
-            } else {
-                String minKey = getMax();
-                FlowNew tempFlow = flowNewMap.get(minKey);
-                FlowRule minFlowRule = tempFlow.getFlowRule();
-                flowRuleService.removeFlowRules(minFlowRule);
-                Long minFlowCount = tempFlow.getFlowCount();
-                flowNewMap.remove(minKey);
-                currentFlow.setFlowCount(minFlowCount + newPackets);
-                flowNewMap.put(keyString, currentFlow);
-            }
-        }
+        // Since the flow is about to be removed, the temporary packet value
+        // is changed to 0, in case a new iteration of this flow appears later on.
+        flowPacketsTempMap.put(keyString,0L);
     }
 
     Runnable runnable = () -> {
         try {
             String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS").format(new Date());
             String currentUsersHomeDir = System.getProperty("user.home");
-            String otherFolder = currentUsersHomeDir + File.separator + "Documents" + File.separator + "flow-stats" + File.separator;
+            String otherFolder = currentUsersHomeDir + File.separator + "Documents" + File.separator + "univmon-stats" + File.separator;
             java.nio.file.Path txtpath = Paths.get(otherFolder + timeStamp + ".txt");
 
             for (String setKey : flowNewMap.keySet()) {
 
                 FlowNew tempFlow    = flowNewMap.get(setKey);
 
-                String flowPacketsString   = tempFlow.getFlowPackets();
+                String flowPacketsString   = Long.toString(tempFlow.getFlowPackets());
                 String flowBytesString     = tempFlow.getFlowBytes();
                 String ipSrcString         = tempFlow.getFlowSrcIP();
                 String ipDstString         = tempFlow.getFlowDstIP();
@@ -358,48 +367,16 @@ public class FlowStats {
             }
         }
         return null;
-    }
-
-    private byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-        data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                         + Character.digit(s.charAt(i+1), 16));
-        }
-        return data;
-    }
-
-    private String getMax() {
-        
-        String minKey = null;
-        Long minValue = Long.MAX_VALUE;
-        
-        for (String key : flowNewMap.keySet()) {
-            FlowNew tempFlow = flowNewMap.get(key);
-            Long value = tempFlow.getFlowCount();
-            if (value == globalMinValue) {
-                minValue = value;
-                minKey = key;
-                return minKey;
-            }
-            if (value < minValue) {
-                minValue = value;
-                minKey = key;
-            }
-        }
-        if (minValue > globalMinValue) {
-            globalMinValue = minValue;
-        }
-        return minKey;
-    }    
+    } 
 
     private class InternalFlowListener implements FlowRuleListener {
         @Override
         public void event(FlowRuleEvent event) {
             FlowRule flowRule = event.subject();
-            if ((event.type() == RULE_ADDED) || (event.type() == RULE_UPDATED)) {
+            if ((event.type() == RULE_ADD_REQUESTED) || (event.type() == RULE_UPDATED)) {
                 writeUpdatedFlow(flowRule);
+            } else if ((event.type() == RULE_REMOVED)) {
+                updateRemovedFlowInfo(flowRule);
             }
         }
     }

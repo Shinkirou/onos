@@ -10,17 +10,17 @@ osgi_jar(
 )
 
 BUNDLES = [
-    "//apps/p4-sketches/pipeconf:onos-apps-p4-sketches-pipeconf",
+    "//apps/p4-univmon/pipeconf:onos-apps-p4-univmon-pipeconf",
 ]
 
 onos_app(
-    app_name = "org.onosproject.p4sketches.pipeconf",
+    app_name = "org.onosproject.p4univmon.pipeconf",
     category = "Pipeconf",
     description = "Provides pipeconf for the ONOS-P4 Tutorial",
     included_bundles = BUNDLES,
     required_apps = [
         "org.onosproject.drivers.p4runtime",
     ],
-    title = "P4 Sketches Pipeconf",
+    title = "P4 UnivMon Pipeconf",
     url = "http://onosproject.org",
 )

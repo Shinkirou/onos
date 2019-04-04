@@ -7,8 +7,6 @@
 const bit<8> IP_PROTO_UDP = 17;
 const bit<8> IP_PROTO_TCP = 6;
 
-const bit<32> THRESHOLD = 10;
-
 const bit<16> ETH_TYPE_IPV4 = 0x800;
 const bit<32> MAX_INT = 0xFFFFFFFF;
 
@@ -126,11 +124,8 @@ header meta_k_ary_header {
     bit<32> k_ary_val_F2_2;
     bit<32> k_ary_val_F2_3;
     bit<32> k_ary_val_F2_4;
-    bit<32> k_ary_estimate;
-    bit<32> k_ary_estimate_old;
     bit<32> k_ary_estimate_F2;
     bit<32> k_ary_sum;
-    bit<32> k_ary_threshold;
     bit<32> k_ary_final;
     bit<32> k_ary_alert;
 } 
@@ -239,8 +234,8 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 
     // We use these counters to count packets/bytes received/sent on each port.
     // For each counter we instantiate a number of cells equal to MAX_PORTS.
-    // counter(MAX_PORTS, CounterType.packets_and_bytes) tx_port_counter;
-    // counter(MAX_PORTS, CounterType.packets_and_bytes) rx_port_counter;
+    counter(MAX_PORTS, CounterType.packets_and_bytes) tx_port_counter;
+    counter(MAX_PORTS, CounterType.packets_and_bytes) rx_port_counter;
 
     action send_to_cpu() {
         // Packets sent to the controller needs to be prepended with the
@@ -392,6 +387,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         hash(k_ary_hash0, 
             HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
+            // {hdr.ipv4.src_addr, hdr.ipv4.dst_addr}, 
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.my_metadata.l4_src_port, (bit<32>)meta.my_metadata.l4_dst_port}, 
             (bit<32>)131072);
         meta.meta_k_ary.k_ary_hash_val0 = k_ary_hash0;
@@ -401,6 +397,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         hash(k_ary_hash1, 
             HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
+            // {hdr.ipv4.src_addr, hdr.ipv4.dst_addr}, 
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.my_metadata.l4_src_port, (bit<32>)meta.my_metadata.l4_dst_port}, 
             (bit<32>)131072);
         meta.meta_k_ary.k_ary_hash_val1 = k_ary_hash1;
@@ -410,6 +407,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         hash(k_ary_hash2, 
             HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
+            // {hdr.ipv4.src_addr, hdr.ipv4.dst_addr}, 
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.my_metadata.l4_src_port, (bit<32>)meta.my_metadata.l4_dst_port}, 
             (bit<32>)131072);
         meta.meta_k_ary.k_ary_hash_val2 = k_ary_hash2;
@@ -419,6 +417,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         hash(k_ary_hash3, 
             HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
+            // {hdr.ipv4.src_addr, hdr.ipv4.dst_addr}, 
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.my_metadata.l4_src_port, (bit<32>)meta.my_metadata.l4_dst_port}, 
             (bit<32>)131072);
         meta.meta_k_ary.k_ary_hash_val3 = k_ary_hash3;
@@ -428,6 +427,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         hash(k_ary_hash4, 
             HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
+            // {hdr.ipv4.src_addr, hdr.ipv4.dst_addr}, 
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.my_metadata.l4_src_port, (bit<32>)meta.my_metadata.l4_dst_port}, 
             (bit<32>)131072);
         meta.meta_k_ary.k_ary_hash_val4 = k_ary_hash4;
@@ -542,97 +542,6 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         k_ary_register_estimate_F2.write((bit<32>)4, meta.meta_k_ary.k_ary_val_F2_4);
     }
 
-    /*
-    action action_k_ary_sketch_estimate() {
-        
-        bit<32> tmp0;
-        bit<32> tmp1;
-        bit<32> tmp2;
-        bit<32> tmp3;
-        bit<32> tmp4;
-        bit<32> tmp5;
-
-        // Retrieve the current sketch values.
-        k_ary_register0.read(tmp0, (bit<32>)meta.meta_k_ary.k_ary_hash_val0);
-        k_ary_register1.read(tmp1, (bit<32>)meta.meta_k_ary.k_ary_hash_val1);
-        k_ary_register2.read(tmp2, (bit<32>)meta.meta_k_ary.k_ary_hash_val2);
-        k_ary_register3.read(tmp3, (bit<32>)meta.meta_k_ary.k_ary_hash_val3);
-        k_ary_register4.read(tmp4, (bit<32>)meta.meta_k_ary.k_ary_hash_val4);
-
-        // Retrieve the current sum of all values.
-        k_ary_register_estimate_F2.read(tmp5, (bit<32>)6);
-
-        meta.meta_k_ary.k_ary_val0 = tmp0;
-        meta.meta_k_ary.k_ary_val1 = tmp1;
-        meta.meta_k_ary.k_ary_val2 = tmp2;
-        meta.meta_k_ary.k_ary_val3 = tmp3;
-        meta.meta_k_ary.k_ary_val4 = tmp4;
-
-        meta.meta_k_ary.k_ary_sum  = tmp5;
-
-        // Calculate the estimate for each row.
-
-        meta.meta_k_ary.k_ary_val0 = (meta.meta_k_ary.k_ary_val0 - (meta.meta_k_ary.k_ary_sum / 131072)) / (1 - (1/131072));               
-        meta.meta_k_ary.k_ary_val1 = (meta.meta_k_ary.k_ary_val1 - (meta.meta_k_ary.k_ary_sum / 131072)) / (1 - (1/131072));
-        meta.meta_k_ary.k_ary_val2 = (meta.meta_k_ary.k_ary_val2 - (meta.meta_k_ary.k_ary_sum / 131072)) / (1 - (1/131072));
-        meta.meta_k_ary.k_ary_val3 = (meta.meta_k_ary.k_ary_val3 - (meta.meta_k_ary.k_ary_sum / 131072)) / (1 - (1/131072));
-        meta.meta_k_ary.k_ary_val4 = (meta.meta_k_ary.k_ary_val4 - (meta.meta_k_ary.k_ary_sum / 131072)) / (1 - (1/131072));
-
-        // Discover the median value
-
-        tmp0 = meta.meta_k_ary.k_ary_val0;
-        tmp1 = meta.meta_k_ary.k_ary_val1;
-        tmp2 = meta.meta_k_ary.k_ary_val2;
-        tmp3 = meta.meta_k_ary.k_ary_val3;
-        tmp4 = meta.meta_k_ary.k_ary_val4;
-
-        if  ((tmp0 <= tmp1 && tmp0 <= tmp2 && tmp0 >= tmp3 && tmp0 >= tmp4) ||
-            (tmp0 <= tmp1 && tmp0 <= tmp3 && tmp0 >= tmp2 && tmp0 >= tmp4) ||
-            (tmp0 <= tmp1 && tmp0 <= tmp4 && tmp0 >= tmp2 && tmp0 >= tmp3) ||
-            (tmp0 <= tmp2 && tmp0 <= tmp3 && tmp0 >= tmp1 && tmp0 >= tmp4) ||
-            (tmp0 <= tmp2 && tmp0 <= tmp4 && tmp0 >= tmp1 && tmp0 >= tmp3) ||
-            (tmp0 <= tmp3 && tmp0 <= tmp4 && tmp0 >= tmp1 && tmp0 >= tmp2)) {
-                meta.meta_k_ary.k_ary_estimate = tmp0;
-        } 
-        else if ((tmp1 <= tmp0 && tmp1 <= tmp2 && tmp1 >= tmp3 && tmp1 >= tmp4) ||
-                (tmp1 <= tmp0 && tmp1 <= tmp3 && tmp1 >= tmp2 && tmp1 >= tmp4) ||
-                (tmp1 <= tmp0 && tmp1 <= tmp4 && tmp1 >= tmp2 && tmp1 >= tmp3) ||
-                (tmp1 <= tmp2 && tmp1 <= tmp3 && tmp1 >= tmp0 && tmp1 >= tmp4) ||
-                (tmp1 <= tmp2 && tmp1 <= tmp4 && tmp1 >= tmp0 && tmp1 >= tmp3) ||
-                (tmp1 <= tmp3 && tmp1 <= tmp4 && tmp1 >= tmp0 && tmp1 >= tmp2)) {
-                    meta.meta_k_ary.k_ary_estimate = tmp1;
-        }
-        else if ((tmp2 <= tmp1 && tmp2 <= tmp0 && tmp2 >= tmp3 && tmp2 >= tmp4) ||
-                (tmp2 <= tmp1 && tmp2 <= tmp3 && tmp2 >= tmp0 && tmp2 >= tmp4) ||
-                (tmp2 <= tmp1 && tmp2 <= tmp4 && tmp2 >= tmp0 && tmp2 >= tmp3) ||
-                (tmp2 <= tmp0 && tmp2 <= tmp3 && tmp2 >= tmp1 && tmp2 >= tmp4) ||
-                (tmp2 <= tmp0 && tmp2 <= tmp4 && tmp2 >= tmp1 && tmp2 >= tmp3) ||
-                (tmp2 <= tmp3 && tmp2 <= tmp4 && tmp2 >= tmp1 && tmp2 >= tmp0)) {
-                    meta.meta_k_ary.k_ary_estimate = tmp2;
-        }
-        else if ((tmp3 <= tmp1 && tmp3 <= tmp2 && tmp3 >= tmp0 && tmp3 >= tmp4) ||
-                (tmp3 <= tmp1 && tmp3 <= tmp0 && tmp3 >= tmp2 && tmp3 >= tmp4) ||
-                (tmp3 <= tmp1 && tmp3 <= tmp4 && tmp3 >= tmp2 && tmp3 >= tmp0) ||
-                (tmp3 <= tmp2 && tmp3 <= tmp0 && tmp3 >= tmp1 && tmp3 >= tmp4) ||
-                (tmp3 <= tmp2 && tmp3 <= tmp4 && tmp3 >= tmp1 && tmp3 >= tmp0) ||
-                (tmp3 <= tmp0 && tmp3 <= tmp4 && tmp3 >= tmp1 && tmp3 >= tmp2)) {
-                    meta.meta_k_ary.k_ary_estimate = tmp3;
-        }
-        else {
-                meta.meta_k_ary.k_ary_estimate = tmp4;
-        }
-
-        // Save the old value for threshold estimation.
-
-        k_ary_register_estimate.read(tmp5, (bit<32>)meta.meta_k_ary.k_ary_hash_val0);
-        meta.meta_k_ary.k_ary_estimate_old = tmp5;
-        k_ary_register_estimate_old.write((bit<32>)meta.meta_k_ary.k_ary_hash_val0, meta.meta_k_ary.k_ary_estimate_old);
-
-        // Write the new value to the register.
-        k_ary_register_estimate.write((bit<32>)meta.meta_k_ary.k_ary_hash_val0, meta.meta_k_ary.k_ary_estimate);
-    }
-    */
-
     action action_k_ary_sketch_estimate_F2() {
         
         bit<32> tmp0;
@@ -714,23 +623,6 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 
         k_ary_register_estimate_F2.write((bit<32>)5, meta.meta_k_ary.k_ary_estimate_F2);
     }
-
-    /*
-    action action_k_ary_sketch_check_threshold() {
-
-        meta.meta_k_ary.k_ary_final = meta.meta_k_ary.k_ary_estimate - meta.meta_k_ary.k_ary_estimate_old;
-
-        meta.meta_k_ary.k_ary_threshold = THRESHOLD * (meta.meta_k_ary.k_ary_estimate_F2^(1/2));
-
-        if (meta.meta_k_ary.k_ary_final > meta.meta_k_ary.k_ary_threshold) {
-            meta.meta_k_ary.k_ary_alert = 1;
-        } else {
-            meta.meta_k_ary.k_ary_alert = 0;
-        }
-
-        k_ary_register_alert.write((bit<32>)meta.meta_k_ary.k_ary_hash_val0, meta.meta_k_ary.k_ary_alert);
-    }
-    */
 
     // Ping hash.
 
@@ -839,17 +731,14 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 
                 action_k_ary_sketch_incr();
 
-                // Check if the current packet part of a pingall.
+                // Check if the current packet is part of a pingall.
                 // Only run both estimates if true.
 
                 action_get_ping_hash_val();
 
                 if ((bit<32>)meta.my_metadata.ping_hash_val == (bit<32>)93017) {
-                    // action_k_ary_sketch_estimate(); 
                     action_k_ary_sketch_estimate_F2();
                 }
-
-                // action_k_ary_sketch_check_threshold();
 
                 // Packet hit an entry in t_l2_fwd table. A forwarding action
                 // has already been taken. No need to apply other tables, exit
@@ -857,6 +746,13 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
                 return;
             }
         }
+
+        if (standard_metadata.egress_spec < MAX_PORTS) {
+            tx_port_counter.count((bit<32>) standard_metadata.egress_spec);
+        }
+        if (standard_metadata.ingress_port < MAX_PORTS) {
+            rx_port_counter.count((bit<32>) standard_metadata.ingress_port);
+        }        
      }
 }
 

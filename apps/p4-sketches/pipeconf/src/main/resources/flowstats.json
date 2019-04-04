@@ -37,6 +37,8 @@
         ["tmp_30", 32, false],
         ["tmp_31", 32, false],
         ["tmp_32", 32, false],
+        ["tmp_33", 32, false],
+        ["tmp_34", 32, false],
         ["count_min_hash0", 32, false],
         ["count_min_hash1", 32, false],
         ["count_min_hash2", 32, false],
@@ -75,7 +77,8 @@
         ["tmp4_2", 32, false],
         ["tmp5_2", 32, false],
         ["tmp_0", 1, false],
-        ["_padding_2", 7, false]
+        ["hasReturned_0", 1, false],
+        ["_padding_2", 6, false]
       ]
     },
     {
@@ -230,11 +233,8 @@
         ["k_ary_val_F2_2", 32, false],
         ["k_ary_val_F2_3", 32, false],
         ["k_ary_val_F2_4", 32, false],
-        ["k_ary_estimate", 32, false],
-        ["k_ary_estimate_old", 32, false],
         ["k_ary_estimate_F2", 32, false],
         ["k_ary_sum", 32, false],
-        ["k_ary_threshold", 32, false],
         ["k_ary_final", 32, false],
         ["k_ary_alert", 32, false]
       ]
@@ -575,7 +575,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 887,
+        "line" : 783,
         "column" : 8,
         "source_fragment" : "c_deparser"
       },
@@ -585,13 +585,37 @@
   "meter_arrays" : [],
   "counter_arrays" : [
     {
-      "name" : "c_ingress.l2_fwd_counter",
+      "name" : "c_ingress.tx_port_counter",
       "id" : 0,
+      "source_info" : {
+        "filename" : "flowstats.p4",
+        "line" : 237,
+        "column" : 48,
+        "source_fragment" : "tx_port_counter"
+      },
+      "size" : 255,
+      "is_direct" : false
+    },
+    {
+      "name" : "c_ingress.rx_port_counter",
+      "id" : 1,
+      "source_info" : {
+        "filename" : "flowstats.p4",
+        "line" : 238,
+        "column" : 48,
+        "source_fragment" : "rx_port_counter"
+      },
+      "size" : 255,
+      "is_direct" : false
+    },
+    {
+      "name" : "c_ingress.l2_fwd_counter",
+      "id" : 2,
       "is_direct" : true,
       "binding" : "c_ingress.t_l2_fwd",
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 748,
+        "line" : 640,
         "column" : 50,
         "source_fragment" : "l2_fwd_counter"
       }
@@ -603,7 +627,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 204,
+        "line" : 199,
         "column" : 30,
         "source_fragment" : "count_min_register0"
       },
@@ -615,7 +639,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 205,
+        "line" : 200,
         "column" : 30,
         "source_fragment" : "count_min_register1"
       },
@@ -627,7 +651,7 @@
       "id" : 2,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 206,
+        "line" : 201,
         "column" : 30,
         "source_fragment" : "count_min_register2"
       },
@@ -639,7 +663,7 @@
       "id" : 3,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 207,
+        "line" : 202,
         "column" : 30,
         "source_fragment" : "count_register_final"
       },
@@ -651,7 +675,7 @@
       "id" : 4,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 209,
+        "line" : 204,
         "column" : 30,
         "source_fragment" : "bitmap_register0"
       },
@@ -663,7 +687,7 @@
       "id" : 5,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 211,
+        "line" : 206,
         "column" : 30,
         "source_fragment" : "bitmap_register1"
       },
@@ -675,7 +699,7 @@
       "id" : 6,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 213,
+        "line" : 208,
         "column" : 30,
         "source_fragment" : "bitmap_register2"
       },
@@ -687,7 +711,7 @@
       "id" : 7,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 215,
+        "line" : 210,
         "column" : 30,
         "source_fragment" : "k_ary_register0"
       },
@@ -699,7 +723,7 @@
       "id" : 8,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 216,
+        "line" : 211,
         "column" : 30,
         "source_fragment" : "k_ary_register1"
       },
@@ -711,7 +735,7 @@
       "id" : 9,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 217,
+        "line" : 212,
         "column" : 30,
         "source_fragment" : "k_ary_register2"
       },
@@ -723,7 +747,7 @@
       "id" : 10,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 218,
+        "line" : 213,
         "column" : 30,
         "source_fragment" : "k_ary_register3"
       },
@@ -735,7 +759,7 @@
       "id" : 11,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 219,
+        "line" : 214,
         "column" : 30,
         "source_fragment" : "k_ary_register4"
       },
@@ -747,7 +771,7 @@
       "id" : 12,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 220,
+        "line" : 215,
         "column" : 25,
         "source_fragment" : "k_ary_register_estimate_F2"
       },
@@ -1080,7 +1104,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 16,
+            "line" : 14,
             "column" : 24,
             "source_fragment" : "255; ..."
           }
@@ -1095,7 +1119,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 250,
+            "line" : 245,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.setValid()"
           }
@@ -1114,7 +1138,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 251,
+            "line" : 246,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.ingress_port = standard_metadata.ingress_port"
           }
@@ -1145,7 +1169,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 257,
+            "line" : 252,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = port"
           }
@@ -1190,7 +1214,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 268,
+            "line" : 263,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -1222,7 +1246,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 268,
+            "line" : 263,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -1254,7 +1278,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 268,
+            "line" : 263,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -1281,7 +1305,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 265,
+            "line" : 260,
             "column" : 8,
             "source_fragment" : "hash(count_min_hash0, ..."
           }
@@ -1300,7 +1324,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 270,
+            "line" : 265,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_hash_val0 = count_min_hash0"
           }
@@ -1339,7 +1363,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 277,
+            "line" : 272,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -1371,7 +1395,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 277,
+            "line" : 272,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -1403,7 +1427,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 277,
+            "line" : 272,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -1430,7 +1454,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 274,
+            "line" : 269,
             "column" : 8,
             "source_fragment" : "hash(count_min_hash1, ..."
           }
@@ -1449,7 +1473,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 279,
+            "line" : 274,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_hash_val1 = count_min_hash1"
           }
@@ -1488,7 +1512,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 286,
+            "line" : 281,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -1520,7 +1544,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 286,
+            "line" : 281,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -1552,7 +1576,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 286,
+            "line" : 281,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -1579,7 +1603,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 283,
+            "line" : 278,
             "column" : 8,
             "source_fragment" : "hash(count_min_hash2, ..."
           }
@@ -1598,7 +1622,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 288,
+            "line" : 283,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_hash_val2 = count_min_hash2"
           }
@@ -1628,7 +1652,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 297,
+            "line" : 292,
             "column" : 8,
             "source_fragment" : "count_min_register0.read(tmp0, (bit<32>)meta.meta_count_min.count_min_hash_val0)"
           }
@@ -1651,7 +1675,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 298,
+            "line" : 293,
             "column" : 8,
             "source_fragment" : "count_min_register1.read(tmp1, (bit<32>)meta.meta_count_min.count_min_hash_val1)"
           }
@@ -1674,7 +1698,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 299,
+            "line" : 294,
             "column" : 8,
             "source_fragment" : "count_min_register2.read(tmp2, (bit<32>)meta.meta_count_min.count_min_hash_val2)"
           }
@@ -1693,7 +1717,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 301,
+            "line" : 296,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_val0 = tmp0"
           }
@@ -1712,7 +1736,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 302,
+            "line" : 297,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_val1 = tmp1"
           }
@@ -1731,7 +1755,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 303,
+            "line" : 298,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_val2 = tmp2"
           }
@@ -1773,7 +1797,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 305,
+            "line" : 300,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_val0 = meta.meta_count_min.count_min_val0 + 1"
           }
@@ -1815,7 +1839,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 306,
+            "line" : 301,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_val1 = meta.meta_count_min.count_min_val1 + 1"
           }
@@ -1857,7 +1881,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 307,
+            "line" : 302,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_val2 = meta.meta_count_min.count_min_val2 + 1"
           }
@@ -1899,7 +1923,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 305,
+            "line" : 300,
             "column" : 45,
             "source_fragment" : "meta.meta_count_min.count_min_val0 + 1"
           }
@@ -1922,7 +1946,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 309,
+            "line" : 304,
             "column" : 8,
             "source_fragment" : "count_min_register0.write((bit<32>)meta.meta_count_min.count_min_hash_val0, meta.meta_count_min.count_min_val0)"
           }
@@ -1945,7 +1969,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 310,
+            "line" : 305,
             "column" : 8,
             "source_fragment" : "count_min_register1.write((bit<32>)meta.meta_count_min.count_min_hash_val1, meta.meta_count_min.count_min_val1)"
           }
@@ -1968,7 +1992,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 311,
+            "line" : 306,
             "column" : 8,
             "source_fragment" : "count_min_register2.write((bit<32>)meta.meta_count_min.count_min_hash_val2, meta.meta_count_min.count_min_val2)"
           }
@@ -1998,7 +2022,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 315,
+            "line" : 310,
             "column" : 8,
             "source_fragment" : "count_register_final.write((bit<32>)meta.meta_count_min.count_min_hash_val2, meta.meta_count_min.count_min_val)"
           }
@@ -2037,7 +2061,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 324,
+            "line" : 319,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -2069,7 +2093,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 324,
+            "line" : 319,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -2101,7 +2125,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 324,
+            "line" : 319,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -2128,7 +2152,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 321,
+            "line" : 316,
             "column" : 8,
             "source_fragment" : "hash(bitmap_hash0, ..."
           }
@@ -2147,7 +2171,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 326,
+            "line" : 321,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_hash_val0 = bitmap_hash0"
           }
@@ -2186,7 +2210,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 333,
+            "line" : 328,
             "column" : 32,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -2218,7 +2242,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 333,
+            "line" : 328,
             "column" : 60,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -2245,7 +2269,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 330,
+            "line" : 325,
             "column" : 8,
             "source_fragment" : "hash(bitmap_hash1, ..."
           }
@@ -2264,7 +2288,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 335,
+            "line" : 330,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_hash_val1 = bitmap_hash1"
           }
@@ -2303,7 +2327,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 342,
+            "line" : 337,
             "column" : 32,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -2335,7 +2359,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 342,
+            "line" : 337,
             "column" : 60,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -2362,7 +2386,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 339,
+            "line" : 334,
             "column" : 8,
             "source_fragment" : "hash(bitmap_hash2, ..."
           }
@@ -2381,7 +2405,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 344,
+            "line" : 339,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_hash_val2 = bitmap_hash2"
           }
@@ -2411,7 +2435,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 352,
+            "line" : 347,
             "column" : 8,
             "source_fragment" : "bitmap_register0.read(tmp0, (bit<32>)meta.meta_bitmap.bitmap_hash_val0)"
           }
@@ -2430,7 +2454,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 353,
+            "line" : 348,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_val0 = tmp0"
           }
@@ -2479,7 +2503,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 361,
+            "line" : 356,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_val0 = meta.meta_bitmap.bitmap_val0 + 1"
           }
@@ -2502,7 +2526,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 363,
+            "line" : 358,
             "column" : 8,
             "source_fragment" : "bitmap_register1.read(tmp1, (bit<32>)meta.meta_bitmap.bitmap_hash_val1)"
           }
@@ -2525,7 +2549,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 364,
+            "line" : 359,
             "column" : 8,
             "source_fragment" : "bitmap_register2.read(tmp2, (bit<32>)meta.meta_bitmap.bitmap_hash_val2)"
           }
@@ -2544,7 +2568,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 366,
+            "line" : 361,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_val1 = tmp1"
           }
@@ -2563,7 +2587,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 367,
+            "line" : 362,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_val2 = tmp2"
           }
@@ -2605,7 +2629,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 369,
+            "line" : 364,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_val1 = meta.meta_bitmap.bitmap_val1 + 1"
           }
@@ -2647,7 +2671,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 370,
+            "line" : 365,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_val2 = meta.meta_bitmap.bitmap_val2 + 1"
           }
@@ -2670,7 +2694,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 372,
+            "line" : 367,
             "column" : 8,
             "source_fragment" : "bitmap_register0.write((bit<32>)meta.meta_bitmap.bitmap_hash_val0, meta.meta_bitmap.bitmap_val0)"
           }
@@ -2693,7 +2717,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 373,
+            "line" : 368,
             "column" : 8,
             "source_fragment" : "bitmap_register1.write((bit<32>)meta.meta_bitmap.bitmap_hash_val1, meta.meta_bitmap.bitmap_val1)"
           }
@@ -2716,7 +2740,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 374,
+            "line" : 369,
             "column" : 8,
             "source_fragment" : "bitmap_register2.write((bit<32>)meta.meta_bitmap.bitmap_hash_val2, meta.meta_bitmap.bitmap_val2)"
           }
@@ -2746,7 +2770,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 382,
+            "line" : 377,
             "column" : 8,
             "source_fragment" : "bitmap_register1.read(tmp1, (bit<32>)meta.meta_bitmap.bitmap_hash_val1)"
           }
@@ -2765,7 +2789,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 383,
+            "line" : 378,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_val1 = tmp1"
           }
@@ -2788,7 +2812,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 385,
+            "line" : 380,
             "column" : 8,
             "source_fragment" : "bitmap_register2.read(tmp2, (bit<32>)meta.meta_bitmap.bitmap_hash_val2)"
           }
@@ -2807,7 +2831,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 386,
+            "line" : 381,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_val2 = tmp2"
           }
@@ -2846,7 +2870,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 395,
+            "line" : 391,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -2878,7 +2902,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 395,
+            "line" : 391,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -2910,7 +2934,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 395,
+            "line" : 391,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -2937,7 +2961,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 392,
+            "line" : 387,
             "column" : 8,
             "source_fragment" : "hash(k_ary_hash0, ..."
           }
@@ -2956,7 +2980,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 397,
+            "line" : 393,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_hash_val0 = k_ary_hash0"
           }
@@ -2995,7 +3019,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 404,
+            "line" : 401,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -3027,7 +3051,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 404,
+            "line" : 401,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -3059,7 +3083,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 404,
+            "line" : 401,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -3086,7 +3110,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 401,
+            "line" : 397,
             "column" : 8,
             "source_fragment" : "hash(k_ary_hash1, ..."
           }
@@ -3105,7 +3129,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 406,
+            "line" : 403,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_hash_val1 = k_ary_hash1"
           }
@@ -3144,7 +3168,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 413,
+            "line" : 411,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -3176,7 +3200,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 413,
+            "line" : 411,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -3208,7 +3232,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 413,
+            "line" : 411,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -3235,7 +3259,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 410,
+            "line" : 407,
             "column" : 8,
             "source_fragment" : "hash(k_ary_hash2, ..."
           }
@@ -3254,7 +3278,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 415,
+            "line" : 413,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_hash_val2 = k_ary_hash2"
           }
@@ -3293,7 +3317,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 422,
+            "line" : 421,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -3325,7 +3349,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 422,
+            "line" : 421,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -3357,7 +3381,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 422,
+            "line" : 421,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -3384,7 +3408,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 419,
+            "line" : 417,
             "column" : 8,
             "source_fragment" : "hash(k_ary_hash3, ..."
           }
@@ -3403,7 +3427,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 424,
+            "line" : 423,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_hash_val3 = k_ary_hash3"
           }
@@ -3533,7 +3557,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 428,
+            "line" : 427,
             "column" : 8,
             "source_fragment" : "hash(k_ary_hash4, ..."
           }
@@ -10688,7 +10712,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 646,
+            "line" : 555,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp0, (bit<32>)0)"
           }
@@ -10711,7 +10735,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 647,
+            "line" : 556,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp1, (bit<32>)1)"
           }
@@ -10734,7 +10758,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 648,
+            "line" : 557,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp2, (bit<32>)2)"
           }
@@ -10757,7 +10781,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 649,
+            "line" : 558,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp3, (bit<32>)3)"
           }
@@ -10780,7 +10804,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 650,
+            "line" : 559,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp4, (bit<32>)4)"
           }
@@ -10803,7 +10827,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 653,
+            "line" : 562,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp5, (bit<32>)6)"
           }
@@ -10822,7 +10846,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 655,
+            "line" : 564,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_0 = tmp0"
           }
@@ -10841,7 +10865,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 656,
+            "line" : 565,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_1 = tmp1"
           }
@@ -10860,7 +10884,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 657,
+            "line" : 566,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_2 = tmp2"
           }
@@ -10879,7 +10903,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 658,
+            "line" : 567,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_3 = tmp3"
           }
@@ -10898,7 +10922,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 659,
+            "line" : 568,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_4 = tmp4"
           }
@@ -10917,7 +10941,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 661,
+            "line" : 570,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_sum = tmp5"
           }
@@ -10936,7 +10960,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 655,
+            "line" : 564,
             "column" : 41,
             "source_fragment" : "tmp0; ..."
           }
@@ -10955,7 +10979,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 656,
+            "line" : 565,
             "column" : 41,
             "source_fragment" : "tmp1; ..."
           }
@@ -10974,7 +10998,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 657,
+            "line" : 566,
             "column" : 41,
             "source_fragment" : "tmp2; ..."
           }
@@ -10993,7 +11017,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 658,
+            "line" : 567,
             "column" : 41,
             "source_fragment" : "tmp3; ..."
           }
@@ -11012,7 +11036,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 659,
+            "line" : 568,
             "column" : 41,
             "source_fragment" : "tmp4; ..."
           }
@@ -11518,7 +11542,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 685,
+            "line" : 594,
             "column" : 16,
             "source_fragment" : "meta.meta_k_ary.k_ary_estimate_F2 ="
           }
@@ -12511,7 +12535,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 693,
+            "line" : 602,
             "column" : 20,
             "source_fragment" : "meta.meta_k_ary.k_ary_estimate_F2 ="
           }
@@ -13991,7 +14015,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 701,
+            "line" : 610,
             "column" : 20,
             "source_fragment" : "meta.meta_k_ary.k_ary_estimate_F2 ="
           }
@@ -15958,7 +15982,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 709,
+            "line" : 618,
             "column" : 20,
             "source_fragment" : "meta.meta_k_ary.k_ary_estimate_F2 ="
           }
@@ -17932,7 +17956,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 712,
+            "line" : 621,
             "column" : 16,
             "source_fragment" : "meta.meta_k_ary.k_ary_estimate_F2 ="
           }
@@ -17955,7 +17979,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 715,
+            "line" : 624,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.write((bit<32>)5, meta.meta_k_ary.k_ary_estimate_F2)"
           }
@@ -17989,7 +18013,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 738,
+            "line" : 630,
             "column" : 8,
             "source_fragment" : "hash(ping_hash, ..."
           }
@@ -18008,7 +18032,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 743,
+            "line" : 635,
             "column" : 8,
             "source_fragment" : "meta.my_metadata.ping_hash_val = ping_hash"
           }
@@ -18034,7 +18058,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 783,
+            "line" : 675,
             "column" : 12,
             "source_fragment" : "standard_metadata.egress_spec = hdr.packet_out.egress_port"
           }
@@ -18049,7 +18073,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 784,
+            "line" : 676,
             "column" : 12,
             "source_fragment" : "hdr.packet_out.setInvalid()"
           }
@@ -18135,7 +18159,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 801,
+            "line" : 693,
             "column" : 20,
             "source_fragment" : "meta.meta_count_min.count_min_val = meta.meta_count_min.count_min_val1"
           }
@@ -18154,7 +18178,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 802,
+            "line" : 694,
             "column" : 20,
             "source_fragment" : "meta.meta_count_min.count_min_hash = meta.meta_count_min.count_min_hash_val1"
           }
@@ -18180,7 +18204,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 797,
+            "line" : 689,
             "column" : 16,
             "source_fragment" : "meta.meta_count_min.count_min_val = meta.meta_count_min.count_min_val0"
           }
@@ -18199,7 +18223,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 798,
+            "line" : 690,
             "column" : 16,
             "source_fragment" : "meta.meta_count_min.count_min_hash = meta.meta_count_min.count_min_hash_val0"
           }
@@ -18225,7 +18249,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 806,
+            "line" : 698,
             "column" : 20,
             "source_fragment" : "meta.meta_count_min.count_min_val = meta.meta_count_min.count_min_val2"
           }
@@ -18244,9 +18268,191 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 807,
+            "line" : 699,
             "column" : 20,
             "source_fragment" : "meta.meta_count_min.count_min_hash = meta.meta_count_min.count_min_hash_val2"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "act_5",
+      "id" : 29,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "hasReturned_0"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "b2d",
+                  "left" : null,
+                  "right" : {
+                    "type" : "bool",
+                    "value" : true
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 746,
+            "column" : 16,
+            "source_fragment" : "return"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "act_6",
+      "id" : 30,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "hasReturned_0"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "b2d",
+                  "left" : null,
+                  "right" : {
+                    "type" : "bool",
+                    "value" : false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name" : "act_7",
+      "id" : 31,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_33"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["standard_metadata", "egress_spec"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 751,
+            "column" : 34,
+            "source_fragment" : "(bit<32>) standard_metadata.egress_spec"
+          }
+        },
+        {
+          "op" : "count",
+          "parameters" : [
+            {
+              "type" : "counter_array",
+              "value" : "c_ingress.tx_port_counter"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_33"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 751,
+            "column" : 12,
+            "source_fragment" : "tx_port_counter.count((bit<32>) standard_metadata.egress_spec)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "act_8",
+      "id" : 32,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_34"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["standard_metadata", "ingress_port"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffffffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 754,
+            "column" : 34,
+            "source_fragment" : "(bit<32>) standard_metadata.ingress_port"
+          }
+        },
+        {
+          "op" : "count",
+          "parameters" : [
+            {
+              "type" : "counter_array",
+              "value" : "c_ingress.rx_port_counter"
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_34"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 754,
+            "column" : 12,
+            "source_fragment" : "rx_port_counter.count((bit<32>) standard_metadata.ingress_port)"
           }
         }
       ]
@@ -18258,11 +18464,11 @@
       "id" : 0,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 202,
+        "line" : 197,
         "column" : 8,
         "source_fragment" : "c_ingress"
       },
-      "init_table" : "node_2",
+      "init_table" : "tbl_act",
       "tables" : [
         {
           "name" : "tbl_act",
@@ -18274,11 +18480,34 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
+          "action_ids" : [30],
+          "actions" : ["act_6"],
+          "base_default_next" : "node_3",
+          "next_tables" : {
+            "act_6" : "node_3"
+          },
+          "default_entry" : {
+            "action_id" : 30,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_act_0",
+          "id" : 1,
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
           "action_ids" : [23],
           "actions" : ["act"],
-          "base_default_next" : null,
+          "base_default_next" : "node_36",
           "next_tables" : {
-            "act" : null
+            "act" : "node_36"
           },
           "default_entry" : {
             "action_id" : 23,
@@ -18289,10 +18518,10 @@
         },
         {
           "name" : "c_ingress.t_l2_fwd",
-          "id" : 1,
+          "id" : 2,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 750,
+            "line" : 642,
             "column" : 10,
             "source_fragment" : "t_l2_fwd"
           },
@@ -18374,37 +18603,14 @@
           "actions" : ["c_ingress.set_out_port", "c_ingress.send_to_cpu", "c_ingress._drop", "NoAction"],
           "base_default_next" : null,
           "next_tables" : {
-            "__HIT__" : "tbl_act_0",
-            "__MISS__" : "tbl_act_1"
+            "__HIT__" : "tbl_act_1",
+            "__MISS__" : "tbl_act_2"
           },
           "default_entry" : {
             "action_id" : 0,
             "action_const" : false,
             "action_data" : [],
             "action_entry_const" : false
-          }
-        },
-        {
-          "name" : "tbl_act_0",
-          "id" : 2,
-          "key" : [],
-          "match_type" : "exact",
-          "type" : "simple",
-          "max_size" : 1024,
-          "with_counters" : false,
-          "support_timeout" : false,
-          "direct_meters" : null,
-          "action_ids" : [24],
-          "actions" : ["act_0"],
-          "base_default_next" : "node_7",
-          "next_tables" : {
-            "act_0" : "node_7"
-          },
-          "default_entry" : {
-            "action_id" : 24,
-            "action_const" : true,
-            "action_data" : [],
-            "action_entry_const" : true
           }
         },
         {
@@ -18417,11 +18623,34 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
+          "action_ids" : [24],
+          "actions" : ["act_0"],
+          "base_default_next" : "node_8",
+          "next_tables" : {
+            "act_0" : "node_8"
+          },
+          "default_entry" : {
+            "action_id" : 24,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_act_2",
+          "id" : 4,
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
           "action_ids" : [25],
           "actions" : ["act_1"],
-          "base_default_next" : "node_7",
+          "base_default_next" : "node_8",
           "next_tables" : {
-            "act_1" : "node_7"
+            "act_1" : "node_8"
           },
           "default_entry" : {
             "action_id" : 25,
@@ -18432,7 +18661,7 @@
         },
         {
           "name" : "tbl_action_get_count_min_hash_0_val",
-          "id" : 4,
+          "id" : 5,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18455,7 +18684,7 @@
         },
         {
           "name" : "tbl_action_get_count_min_hash_1_val",
-          "id" : 5,
+          "id" : 6,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18478,7 +18707,7 @@
         },
         {
           "name" : "tbl_action_get_count_min_hash_2_val",
-          "id" : 6,
+          "id" : 7,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18501,7 +18730,7 @@
         },
         {
           "name" : "tbl_action_count_min_sketch_incr",
-          "id" : 7,
+          "id" : 8,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18511,35 +18740,12 @@
           "direct_meters" : null,
           "action_ids" : [7],
           "actions" : ["c_ingress.action_count_min_sketch_incr"],
-          "base_default_next" : "tbl_act_2",
+          "base_default_next" : "tbl_act_3",
           "next_tables" : {
-            "c_ingress.action_count_min_sketch_incr" : "tbl_act_2"
+            "c_ingress.action_count_min_sketch_incr" : "tbl_act_3"
           },
           "default_entry" : {
             "action_id" : 7,
-            "action_const" : true,
-            "action_data" : [],
-            "action_entry_const" : true
-          }
-        },
-        {
-          "name" : "tbl_act_2",
-          "id" : 8,
-          "key" : [],
-          "match_type" : "exact",
-          "type" : "simple",
-          "max_size" : 1024,
-          "with_counters" : false,
-          "support_timeout" : false,
-          "direct_meters" : null,
-          "action_ids" : [27],
-          "actions" : ["act_3"],
-          "base_default_next" : "node_13",
-          "next_tables" : {
-            "act_3" : "node_13"
-          },
-          "default_entry" : {
-            "action_id" : 27,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -18555,11 +18761,34 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
+          "action_ids" : [27],
+          "actions" : ["act_3"],
+          "base_default_next" : "node_14",
+          "next_tables" : {
+            "act_3" : "node_14"
+          },
+          "default_entry" : {
+            "action_id" : 27,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_act_4",
+          "id" : 10,
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
           "action_ids" : [26],
           "actions" : ["act_2"],
-          "base_default_next" : "node_15",
+          "base_default_next" : "node_16",
           "next_tables" : {
-            "act_2" : "node_15"
+            "act_2" : "node_16"
           },
           "default_entry" : {
             "action_id" : 26,
@@ -18569,8 +18798,8 @@
           }
         },
         {
-          "name" : "tbl_act_4",
-          "id" : 10,
+          "name" : "tbl_act_5",
+          "id" : 11,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18593,7 +18822,7 @@
         },
         {
           "name" : "tbl_action_count_min_register_write",
-          "id" : 11,
+          "id" : 12,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18616,7 +18845,7 @@
         },
         {
           "name" : "tbl_action_bitmap_hash_0_val",
-          "id" : 12,
+          "id" : 13,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18639,7 +18868,7 @@
         },
         {
           "name" : "tbl_action_bitmap_hash_1_val",
-          "id" : 13,
+          "id" : 14,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18662,7 +18891,7 @@
         },
         {
           "name" : "tbl_action_bitmap_hash_2_val",
-          "id" : 14,
+          "id" : 15,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18685,7 +18914,7 @@
         },
         {
           "name" : "tbl_action_bitmap_check_pair",
-          "id" : 15,
+          "id" : 16,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18695,9 +18924,9 @@
           "direct_meters" : null,
           "action_ids" : [12],
           "actions" : ["c_ingress.action_bitmap_check_pair"],
-          "base_default_next" : "node_22",
+          "base_default_next" : "node_23",
           "next_tables" : {
-            "c_ingress.action_bitmap_check_pair" : "node_22"
+            "c_ingress.action_bitmap_check_pair" : "node_23"
           },
           "default_entry" : {
             "action_id" : 12,
@@ -18708,7 +18937,7 @@
         },
         {
           "name" : "tbl_action_bitmap_new_pair",
-          "id" : 16,
+          "id" : 17,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18731,7 +18960,7 @@
         },
         {
           "name" : "tbl_action_bitmap_existing_pair",
-          "id" : 17,
+          "id" : 18,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18754,7 +18983,7 @@
         },
         {
           "name" : "tbl_action_get_k_ary_hash_0_val",
-          "id" : 18,
+          "id" : 19,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18777,7 +19006,7 @@
         },
         {
           "name" : "tbl_action_get_k_ary_hash_1_val",
-          "id" : 19,
+          "id" : 20,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18800,7 +19029,7 @@
         },
         {
           "name" : "tbl_action_get_k_ary_hash_2_val",
-          "id" : 20,
+          "id" : 21,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18823,7 +19052,7 @@
         },
         {
           "name" : "tbl_action_get_k_ary_hash_3_val",
-          "id" : 21,
+          "id" : 22,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18846,7 +19075,7 @@
         },
         {
           "name" : "tbl_action_get_k_ary_hash_4_val",
-          "id" : 22,
+          "id" : 23,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18869,7 +19098,7 @@
         },
         {
           "name" : "tbl_action_k_ary_sketch_incr",
-          "id" : 23,
+          "id" : 24,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18892,7 +19121,7 @@
         },
         {
           "name" : "tbl_action_get_ping_hash_val",
-          "id" : 24,
+          "id" : 25,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18902,9 +19131,9 @@
           "direct_meters" : null,
           "action_ids" : [22],
           "actions" : ["c_ingress.action_get_ping_hash_val"],
-          "base_default_next" : "node_32",
+          "base_default_next" : "node_33",
           "next_tables" : {
-            "c_ingress.action_get_ping_hash_val" : "node_32"
+            "c_ingress.action_get_ping_hash_val" : "node_33"
           },
           "default_entry" : {
             "action_id" : 22,
@@ -18915,7 +19144,7 @@
         },
         {
           "name" : "tbl_action_k_ary_sketch_estimate_F2",
-          "id" : 25,
+          "id" : 26,
           "key" : [],
           "match_type" : "exact",
           "type" : "simple",
@@ -18925,12 +19154,81 @@
           "direct_meters" : null,
           "action_ids" : [21],
           "actions" : ["c_ingress.action_k_ary_sketch_estimate_F2"],
-          "base_default_next" : null,
+          "base_default_next" : "tbl_act_6",
           "next_tables" : {
-            "c_ingress.action_k_ary_sketch_estimate_F2" : null
+            "c_ingress.action_k_ary_sketch_estimate_F2" : "tbl_act_6"
           },
           "default_entry" : {
             "action_id" : 21,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_act_6",
+          "id" : 27,
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [29],
+          "actions" : ["act_5"],
+          "base_default_next" : "node_36",
+          "next_tables" : {
+            "act_5" : "node_36"
+          },
+          "default_entry" : {
+            "action_id" : 29,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_act_7",
+          "id" : 28,
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [31],
+          "actions" : ["act_7"],
+          "base_default_next" : "node_39",
+          "next_tables" : {
+            "act_7" : "node_39"
+          },
+          "default_entry" : {
+            "action_id" : 31,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_act_8",
+          "id" : 29,
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [32],
+          "actions" : ["act_8"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "act_8" : null
+          },
+          "default_entry" : {
+            "action_id" : 32,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -18940,11 +19238,11 @@
       "action_profiles" : [],
       "conditionals" : [
         {
-          "name" : "node_2",
+          "name" : "node_3",
           "id" : 0,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 778,
+            "line" : 670,
             "column" : 12,
             "source_fragment" : "standard_metadata.ingress_port == CPU_PORT"
           },
@@ -18962,11 +19260,11 @@
               }
             }
           },
-          "true_next" : "tbl_act",
+          "true_next" : "tbl_act_0",
           "false_next" : "c_ingress.t_l2_fwd"
         },
         {
-          "name" : "node_7",
+          "name" : "node_8",
           "id" : 1,
           "expression" : {
             "type" : "expression",
@@ -18979,15 +19277,15 @@
               }
             }
           },
-          "false_next" : null,
-          "true_next" : "tbl_action_get_count_min_hash_0_val"
+          "true_next" : "tbl_action_get_count_min_hash_0_val",
+          "false_next" : "node_36"
         },
         {
-          "name" : "node_13",
+          "name" : "node_14",
           "id" : 2,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 800,
+            "line" : 692,
             "column" : 20,
             "source_fragment" : "meta.meta_count_min.count_min_val > meta.meta_count_min.count_min_val1"
           },
@@ -19005,15 +19303,15 @@
               }
             }
           },
-          "true_next" : "tbl_act_3",
-          "false_next" : "node_15"
+          "true_next" : "tbl_act_4",
+          "false_next" : "node_16"
         },
         {
-          "name" : "node_15",
+          "name" : "node_16",
           "id" : 3,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 805,
+            "line" : 697,
             "column" : 20,
             "source_fragment" : "meta.meta_count_min.count_min_val > meta.meta_count_min.count_min_val2"
           },
@@ -19031,15 +19329,15 @@
               }
             }
           },
-          "true_next" : "tbl_act_4",
+          "true_next" : "tbl_act_5",
           "false_next" : "tbl_action_count_min_register_write"
         },
         {
-          "name" : "node_22",
+          "name" : "node_23",
           "id" : 4,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 821,
+            "line" : 713,
             "column" : 20,
             "source_fragment" : "meta.meta_bitmap.bitmap_val0 == 0"
           },
@@ -19061,11 +19359,11 @@
           "false_next" : "tbl_action_bitmap_existing_pair"
         },
         {
-          "name" : "node_32",
+          "name" : "node_33",
           "id" : 5,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 847,
+            "line" : 739,
             "column" : 20,
             "source_fragment" : "(bit<32>)meta.my_metadata.ping_hash_val == (bit<32>)93017"
           },
@@ -19083,8 +19381,84 @@
               }
             }
           },
+          "true_next" : "tbl_action_k_ary_sketch_estimate_F2",
+          "false_next" : "tbl_act_6"
+        },
+        {
+          "name" : "node_36",
+          "id" : 6,
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "not",
+              "left" : null,
+              "right" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "d2b",
+                  "left" : null,
+                  "right" : {
+                    "type" : "field",
+                    "value" : ["scalars", "hasReturned_0"]
+                  }
+                }
+              }
+            }
+          },
           "false_next" : null,
-          "true_next" : "tbl_action_k_ary_sketch_estimate_F2"
+          "true_next" : "node_37"
+        },
+        {
+          "name" : "node_37",
+          "id" : 7,
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 750,
+            "column" : 12,
+            "source_fragment" : "standard_metadata.egress_spec < 255"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "<",
+              "left" : {
+                "type" : "field",
+                "value" : ["standard_metadata", "egress_spec"]
+              },
+              "right" : {
+                "type" : "hexstr",
+                "value" : "0x00ff"
+              }
+            }
+          },
+          "true_next" : "tbl_act_7",
+          "false_next" : "node_39"
+        },
+        {
+          "name" : "node_39",
+          "id" : 8,
+          "source_info" : {
+            "filename" : "flowstats.p4",
+            "line" : 753,
+            "column" : 12,
+            "source_fragment" : "standard_metadata.ingress_port < 255"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "<",
+              "left" : {
+                "type" : "field",
+                "value" : ["standard_metadata", "ingress_port"]
+              },
+              "right" : {
+                "type" : "hexstr",
+                "value" : "0x00ff"
+              }
+            }
+          },
+          "false_next" : null,
+          "true_next" : "tbl_act_8"
         }
       ]
     },
@@ -19093,7 +19467,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 867,
+        "line" : 763,
         "column" : 8,
         "source_fragment" : "c_egress"
       },

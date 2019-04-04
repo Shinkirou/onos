@@ -252,6 +252,28 @@ actions {
     alias: "action_get_ping_hash_val"
   }
 }
+counters {
+  preamble {
+    id: 302003196
+    name: "c_ingress.tx_port_counter"
+    alias: "tx_port_counter"
+  }
+  spec {
+    unit: BOTH
+  }
+  size: 255
+}
+counters {
+  preamble {
+    id: 302045227
+    name: "c_ingress.rx_port_counter"
+    alias: "rx_port_counter"
+  }
+  spec {
+    unit: BOTH
+  }
+  size: 255
+}
 direct_counters {
   preamble {
     id: 318778805

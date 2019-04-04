@@ -33,7 +33,7 @@ NUM_CORES=`grep -c ^processor /proc/cpuinfo`
 
 # If false, build tools without debug features to improve throughput of BMv2 and
 # reduce CPU/memory footprint. Default is true.
-DEBUG_FLAGS=${DEBUG_FLAGS:-true}
+DEBUG_FLAGS=${DEBUG_FLAGS:-false}
 
 # Execute up to the given step (first argument), or all if not defined.
 LAST_STEP=${1:-all}
@@ -77,12 +77,10 @@ function do_requirements {
         libjudy-dev \
         libpcap-dev \
         libpcre3-dev \
-        libreadline6 \
-        libreadline6-dev \
-        libssl-dev \
+        libreadline-dev \
+        libssl1.0-dev\
         libtool \
         make \
-        mktemp \
         pkg-config \
         protobuf-c-compiler \
         python2.7 \
@@ -120,7 +118,7 @@ function do_requirements_1604 {
     sudo apt-get install -y --no-install-recommends \
         ca-certificates \
         g++ \
-        libboost-iostreams1.58-dev \
+        libboost-iostreams1.65-dev \
         libprotobuf-c-dev
 }
 
@@ -186,11 +184,12 @@ function do_grpc {
     git checkout ${GRPC_COMMIT}
     git submodule update --init
 
-    export LDFLAGS="-Wl,-s"
+    # export LDFLAGS="-Wl,-s"
+    # export LDFLAGS=""
     make -j${NUM_CORES}
     sudo make install
     sudo ldconfig
-    unset LDFLAGS
+    # unset LDFLAGS
 
     sudo pip install -r requirements.txt
     sudo pip install .
