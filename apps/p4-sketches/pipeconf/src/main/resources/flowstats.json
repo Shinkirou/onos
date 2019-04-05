@@ -574,8 +574,8 @@
       "name" : "deparser",
       "id" : 0,
       "source_info" : {
-        "filename" : "flowstats.p4",
-        "line" : 783,
+        "filename" : "includes/deparser.p4",
+        "line" : 5,
         "column" : 8,
         "source_fragment" : "c_deparser"
       },
@@ -589,7 +589,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 237,
+        "line" : 54,
         "column" : 48,
         "source_fragment" : "tx_port_counter"
       },
@@ -601,7 +601,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 238,
+        "line" : 55,
         "column" : 48,
         "source_fragment" : "rx_port_counter"
       },
@@ -615,7 +615,7 @@
       "binding" : "c_ingress.t_l2_fwd",
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 640,
+        "line" : 457,
         "column" : 50,
         "source_fragment" : "l2_fwd_counter"
       }
@@ -627,7 +627,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 199,
+        "line" : 16,
         "column" : 30,
         "source_fragment" : "count_min_register0"
       },
@@ -639,7 +639,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 200,
+        "line" : 17,
         "column" : 30,
         "source_fragment" : "count_min_register1"
       },
@@ -651,7 +651,7 @@
       "id" : 2,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 201,
+        "line" : 18,
         "column" : 30,
         "source_fragment" : "count_min_register2"
       },
@@ -663,7 +663,7 @@
       "id" : 3,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 202,
+        "line" : 19,
         "column" : 30,
         "source_fragment" : "count_register_final"
       },
@@ -675,7 +675,7 @@
       "id" : 4,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 204,
+        "line" : 21,
         "column" : 30,
         "source_fragment" : "bitmap_register0"
       },
@@ -687,7 +687,7 @@
       "id" : 5,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 206,
+        "line" : 23,
         "column" : 30,
         "source_fragment" : "bitmap_register1"
       },
@@ -699,7 +699,7 @@
       "id" : 6,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 208,
+        "line" : 25,
         "column" : 30,
         "source_fragment" : "bitmap_register2"
       },
@@ -711,7 +711,7 @@
       "id" : 7,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 210,
+        "line" : 27,
         "column" : 30,
         "source_fragment" : "k_ary_register0"
       },
@@ -723,7 +723,7 @@
       "id" : 8,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 211,
+        "line" : 28,
         "column" : 30,
         "source_fragment" : "k_ary_register1"
       },
@@ -735,7 +735,7 @@
       "id" : 9,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 212,
+        "line" : 29,
         "column" : 30,
         "source_fragment" : "k_ary_register2"
       },
@@ -747,7 +747,7 @@
       "id" : 10,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 213,
+        "line" : 30,
         "column" : 30,
         "source_fragment" : "k_ary_register3"
       },
@@ -759,7 +759,7 @@
       "id" : 11,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 214,
+        "line" : 31,
         "column" : 30,
         "source_fragment" : "k_ary_register4"
       },
@@ -771,7 +771,7 @@
       "id" : 12,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 215,
+        "line" : 32,
         "column" : 25,
         "source_fragment" : "k_ary_register_estimate_F2"
       },
@@ -1104,7 +1104,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 14,
+            "line" : 4,
             "column" : 24,
             "source_fragment" : "255; ..."
           }
@@ -1119,7 +1119,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 245,
+            "line" : 62,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.setValid()"
           }
@@ -1138,7 +1138,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 246,
+            "line" : 63,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.ingress_port = standard_metadata.ingress_port"
           }
@@ -1169,7 +1169,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 252,
+            "line" : 69,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = port"
           }
@@ -1214,7 +1214,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 263,
+            "line" : 80,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -1246,7 +1246,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 263,
+            "line" : 80,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -1278,7 +1278,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 263,
+            "line" : 80,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -1305,7 +1305,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 260,
+            "line" : 77,
             "column" : 8,
             "source_fragment" : "hash(count_min_hash0, ..."
           }
@@ -1324,7 +1324,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 265,
+            "line" : 82,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_hash_val0 = count_min_hash0"
           }
@@ -1363,7 +1363,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 272,
+            "line" : 89,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -1395,7 +1395,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 272,
+            "line" : 89,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -1427,7 +1427,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 272,
+            "line" : 89,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -1454,7 +1454,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 269,
+            "line" : 86,
             "column" : 8,
             "source_fragment" : "hash(count_min_hash1, ..."
           }
@@ -1473,7 +1473,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 274,
+            "line" : 91,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_hash_val1 = count_min_hash1"
           }
@@ -1512,7 +1512,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 281,
+            "line" : 98,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -1544,7 +1544,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 281,
+            "line" : 98,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -1576,7 +1576,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 281,
+            "line" : 98,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -1603,7 +1603,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 278,
+            "line" : 95,
             "column" : 8,
             "source_fragment" : "hash(count_min_hash2, ..."
           }
@@ -1622,7 +1622,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 283,
+            "line" : 100,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_hash_val2 = count_min_hash2"
           }
@@ -1652,7 +1652,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 292,
+            "line" : 109,
             "column" : 8,
             "source_fragment" : "count_min_register0.read(tmp0, (bit<32>)meta.meta_count_min.count_min_hash_val0)"
           }
@@ -1675,7 +1675,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 293,
+            "line" : 110,
             "column" : 8,
             "source_fragment" : "count_min_register1.read(tmp1, (bit<32>)meta.meta_count_min.count_min_hash_val1)"
           }
@@ -1698,7 +1698,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 294,
+            "line" : 111,
             "column" : 8,
             "source_fragment" : "count_min_register2.read(tmp2, (bit<32>)meta.meta_count_min.count_min_hash_val2)"
           }
@@ -1717,7 +1717,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 296,
+            "line" : 113,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_val0 = tmp0"
           }
@@ -1736,7 +1736,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 297,
+            "line" : 114,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_val1 = tmp1"
           }
@@ -1755,7 +1755,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 298,
+            "line" : 115,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_val2 = tmp2"
           }
@@ -1797,7 +1797,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 300,
+            "line" : 117,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_val0 = meta.meta_count_min.count_min_val0 + 1"
           }
@@ -1839,7 +1839,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 301,
+            "line" : 118,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_val1 = meta.meta_count_min.count_min_val1 + 1"
           }
@@ -1881,7 +1881,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 302,
+            "line" : 119,
             "column" : 8,
             "source_fragment" : "meta.meta_count_min.count_min_val2 = meta.meta_count_min.count_min_val2 + 1"
           }
@@ -1923,7 +1923,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 300,
+            "line" : 117,
             "column" : 45,
             "source_fragment" : "meta.meta_count_min.count_min_val0 + 1"
           }
@@ -1946,7 +1946,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 304,
+            "line" : 121,
             "column" : 8,
             "source_fragment" : "count_min_register0.write((bit<32>)meta.meta_count_min.count_min_hash_val0, meta.meta_count_min.count_min_val0)"
           }
@@ -1969,7 +1969,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 305,
+            "line" : 122,
             "column" : 8,
             "source_fragment" : "count_min_register1.write((bit<32>)meta.meta_count_min.count_min_hash_val1, meta.meta_count_min.count_min_val1)"
           }
@@ -1992,7 +1992,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 306,
+            "line" : 123,
             "column" : 8,
             "source_fragment" : "count_min_register2.write((bit<32>)meta.meta_count_min.count_min_hash_val2, meta.meta_count_min.count_min_val2)"
           }
@@ -2022,7 +2022,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 310,
+            "line" : 127,
             "column" : 8,
             "source_fragment" : "count_register_final.write((bit<32>)meta.meta_count_min.count_min_hash_val2, meta.meta_count_min.count_min_val)"
           }
@@ -2061,7 +2061,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 319,
+            "line" : 136,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -2093,7 +2093,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 319,
+            "line" : 136,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -2125,7 +2125,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 319,
+            "line" : 136,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -2152,7 +2152,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 316,
+            "line" : 133,
             "column" : 8,
             "source_fragment" : "hash(bitmap_hash0, ..."
           }
@@ -2171,7 +2171,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 321,
+            "line" : 138,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_hash_val0 = bitmap_hash0"
           }
@@ -2210,7 +2210,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 328,
+            "line" : 145,
             "column" : 32,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -2242,7 +2242,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 328,
+            "line" : 145,
             "column" : 60,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -2269,7 +2269,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 325,
+            "line" : 142,
             "column" : 8,
             "source_fragment" : "hash(bitmap_hash1, ..."
           }
@@ -2288,7 +2288,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 330,
+            "line" : 147,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_hash_val1 = bitmap_hash1"
           }
@@ -2327,7 +2327,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 337,
+            "line" : 154,
             "column" : 32,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -2359,7 +2359,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 337,
+            "line" : 154,
             "column" : 60,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -2386,7 +2386,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 334,
+            "line" : 151,
             "column" : 8,
             "source_fragment" : "hash(bitmap_hash2, ..."
           }
@@ -2405,7 +2405,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 339,
+            "line" : 156,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_hash_val2 = bitmap_hash2"
           }
@@ -2435,7 +2435,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 347,
+            "line" : 164,
             "column" : 8,
             "source_fragment" : "bitmap_register0.read(tmp0, (bit<32>)meta.meta_bitmap.bitmap_hash_val0)"
           }
@@ -2454,7 +2454,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 348,
+            "line" : 165,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_val0 = tmp0"
           }
@@ -2503,7 +2503,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 356,
+            "line" : 173,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_val0 = meta.meta_bitmap.bitmap_val0 + 1"
           }
@@ -2526,7 +2526,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 358,
+            "line" : 175,
             "column" : 8,
             "source_fragment" : "bitmap_register1.read(tmp1, (bit<32>)meta.meta_bitmap.bitmap_hash_val1)"
           }
@@ -2549,7 +2549,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 359,
+            "line" : 176,
             "column" : 8,
             "source_fragment" : "bitmap_register2.read(tmp2, (bit<32>)meta.meta_bitmap.bitmap_hash_val2)"
           }
@@ -2568,7 +2568,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 361,
+            "line" : 178,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_val1 = tmp1"
           }
@@ -2587,7 +2587,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 362,
+            "line" : 179,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_val2 = tmp2"
           }
@@ -2629,7 +2629,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 364,
+            "line" : 181,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_val1 = meta.meta_bitmap.bitmap_val1 + 1"
           }
@@ -2671,7 +2671,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 365,
+            "line" : 182,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_val2 = meta.meta_bitmap.bitmap_val2 + 1"
           }
@@ -2694,7 +2694,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 367,
+            "line" : 184,
             "column" : 8,
             "source_fragment" : "bitmap_register0.write((bit<32>)meta.meta_bitmap.bitmap_hash_val0, meta.meta_bitmap.bitmap_val0)"
           }
@@ -2717,7 +2717,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 368,
+            "line" : 185,
             "column" : 8,
             "source_fragment" : "bitmap_register1.write((bit<32>)meta.meta_bitmap.bitmap_hash_val1, meta.meta_bitmap.bitmap_val1)"
           }
@@ -2740,7 +2740,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 369,
+            "line" : 186,
             "column" : 8,
             "source_fragment" : "bitmap_register2.write((bit<32>)meta.meta_bitmap.bitmap_hash_val2, meta.meta_bitmap.bitmap_val2)"
           }
@@ -2770,7 +2770,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 377,
+            "line" : 194,
             "column" : 8,
             "source_fragment" : "bitmap_register1.read(tmp1, (bit<32>)meta.meta_bitmap.bitmap_hash_val1)"
           }
@@ -2789,7 +2789,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 378,
+            "line" : 195,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_val1 = tmp1"
           }
@@ -2812,7 +2812,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 380,
+            "line" : 197,
             "column" : 8,
             "source_fragment" : "bitmap_register2.read(tmp2, (bit<32>)meta.meta_bitmap.bitmap_hash_val2)"
           }
@@ -2831,7 +2831,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 381,
+            "line" : 198,
             "column" : 8,
             "source_fragment" : "meta.meta_bitmap.bitmap_val2 = tmp2"
           }
@@ -2870,7 +2870,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 391,
+            "line" : 208,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -2902,7 +2902,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 391,
+            "line" : 208,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -2934,7 +2934,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 391,
+            "line" : 208,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -2961,7 +2961,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 387,
+            "line" : 204,
             "column" : 8,
             "source_fragment" : "hash(k_ary_hash0, ..."
           }
@@ -2980,7 +2980,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 393,
+            "line" : 210,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_hash_val0 = k_ary_hash0"
           }
@@ -3019,7 +3019,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 401,
+            "line" : 218,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -3051,7 +3051,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 401,
+            "line" : 218,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -3083,7 +3083,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 401,
+            "line" : 218,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -3110,7 +3110,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 397,
+            "line" : 214,
             "column" : 8,
             "source_fragment" : "hash(k_ary_hash1, ..."
           }
@@ -3129,7 +3129,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 403,
+            "line" : 220,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_hash_val1 = k_ary_hash1"
           }
@@ -3168,7 +3168,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 411,
+            "line" : 228,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -3200,7 +3200,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 411,
+            "line" : 228,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -3232,7 +3232,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 411,
+            "line" : 228,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -3259,7 +3259,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 407,
+            "line" : 224,
             "column" : 8,
             "source_fragment" : "hash(k_ary_hash2, ..."
           }
@@ -3278,7 +3278,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 413,
+            "line" : 230,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_hash_val2 = k_ary_hash2"
           }
@@ -3317,7 +3317,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 421,
+            "line" : 238,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -3349,7 +3349,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 421,
+            "line" : 238,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -3381,7 +3381,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 421,
+            "line" : 238,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -3408,7 +3408,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 417,
+            "line" : 234,
             "column" : 8,
             "source_fragment" : "hash(k_ary_hash3, ..."
           }
@@ -3427,7 +3427,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 423,
+            "line" : 240,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_hash_val3 = k_ary_hash3"
           }
@@ -3466,7 +3466,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 431,
+            "line" : 248,
             "column" : 51,
             "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
           }
@@ -3498,7 +3498,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 431,
+            "line" : 248,
             "column" : 79,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_src_port"
           }
@@ -3530,7 +3530,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 431,
+            "line" : 248,
             "column" : 118,
             "source_fragment" : "(bit<32>)meta.my_metadata.l4_dst_port"
           }
@@ -3557,7 +3557,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 427,
+            "line" : 244,
             "column" : 8,
             "source_fragment" : "hash(k_ary_hash4, ..."
           }
@@ -3576,7 +3576,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 433,
+            "line" : 250,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_hash_val4 = k_ary_hash4"
           }
@@ -3606,7 +3606,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 452,
+            "line" : 269,
             "column" : 8,
             "source_fragment" : "k_ary_register0.read(tmp0, (bit<32>)meta.meta_k_ary.k_ary_hash_val0)"
           }
@@ -3629,7 +3629,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 453,
+            "line" : 270,
             "column" : 8,
             "source_fragment" : "k_ary_register1.read(tmp1, (bit<32>)meta.meta_k_ary.k_ary_hash_val1)"
           }
@@ -3652,7 +3652,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 454,
+            "line" : 271,
             "column" : 8,
             "source_fragment" : "k_ary_register2.read(tmp2, (bit<32>)meta.meta_k_ary.k_ary_hash_val2)"
           }
@@ -3675,7 +3675,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 455,
+            "line" : 272,
             "column" : 8,
             "source_fragment" : "k_ary_register3.read(tmp3, (bit<32>)meta.meta_k_ary.k_ary_hash_val3)"
           }
@@ -3698,7 +3698,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 456,
+            "line" : 273,
             "column" : 8,
             "source_fragment" : "k_ary_register4.read(tmp4, (bit<32>)meta.meta_k_ary.k_ary_hash_val4)"
           }
@@ -3721,7 +3721,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 459,
+            "line" : 276,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp5, (bit<32>)6)"
           }
@@ -3744,7 +3744,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 462,
+            "line" : 279,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp6, (bit<32>)0)"
           }
@@ -3767,7 +3767,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 463,
+            "line" : 280,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp7, (bit<32>)1)"
           }
@@ -3790,7 +3790,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 464,
+            "line" : 281,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp8, (bit<32>)2)"
           }
@@ -3813,7 +3813,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 465,
+            "line" : 282,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp9, (bit<32>)3)"
           }
@@ -3836,7 +3836,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 466,
+            "line" : 283,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp10, (bit<32>)4)"
           }
@@ -3855,7 +3855,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 468,
+            "line" : 285,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val0 = tmp0"
           }
@@ -3874,7 +3874,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 469,
+            "line" : 286,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val1 = tmp1"
           }
@@ -3893,7 +3893,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 470,
+            "line" : 287,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val2 = tmp2"
           }
@@ -3912,7 +3912,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 471,
+            "line" : 288,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val3 = tmp3"
           }
@@ -3931,7 +3931,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 472,
+            "line" : 289,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val4 = tmp4"
           }
@@ -3950,7 +3950,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 474,
+            "line" : 291,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_sum = tmp5"
           }
@@ -3969,7 +3969,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 476,
+            "line" : 293,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_0 = tmp6"
           }
@@ -3988,7 +3988,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 477,
+            "line" : 294,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_1 = tmp7"
           }
@@ -4007,7 +4007,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 478,
+            "line" : 295,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_2 = tmp8"
           }
@@ -4026,7 +4026,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 479,
+            "line" : 296,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_3 = tmp9"
           }
@@ -4045,7 +4045,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 480,
+            "line" : 297,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_4 = tmp10"
           }
@@ -4087,7 +4087,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 484,
+            "line" : 301,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val0 = meta.meta_k_ary.k_ary_val0 + 1"
           }
@@ -4129,7 +4129,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 485,
+            "line" : 302,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val1 = meta.meta_k_ary.k_ary_val1 + 1"
           }
@@ -4171,7 +4171,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 486,
+            "line" : 303,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val2 = meta.meta_k_ary.k_ary_val2 + 1"
           }
@@ -4213,7 +4213,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 487,
+            "line" : 304,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val3 = meta.meta_k_ary.k_ary_val3 + 1"
           }
@@ -4255,7 +4255,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 488,
+            "line" : 305,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val4 = meta.meta_k_ary.k_ary_val4 + 1"
           }
@@ -4297,7 +4297,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 492,
+            "line" : 309,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_sum = meta.meta_k_ary.k_ary_sum + 5"
           }
@@ -4403,7 +4403,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 497,
+            "line" : 314,
             "column" : 12,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_0 ="
           }
@@ -4744,7 +4744,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 499,
+            "line" : 316,
             "column" : 12,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_0 ="
           }
@@ -5515,7 +5515,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 500,
+            "line" : 317,
             "column" : 12,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_0 ="
           }
@@ -5621,7 +5621,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 503,
+            "line" : 320,
             "column" : 12,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_1 ="
           }
@@ -5962,7 +5962,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 505,
+            "line" : 322,
             "column" : 12,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_1 ="
           }
@@ -6733,7 +6733,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 506,
+            "line" : 323,
             "column" : 12,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_1 ="
           }
@@ -6839,7 +6839,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 509,
+            "line" : 326,
             "column" : 12,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_2 ="
           }
@@ -7180,7 +7180,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 511,
+            "line" : 328,
             "column" : 12,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_2 ="
           }
@@ -7951,7 +7951,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 512,
+            "line" : 329,
             "column" : 12,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_2 ="
           }
@@ -8057,7 +8057,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 515,
+            "line" : 332,
             "column" : 12,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_3 ="
           }
@@ -8398,7 +8398,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 517,
+            "line" : 334,
             "column" : 12,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_3 ="
           }
@@ -9169,7 +9169,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 518,
+            "line" : 335,
             "column" : 12,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_3 ="
           }
@@ -9275,7 +9275,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 521,
+            "line" : 338,
             "column" : 12,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_4 ="
           }
@@ -9616,7 +9616,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 523,
+            "line" : 340,
             "column" : 12,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_4 ="
           }
@@ -10387,7 +10387,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 524,
+            "line" : 341,
             "column" : 12,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_4 ="
           }
@@ -10429,7 +10429,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 484,
+            "line" : 301,
             "column" : 37,
             "source_fragment" : "meta.meta_k_ary.k_ary_val0 + 1"
           }
@@ -10452,7 +10452,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 528,
+            "line" : 345,
             "column" : 8,
             "source_fragment" : "k_ary_register0.write((bit<32>)meta.meta_k_ary.k_ary_hash_val0, meta.meta_k_ary.k_ary_val0)"
           }
@@ -10475,7 +10475,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 529,
+            "line" : 346,
             "column" : 8,
             "source_fragment" : "k_ary_register1.write((bit<32>)meta.meta_k_ary.k_ary_hash_val1, meta.meta_k_ary.k_ary_val1)"
           }
@@ -10498,7 +10498,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 530,
+            "line" : 347,
             "column" : 8,
             "source_fragment" : "k_ary_register2.write((bit<32>)meta.meta_k_ary.k_ary_hash_val2, meta.meta_k_ary.k_ary_val2)"
           }
@@ -10521,7 +10521,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 531,
+            "line" : 348,
             "column" : 8,
             "source_fragment" : "k_ary_register3.write((bit<32>)meta.meta_k_ary.k_ary_hash_val3, meta.meta_k_ary.k_ary_val3)"
           }
@@ -10544,7 +10544,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 532,
+            "line" : 349,
             "column" : 8,
             "source_fragment" : "k_ary_register4.write((bit<32>)meta.meta_k_ary.k_ary_hash_val4, meta.meta_k_ary.k_ary_val4)"
           }
@@ -10567,7 +10567,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 535,
+            "line" : 352,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.write((bit<32>)6, meta.meta_k_ary.k_ary_sum)"
           }
@@ -10590,7 +10590,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 538,
+            "line" : 355,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.write((bit<32>)0, meta.meta_k_ary.k_ary_val_F2_0)"
           }
@@ -10613,7 +10613,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 539,
+            "line" : 356,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.write((bit<32>)1, meta.meta_k_ary.k_ary_val_F2_1)"
           }
@@ -10636,7 +10636,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 540,
+            "line" : 357,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.write((bit<32>)2, meta.meta_k_ary.k_ary_val_F2_2)"
           }
@@ -10659,7 +10659,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 541,
+            "line" : 358,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.write((bit<32>)3, meta.meta_k_ary.k_ary_val_F2_3)"
           }
@@ -10682,7 +10682,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 542,
+            "line" : 359,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.write((bit<32>)4, meta.meta_k_ary.k_ary_val_F2_4)"
           }
@@ -10712,7 +10712,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 555,
+            "line" : 372,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp0, (bit<32>)0)"
           }
@@ -10735,7 +10735,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 556,
+            "line" : 373,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp1, (bit<32>)1)"
           }
@@ -10758,7 +10758,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 557,
+            "line" : 374,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp2, (bit<32>)2)"
           }
@@ -10781,7 +10781,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 558,
+            "line" : 375,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp3, (bit<32>)3)"
           }
@@ -10804,7 +10804,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 559,
+            "line" : 376,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp4, (bit<32>)4)"
           }
@@ -10827,7 +10827,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 562,
+            "line" : 379,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.read(tmp5, (bit<32>)6)"
           }
@@ -10846,7 +10846,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 564,
+            "line" : 381,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_0 = tmp0"
           }
@@ -10865,7 +10865,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 565,
+            "line" : 382,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_1 = tmp1"
           }
@@ -10884,7 +10884,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 566,
+            "line" : 383,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_2 = tmp2"
           }
@@ -10903,7 +10903,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 567,
+            "line" : 384,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_3 = tmp3"
           }
@@ -10922,7 +10922,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 568,
+            "line" : 385,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_val_F2_4 = tmp4"
           }
@@ -10941,7 +10941,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 570,
+            "line" : 387,
             "column" : 8,
             "source_fragment" : "meta.meta_k_ary.k_ary_sum = tmp5"
           }
@@ -10960,7 +10960,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 564,
+            "line" : 381,
             "column" : 41,
             "source_fragment" : "tmp0; ..."
           }
@@ -10979,7 +10979,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 565,
+            "line" : 382,
             "column" : 41,
             "source_fragment" : "tmp1; ..."
           }
@@ -10998,7 +10998,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 566,
+            "line" : 383,
             "column" : 41,
             "source_fragment" : "tmp2; ..."
           }
@@ -11017,7 +11017,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 567,
+            "line" : 384,
             "column" : 41,
             "source_fragment" : "tmp3; ..."
           }
@@ -11036,7 +11036,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 568,
+            "line" : 385,
             "column" : 41,
             "source_fragment" : "tmp4; ..."
           }
@@ -11542,7 +11542,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 594,
+            "line" : 411,
             "column" : 16,
             "source_fragment" : "meta.meta_k_ary.k_ary_estimate_F2 ="
           }
@@ -12535,7 +12535,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 602,
+            "line" : 419,
             "column" : 20,
             "source_fragment" : "meta.meta_k_ary.k_ary_estimate_F2 ="
           }
@@ -14015,7 +14015,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 610,
+            "line" : 427,
             "column" : 20,
             "source_fragment" : "meta.meta_k_ary.k_ary_estimate_F2 ="
           }
@@ -15982,7 +15982,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 618,
+            "line" : 435,
             "column" : 20,
             "source_fragment" : "meta.meta_k_ary.k_ary_estimate_F2 ="
           }
@@ -17956,7 +17956,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 621,
+            "line" : 438,
             "column" : 16,
             "source_fragment" : "meta.meta_k_ary.k_ary_estimate_F2 ="
           }
@@ -17979,7 +17979,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 624,
+            "line" : 441,
             "column" : 8,
             "source_fragment" : "k_ary_register_estimate_F2.write((bit<32>)5, meta.meta_k_ary.k_ary_estimate_F2)"
           }
@@ -18013,7 +18013,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 630,
+            "line" : 447,
             "column" : 8,
             "source_fragment" : "hash(ping_hash, ..."
           }
@@ -18032,7 +18032,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 635,
+            "line" : 452,
             "column" : 8,
             "source_fragment" : "meta.my_metadata.ping_hash_val = ping_hash"
           }
@@ -18058,7 +18058,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 675,
+            "line" : 492,
             "column" : 12,
             "source_fragment" : "standard_metadata.egress_spec = hdr.packet_out.egress_port"
           }
@@ -18073,7 +18073,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 676,
+            "line" : 493,
             "column" : 12,
             "source_fragment" : "hdr.packet_out.setInvalid()"
           }
@@ -18159,7 +18159,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 693,
+            "line" : 510,
             "column" : 20,
             "source_fragment" : "meta.meta_count_min.count_min_val = meta.meta_count_min.count_min_val1"
           }
@@ -18178,7 +18178,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 694,
+            "line" : 511,
             "column" : 20,
             "source_fragment" : "meta.meta_count_min.count_min_hash = meta.meta_count_min.count_min_hash_val1"
           }
@@ -18204,7 +18204,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 689,
+            "line" : 506,
             "column" : 16,
             "source_fragment" : "meta.meta_count_min.count_min_val = meta.meta_count_min.count_min_val0"
           }
@@ -18223,7 +18223,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 690,
+            "line" : 507,
             "column" : 16,
             "source_fragment" : "meta.meta_count_min.count_min_hash = meta.meta_count_min.count_min_hash_val0"
           }
@@ -18249,7 +18249,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 698,
+            "line" : 515,
             "column" : 20,
             "source_fragment" : "meta.meta_count_min.count_min_val = meta.meta_count_min.count_min_val2"
           }
@@ -18268,7 +18268,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 699,
+            "line" : 516,
             "column" : 20,
             "source_fragment" : "meta.meta_count_min.count_min_hash = meta.meta_count_min.count_min_hash_val2"
           }
@@ -18304,7 +18304,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 746,
+            "line" : 563,
             "column" : 16,
             "source_fragment" : "return"
           }
@@ -18373,7 +18373,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 751,
+            "line" : 568,
             "column" : 34,
             "source_fragment" : "(bit<32>) standard_metadata.egress_spec"
           }
@@ -18392,7 +18392,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 751,
+            "line" : 568,
             "column" : 12,
             "source_fragment" : "tx_port_counter.count((bit<32>) standard_metadata.egress_spec)"
           }
@@ -18431,7 +18431,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 754,
+            "line" : 571,
             "column" : 34,
             "source_fragment" : "(bit<32>) standard_metadata.ingress_port"
           }
@@ -18450,7 +18450,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 754,
+            "line" : 571,
             "column" : 12,
             "source_fragment" : "rx_port_counter.count((bit<32>) standard_metadata.ingress_port)"
           }
@@ -18464,7 +18464,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 197,
+        "line" : 14,
         "column" : 8,
         "source_fragment" : "c_ingress"
       },
@@ -18521,7 +18521,7 @@
           "id" : 2,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 642,
+            "line" : 459,
             "column" : 10,
             "source_fragment" : "t_l2_fwd"
           },
@@ -19242,7 +19242,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 670,
+            "line" : 487,
             "column" : 12,
             "source_fragment" : "standard_metadata.ingress_port == CPU_PORT"
           },
@@ -19285,7 +19285,7 @@
           "id" : 2,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 692,
+            "line" : 509,
             "column" : 20,
             "source_fragment" : "meta.meta_count_min.count_min_val > meta.meta_count_min.count_min_val1"
           },
@@ -19311,7 +19311,7 @@
           "id" : 3,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 697,
+            "line" : 514,
             "column" : 20,
             "source_fragment" : "meta.meta_count_min.count_min_val > meta.meta_count_min.count_min_val2"
           },
@@ -19337,7 +19337,7 @@
           "id" : 4,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 713,
+            "line" : 530,
             "column" : 20,
             "source_fragment" : "meta.meta_bitmap.bitmap_val0 == 0"
           },
@@ -19363,7 +19363,7 @@
           "id" : 5,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 739,
+            "line" : 556,
             "column" : 20,
             "source_fragment" : "(bit<32>)meta.my_metadata.ping_hash_val == (bit<32>)93017"
           },
@@ -19413,7 +19413,7 @@
           "id" : 7,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 750,
+            "line" : 567,
             "column" : 12,
             "source_fragment" : "standard_metadata.egress_spec < 255"
           },
@@ -19439,7 +19439,7 @@
           "id" : 8,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 753,
+            "line" : 570,
             "column" : 12,
             "source_fragment" : "standard_metadata.ingress_port < 255"
           },
@@ -19467,7 +19467,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 763,
+        "line" : 580,
         "column" : 8,
         "source_fragment" : "c_egress"
       },
