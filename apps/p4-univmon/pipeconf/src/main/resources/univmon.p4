@@ -36,6 +36,8 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
     bit<32> top_k_stage_2_hash;
     bit<32> top_k_stage_3_hash;
 
+    // Registers for the sketching phases.
+
     register<bit<32>>(131072) level_0_count_register_0;
     register<bit<32>>(131072) level_0_count_register_1;
     register<bit<32>>(131072) level_0_count_register_2;
@@ -59,6 +61,8 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
     register<bit<32>>(131072) level_3_count_register_2;
     register<bit<32>>(131072) level_3_count_register_3;             
     register<bit<32>>(131072) level_3_count_register_final;
+
+    // Registers for the top-k phases. 
 
     register<bit<32>>(32) level_0_flow_tracker_stage_1_register;
     register<bit<32>>(32) level_0_flow_tracker_stage_2_register;
@@ -99,6 +103,9 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
     register<bit<1>>(32)  level_3_valid_bit_stage_1_register;
     register<bit<1>>(32)  level_3_valid_bit_stage_2_register;
     register<bit<1>>(32)  level_3_valid_bit_stage_3_register;             
+
+    // The sampling hashes can have the value 0 or 1,
+    // deciding if a specific level is executed for each flow.
 
     action action_binary_hash_1() {
         hash(binary_hash_1, 
