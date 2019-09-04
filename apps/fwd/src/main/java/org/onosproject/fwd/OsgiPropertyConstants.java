@@ -42,7 +42,7 @@ public final class OsgiPropertyConstants {
     static final boolean MATCH_VLAN_ID_DEFAULT = false;
 
     static final String MATCH_IPV4_ADDRESS = "matchIpv4Address";
-    static final boolean MATCH_IPV4_ADDRESS_DEFAULT = false;
+    static final boolean MATCH_IPV4_ADDRESS_DEFAULT = true;
 
     static final String MATCH_IPV4_DSCP = "matchIpv4Dscp";
     static final boolean MATCH_IPV4_DSCP_DEFAULT = false;
@@ -54,7 +54,7 @@ public final class OsgiPropertyConstants {
     static final boolean MATCH_IPV6_FLOW_LABEL_DEFAULT = false;
 
     static final String MATCH_TCP_UDP_PORTS = "matchTcpUdpPorts";
-    static final boolean MATCH_TCP_UDP_PORTS_DEFAULT = false;
+    static final boolean MATCH_TCP_UDP_PORTS_DEFAULT = true;
 
     static final String MATCH_ICMP_FIELDS = "matchIcmpFields";
     static final boolean MATCH_ICMP_FIELDS_DEFAULT = false;
