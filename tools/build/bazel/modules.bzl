@@ -234,6 +234,8 @@ ONOS_APPS = [
     "//apps/evpn-route-service:onos-apps-evpn-route-service-oar",
     "//apps/p4-tutorial/pipeconf:onos-apps-p4-tutorial-pipeconf-oar",
     "//apps/p4-tutorial/mytunnel:onos-apps-p4-tutorial-mytunnel-oar",
+    "//apps/p4-sketches/pipeconf:onos-apps-p4-sketches-pipeconf-oar",
+    "//apps/p4-sketches/flowstats:onos-apps-p4-sketches-flowstats-oar",
     "//apps/cfm:onos-apps-cfm-oar",
     "//apps/routeradvertisement:onos-apps-routeradvertisement-oar",
     "//apps/powermanagement:onos-apps-powermanagement-oar",
