@@ -42,7 +42,7 @@ public final class OsgiPropertyConstants {
     public static final boolean PURGE_ON_DISCONNECTION_DEFAULT = false;
 
     public static final String POLL_FREQUENCY = "fallbackFlowPollFrequency";
-    public static final int POLL_FREQUENCY_DEFAULT = 30;
+    public static final int POLL_FREQUENCY_DEFAULT = 5;
 
     public static final String FOM_NUM_THREADS = "numThreads";
     public static final int FOM_NUM_THREADS_DEFAULT = 4;

@@ -32,7 +32,7 @@ BUILD_DIR=~/p4tools
 NUM_CORES=`grep -c ^processor /proc/cpuinfo`
 # If false, build tools without debug features to improve throughput of BMv2 and
 # reduce CPU/memory footprint. Default is true.
-DEBUG_FLAGS=${DEBUG_FLAGS:-true}
+DEBUG_FLAGS=${DEBUG_FLAGS:-false}
 # Execute up to the given step (first argument), or all if not defined.
 LAST_STEP=${1:-all}
 # PI and BMv2 must be configured differently if we want to use Stratum
