@@ -123,114 +123,107 @@ actions {
 }
 actions {
   preamble {
-    id: 16791868
-    name: "c_ingress.action_get_count_min_hash_0_val"
-    alias: "action_get_count_min_hash_0_val"
+    id: 16788965
+    name: "c_ingress.action_get_cm_hash_0"
+    alias: "action_get_cm_hash_0"
   }
 }
 actions {
   preamble {
-    id: 16817652
-    name: "c_ingress.action_get_count_min_hash_1_val"
-    alias: "action_get_count_min_hash_1_val"
+    id: 16814859
+    name: "c_ingress.action_get_cm_hash_1"
+    alias: "action_get_cm_hash_1"
   }
 }
 actions {
   preamble {
-    id: 16799134
-    name: "c_ingress.action_get_count_min_hash_2_val"
-    alias: "action_get_count_min_hash_2_val"
+    id: 16840560
+    name: "c_ingress.action_get_cm_hash_2"
+    alias: "action_get_cm_hash_2"
   }
 }
 actions {
   preamble {
-    id: 16818081
-    name: "c_ingress.action_count_min_sketch_incr"
-    alias: "action_count_min_sketch_incr"
+    id: 16783131
+    name: "c_ingress.action_cm_sketch_incr"
+    alias: "action_cm_sketch_incr"
   }
 }
 actions {
   preamble {
-    id: 16790822
-    name: "c_ingress.action_count_min_register_write"
-    alias: "action_count_min_register_write"
+    id: 16841752
+    name: "c_ingress.action_cm_register_write"
+    alias: "action_cm_register_write"
   }
 }
 actions {
   preamble {
-    id: 16784852
-    name: "c_ingress.action_bitmap_hash_0_val"
-    alias: "action_bitmap_hash_0_val"
+    id: 16840895
+    name: "c_ingress.action_bm_hash_0"
+    alias: "action_bm_hash_0"
   }
 }
 actions {
   preamble {
-    id: 16820028
-    name: "c_ingress.action_bitmap_hash_1_val"
-    alias: "action_bitmap_hash_1_val"
+    id: 16800802
+    name: "c_ingress.action_bm_hash_1"
+    alias: "action_bm_hash_1"
   }
 }
 actions {
   preamble {
-    id: 16790643
-    name: "c_ingress.action_bitmap_hash_2_val"
-    alias: "action_bitmap_hash_2_val"
+    id: 16788683
+    name: "c_ingress.action_bm_hash_2"
+    alias: "action_bm_hash_2"
   }
 }
 actions {
   preamble {
-    id: 16806113
-    name: "c_ingress.action_bitmap_check_pair"
-    alias: "action_bitmap_check_pair"
+    id: 16799807
+    name: "c_ingress.action_bm_check_pair"
+    alias: "action_bm_check_pair"
   }
 }
 actions {
   preamble {
-    id: 16818664
-    name: "c_ingress.action_bitmap_new_pair"
-    alias: "action_bitmap_new_pair"
+    id: 16794687
+    name: "c_ingress.action_bm_new_pair"
+    alias: "action_bm_new_pair"
   }
 }
 actions {
   preamble {
-    id: 16780342
-    name: "c_ingress.action_bitmap_existing_pair"
-    alias: "action_bitmap_existing_pair"
+    id: 16810696
+    name: "c_ingress.action_get_k_ary_hash_0"
+    alias: "action_get_k_ary_hash_0"
   }
 }
 actions {
   preamble {
-    id: 16796473
-    name: "c_ingress.action_get_k_ary_hash_0_val"
-    alias: "action_get_k_ary_hash_0_val"
+    id: 16823463
+    name: "c_ingress.action_get_k_ary_hash_1"
+    alias: "action_get_k_ary_hash_1"
   }
 }
 actions {
   preamble {
-    id: 16818797
-    name: "c_ingress.action_get_k_ary_hash_1_val"
-    alias: "action_get_k_ary_hash_1_val"
+    id: 16800593
+    name: "c_ingress.action_get_k_ary_hash_2"
+    alias: "action_get_k_ary_hash_2"
   }
 }
 actions {
   preamble {
-    id: 16830986
-    name: "c_ingress.action_get_k_ary_hash_2_val"
-    alias: "action_get_k_ary_hash_2_val"
+    id: 16805374
+    name: "c_ingress.action_get_k_ary_hash_3"
+    alias: "action_get_k_ary_hash_3"
   }
 }
 actions {
   preamble {
-    id: 16824789
-    name: "c_ingress.action_get_k_ary_hash_3_val"
-    alias: "action_get_k_ary_hash_3_val"
-  }
-}
-actions {
-  preamble {
-    id: 16796186
-    name: "c_ingress.action_get_k_ary_hash_4_val"
-    alias: "action_get_k_ary_hash_4_val"
+    id: 16781438
+    name: "c_ingress.action_get_k_ary_hash_4"
+    alias: "action_get_k_ary_hash_4"
   }
 }
 actions {
@@ -249,9 +242,9 @@ actions {
 }
 actions {
   preamble {
-    id: 16823093
-    name: "c_ingress.action_get_ping_hash_val"
-    alias: "action_get_ping_hash_val"
+    id: 16784964
+    name: "c_ingress.action_get_ping_hash"
+    alias: "action_get_ping_hash"
   }
 }
 counters {
@@ -325,9 +318,9 @@ controller_packet_metadata {
 }
 registers {
   preamble {
-    id: 369121279
-    name: "c_ingress.count_min_register0"
-    alias: "count_min_register0"
+    id: 369105335
+    name: "c_ingress.cm_register_0"
+    alias: "cm_register_0"
   }
   type_spec {
     bitstring {
@@ -340,9 +333,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369143759
-    name: "c_ingress.count_min_register1"
-    alias: "count_min_register1"
+    id: 369105224
+    name: "c_ingress.cm_register_1"
+    alias: "cm_register_1"
   }
   type_spec {
     bitstring {
@@ -355,9 +348,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369118042
-    name: "c_ingress.count_min_register2"
-    alias: "count_min_register2"
+    id: 369161676
+    name: "c_ingress.cm_register_2"
+    alias: "cm_register_2"
   }
   type_spec {
     bitstring {
@@ -370,9 +363,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369139648
-    name: "c_ingress.count_register_final"
-    alias: "count_register_final"
+    id: 369104866
+    name: "c_ingress.cm_register_final"
+    alias: "cm_register_final"
   }
   type_spec {
     bitstring {
@@ -385,9 +378,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369102503
-    name: "c_ingress.bitmap_register0"
-    alias: "bitmap_register0"
+    id: 369140354
+    name: "c_ingress.bm_register_0"
+    alias: "bm_register_0"
   }
   type_spec {
     bitstring {
@@ -400,9 +393,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369158962
-    name: "c_ingress.bitmap_register1"
-    alias: "bitmap_register1"
+    id: 369108763
+    name: "c_ingress.bm_register_1"
+    alias: "bm_register_1"
   }
   type_spec {
     bitstring {
@@ -415,9 +408,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369141249
-    name: "c_ingress.bitmap_register2"
-    alias: "bitmap_register2"
+    id: 369163147
+    name: "c_ingress.bm_register_2"
+    alias: "bm_register_2"
   }
   type_spec {
     bitstring {
@@ -430,9 +423,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369113997
-    name: "c_ingress.k_ary_register0"
-    alias: "k_ary_register0"
+    id: 369118650
+    name: "c_ingress.k_ary_register_0"
+    alias: "k_ary_register_0"
   }
   type_spec {
     bitstring {
@@ -445,9 +438,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369110976
-    name: "c_ingress.k_ary_register1"
-    alias: "k_ary_register1"
+    id: 369107486
+    name: "c_ingress.k_ary_register_1"
+    alias: "k_ary_register_1"
   }
   type_spec {
     bitstring {
@@ -460,9 +453,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369148980
-    name: "c_ingress.k_ary_register2"
-    alias: "k_ary_register2"
+    id: 369104567
+    name: "c_ingress.k_ary_register_2"
+    alias: "k_ary_register_2"
   }
   type_spec {
     bitstring {
@@ -475,9 +468,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369125562
-    name: "c_ingress.k_ary_register3"
-    alias: "k_ary_register3"
+    id: 369158913
+    name: "c_ingress.k_ary_register_3"
+    alias: "k_ary_register_3"
   }
   type_spec {
     bitstring {
@@ -490,9 +483,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369134879
-    name: "c_ingress.k_ary_register4"
-    alias: "k_ary_register4"
+    id: 369155980
+    name: "c_ingress.k_ary_register_4"
+    alias: "k_ary_register_4"
   }
   type_spec {
     bitstring {

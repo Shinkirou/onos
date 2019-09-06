@@ -72,45 +72,44 @@ struct headers_t {
 header my_metadata_header {
     bit<16> l4_src_port;
     bit<16> l4_dst_port;
-    bit<32> ping_hash_val;
+    bit<32> ping_hash;
 }
 
-header meta_count_min_header {
-    bit<32> count_min_hash_val0;
-    bit<32> count_min_hash_val1;
-    bit<32> count_min_hash_val2;
-    bit<32> count_min_val0;
-    bit<32> count_min_val1;
-    bit<32> count_min_val2;
-    bit<32> count_min_val;
-    bit<32> count_min_hash;
+header meta_cm_header {
+    bit<32> cm_hash_0;
+    bit<32> cm_hash_1;
+    bit<32> cm_hash_2;
+    bit<32> cm_sketch_0;
+    bit<32> cm_sketch_1;
+    bit<32> cm_sketch_2;
+    bit<32> cm_sketch_final;
 }
 
-header meta_bitmap_header {
-    bit<32> bitmap_hash_val0;
-    bit<32> bitmap_hash_val1;
-    bit<32> bitmap_hash_val2;
-    bit<32> bitmap_val0;
-    bit<32> bitmap_val1;
-    bit<32> bitmap_val2;
+header meta_bm_header {
+    bit<32> bm_hash_0;
+    bit<32> bm_hash_1;
+    bit<32> bm_hash_2;
+    bit<32> bm_sketch_0;
+    bit<32> bm_sketch_1;
+    bit<32> bm_sketch_2;
 } 
 
 header meta_k_ary_header {
-    bit<32> k_ary_hash_val0;
-    bit<32> k_ary_hash_val1;
-    bit<32> k_ary_hash_val2;
-    bit<32> k_ary_hash_val3;
-    bit<32> k_ary_hash_val4;
-    bit<32> k_ary_val0;
-    bit<32> k_ary_val1;
-    bit<32> k_ary_val2;
-    bit<32> k_ary_val3;
-    bit<32> k_ary_val4;
-    bit<32> k_ary_val_F2_0;
-    bit<32> k_ary_val_F2_1;
-    bit<32> k_ary_val_F2_2;
-    bit<32> k_ary_val_F2_3;
-    bit<32> k_ary_val_F2_4;
+    bit<32> k_ary_hash_0;
+    bit<32> k_ary_hash_1;
+    bit<32> k_ary_hash_2;
+    bit<32> k_ary_hash_3;
+    bit<32> k_ary_hash_4;
+    bit<32> k_ary_sketch_0;
+    bit<32> k_ary_sketch_1;
+    bit<32> k_ary_sketch_2;
+    bit<32> k_ary_sketch_3;
+    bit<32> k_ary_sketch_4;
+    bit<32> k_ary_sketch_F2_0;
+    bit<32> k_ary_sketch_F2_1;
+    bit<32> k_ary_sketch_F2_2;
+    bit<32> k_ary_sketch_F2_3;
+    bit<32> k_ary_sketch_F2_4;
     bit<32> k_ary_estimate_F2;
     bit<32> k_ary_sum;
     bit<32> k_ary_final;
@@ -119,7 +118,7 @@ header meta_k_ary_header {
 
 struct metadata_t {
     my_metadata_header      my_metadata;
-    meta_count_min_header   meta_count_min;
-    meta_bitmap_header      meta_bitmap;
+    meta_cm_header          meta_cm;
+    meta_bm_header          meta_bm;
     meta_k_ary_header       meta_k_ary;  
 }

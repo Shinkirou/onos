@@ -49,7 +49,7 @@ public final class PipeconfFactory {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     public static final PiPipeconfId PIPECONF_ID = new PiPipeconfId("p4-sketches-pipeconf");
-    private static final URL P4INFO_URL = PipeconfFactory.class.getResource("/flowstats.p4info.txt");
+    private static final URL P4INFO_URL = PipeconfFactory.class.getResource("/flowstats-p4info.txt");
     private static final URL BMV2_JSON_URL = PipeconfFactory.class.getResource("/flowstats.json");
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
