@@ -69,55 +69,67 @@ struct headers_t {
     packet_in_header_t packet_in;
 }
 
-header my_metadata_header {
+header meta_header {
     bit<16> l4_src_port;
     bit<16> l4_dst_port;
     bit<32> ping_hash;
 }
 
 header meta_cm_header {
-    bit<32> cm_hash_0;
-    bit<32> cm_hash_1;
-    bit<32> cm_hash_2;
-    bit<32> cm_sketch_0;
-    bit<32> cm_sketch_1;
-    bit<32> cm_sketch_2;
-    bit<32> cm_sketch_final;
+    bit<32> hash_0;
+    bit<32> hash_1;
+    bit<32> hash_2;
+    bit<32> sketch_0;
+    bit<32> sketch_1;
+    bit<32> sketch_2;
+    bit<32> sketch_final;
 }
 
 header meta_bm_header {
-    bit<32> bm_hash_0;
-    bit<32> bm_hash_1;
-    bit<32> bm_hash_2;
-    bit<32> bm_sketch_0;
-    bit<32> bm_sketch_1;
-    bit<32> bm_sketch_2;
+    bit<32> hash_0;
+    bit<32> hash_1;
+    bit<32> hash_2;
+    bit<32> sketch_0;
+    bit<32> sketch_1;
+    bit<32> sketch_2;
 } 
 
 header meta_k_ary_header {
-    bit<32> k_ary_hash_0;
-    bit<32> k_ary_hash_1;
-    bit<32> k_ary_hash_2;
-    bit<32> k_ary_hash_3;
-    bit<32> k_ary_hash_4;
-    bit<32> k_ary_sketch_0;
-    bit<32> k_ary_sketch_1;
-    bit<32> k_ary_sketch_2;
-    bit<32> k_ary_sketch_3;
-    bit<32> k_ary_sketch_4;
-    bit<32> k_ary_sketch_F2_0;
-    bit<32> k_ary_sketch_F2_1;
-    bit<32> k_ary_sketch_F2_2;
-    bit<32> k_ary_sketch_F2_3;
-    bit<32> k_ary_sketch_F2_4;
-    bit<32> k_ary_estimate_F2;
-    bit<32> k_ary_sum;
-    bit<32> k_ary_final;
-    bit<32> k_ary_alert;
+    bit<32> hash_0;
+    bit<32> hash_1;
+    bit<32> hash_2;
+    bit<32> hash_3;
+    bit<32> hash_4;
+    bit<32> sketch_0;
+    bit<32> sketch_1;
+    bit<32> sketch_2;
+    bit<32> sketch_3;
+    bit<32> sketch_4;
+    bit<32> est_row_0;
+    bit<32> est_row_1;
+    bit<32> est_row_2;
+    bit<32> est_row_3;
+    bit<32> est_row_4;
+    bit<32> est_F2_sum_0;
+    bit<32> est_F2_sum_1;
+    bit<32> est_F2_sum_2;
+    bit<32> est_F2_sum_3;
+    bit<32> est_F2_sum_4;
+    bit<32> est_F2_row_0;
+    bit<32> est_F2_row_1;
+    bit<32> est_F2_row_2;
+    bit<32> est_F2_row_3;
+    bit<32> est_F2_row_4; 
+    bit<32> median;
+    bit<32> estimate;   
+    bit<32> estimate_F2;
+    bit<32> sum;
+    bit<32> final;
+    bit<32> alert;
 } 
 
 struct metadata_t {
-    my_metadata_header      my_metadata;
+    meta_header             meta;
     meta_cm_header          meta_cm;
     meta_bm_header          meta_bm;
     meta_k_ary_header       meta_k_ary;  

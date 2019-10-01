@@ -38,15 +38,15 @@ parser c_parser(packet_in packet, out headers_t hdr, inout metadata_t meta, inou
 
     state parse_tcp {
         packet.extract(hdr.tcp);
-        meta.my_metadata.l4_src_port = hdr.tcp.src_port;
-        meta.my_metadata.l4_dst_port = hdr.tcp.dst_port;
+        meta.meta.l4_src_port = hdr.tcp.src_port;
+        meta.meta.l4_dst_port = hdr.tcp.dst_port;
         transition accept;
     }
 
     state parse_udp {
         packet.extract(hdr.udp);
-        meta.my_metadata.l4_src_port = hdr.udp.src_port;
-        meta.my_metadata.l4_dst_port = hdr.udp.dst_port;
+        meta.meta.l4_src_port = hdr.udp.src_port;
+        meta.meta.l4_dst_port = hdr.udp.dst_port;
         transition accept;
     }
 }

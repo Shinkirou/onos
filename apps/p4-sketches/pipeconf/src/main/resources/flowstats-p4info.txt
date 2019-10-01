@@ -235,9 +235,37 @@ actions {
 }
 actions {
   preamble {
-    id: 16792639
-    name: "c_ingress.action_k_ary_sketch_estimate_F2"
-    alias: "action_k_ary_sketch_estimate_F2"
+    id: 16799537
+    name: "c_ingress.action_k_ary_median"
+    alias: "action_k_ary_median"
+  }
+}
+actions {
+  preamble {
+    id: 16793380
+    name: "c_ingress.action_k_ary_estimate_row"
+    alias: "action_k_ary_estimate_row"
+  }
+}
+actions {
+  preamble {
+    id: 16806509
+    name: "c_ingress.action_k_ary_estimate_write"
+    alias: "action_k_ary_estimate_write"
+  }
+}
+actions {
+  preamble {
+    id: 16841902
+    name: "c_ingress.action_k_ary_estimate_F2_row"
+    alias: "action_k_ary_estimate_F2_row"
+  }
+}
+actions {
+  preamble {
+    id: 16818238
+    name: "c_ingress.action_k_ary_estimate_F2_write"
+    alias: "action_k_ary_estimate_F2_write"
   }
 }
 actions {
@@ -329,7 +357,7 @@ registers {
       }
     }
   }
-  size: 131072
+  size: 262144
 }
 registers {
   preamble {
@@ -344,7 +372,7 @@ registers {
       }
     }
   }
-  size: 131072
+  size: 262144
 }
 registers {
   preamble {
@@ -359,7 +387,7 @@ registers {
       }
     }
   }
-  size: 131072
+  size: 262144
 }
 registers {
   preamble {
@@ -374,7 +402,7 @@ registers {
       }
     }
   }
-  size: 131072
+  size: 262144
 }
 registers {
   preamble {
@@ -389,7 +417,7 @@ registers {
       }
     }
   }
-  size: 131072
+  size: 262144
 }
 registers {
   preamble {
@@ -404,7 +432,7 @@ registers {
       }
     }
   }
-  size: 131072
+  size: 262144
 }
 registers {
   preamble {
@@ -419,7 +447,7 @@ registers {
       }
     }
   }
-  size: 131072
+  size: 262144
 }
 registers {
   preamble {
@@ -434,7 +462,7 @@ registers {
       }
     }
   }
-  size: 131072
+  size: 262144
 }
 registers {
   preamble {
@@ -449,7 +477,7 @@ registers {
       }
     }
   }
-  size: 131072
+  size: 262144
 }
 registers {
   preamble {
@@ -464,7 +492,7 @@ registers {
       }
     }
   }
-  size: 131072
+  size: 262144
 }
 registers {
   preamble {
@@ -479,7 +507,7 @@ registers {
       }
     }
   }
-  size: 131072
+  size: 262144
 }
 registers {
   preamble {
@@ -494,13 +522,13 @@ registers {
       }
     }
   }
-  size: 131072
+  size: 262144
 }
 registers {
   preamble {
-    id: 369145590
-    name: "c_ingress.k_ary_register_estimate_F2"
-    alias: "k_ary_register_estimate_F2"
+    id: 369118212
+    name: "c_ingress.k_ary_register_estimate"
+    alias: "k_ary_register_estimate"
   }
   type_spec {
     bitstring {
@@ -509,7 +537,22 @@ registers {
       }
     }
   }
-  size: 7
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369105289
+    name: "c_ingress.k_ary_register_final"
+    alias: "k_ary_register_final"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 10
 }
 type_info {
 }
