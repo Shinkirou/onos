@@ -101,7 +101,7 @@ public class FlowStats {
     private static final int FLOW_RULE_PRIORITY = 100;
 
     // Size of the ONOS flow table.
-    private static final int FLOW_TABLE_SIZE = 500;
+    private static final int FLOW_TABLE_SIZE = 250;
 
     private final FlowRuleListener flowListener = new InternalFlowListener();
 
@@ -358,16 +358,6 @@ public class FlowStats {
             }
         }
         return null;
-    }
-
-    private byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-        data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                         + Character.digit(s.charAt(i+1), 16));
-        }
-        return data;
     }
 
     private String getMax() {
