@@ -598,7 +598,7 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 16,
-        "column" : 30,
+        "column" : 39,
         "source_fragment" : "cm_register_0"
       },
       "size" : 262144,
@@ -610,7 +610,7 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 17,
-        "column" : 30,
+        "column" : 39,
         "source_fragment" : "cm_register_1"
       },
       "size" : 262144,
@@ -622,7 +622,7 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 18,
-        "column" : 30,
+        "column" : 39,
         "source_fragment" : "cm_register_2"
       },
       "size" : 262144,
@@ -634,7 +634,7 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 19,
-        "column" : 30,
+        "column" : 39,
         "source_fragment" : "cm_register_final"
       },
       "size" : 262144,
@@ -646,7 +646,7 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 21,
-        "column" : 30,
+        "column" : 39,
         "source_fragment" : "bm_register_0"
       },
       "size" : 262144,
@@ -658,7 +658,7 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 23,
-        "column" : 30,
+        "column" : 39,
         "source_fragment" : "bm_register_1"
       },
       "size" : 262144,
@@ -670,7 +670,7 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 25,
-        "column" : 30,
+        "column" : 39,
         "source_fragment" : "bm_register_2"
       },
       "size" : 262144,
@@ -682,7 +682,7 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 27,
-        "column" : 30,
+        "column" : 39,
         "source_fragment" : "k_ary_register_0"
       },
       "size" : 262144,
@@ -694,7 +694,7 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 28,
-        "column" : 30,
+        "column" : 39,
         "source_fragment" : "k_ary_register_1"
       },
       "size" : 262144,
@@ -706,7 +706,7 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 29,
-        "column" : 30,
+        "column" : 39,
         "source_fragment" : "k_ary_register_2"
       },
       "size" : 262144,
@@ -718,7 +718,7 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 30,
-        "column" : 30,
+        "column" : 39,
         "source_fragment" : "k_ary_register_3"
       },
       "size" : 262144,
@@ -730,7 +730,7 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 31,
-        "column" : 30,
+        "column" : 39,
         "source_fragment" : "k_ary_register_4"
       },
       "size" : 262144,
@@ -742,7 +742,7 @@
       "source_info" : {
         "filename" : "flowstats.p4",
         "line" : 32,
-        "column" : 30,
+        "column" : 39,
         "source_fragment" : "k_ary_register_estimate"
       },
       "size" : 262144,
@@ -18828,7 +18828,7 @@
             "filename" : "flowstats.p4",
             "line" : 349,
             "column" : 8,
-            "source_fragment" : "meta.meta_k_ary.est_row_0 = (meta.meta_k_ary.sketch_0 - (meta.meta_k_ary.sum / 262144)"
+            "source_fragment" : "meta.meta_k_ary.est_row_0 = (meta.meta_k_ary.sketch_0 - (meta.meta_k_ary.sum / REG_SKETCH_SIZE)"
           }
         },
         {
@@ -18890,7 +18890,7 @@
             "filename" : "flowstats.p4",
             "line" : 350,
             "column" : 8,
-            "source_fragment" : "meta.meta_k_ary.est_row_1 = (meta.meta_k_ary.sketch_1 - (meta.meta_k_ary.sum / 262144)"
+            "source_fragment" : "meta.meta_k_ary.est_row_1 = (meta.meta_k_ary.sketch_1 - (meta.meta_k_ary.sum / REG_SKETCH_SIZE)"
           }
         },
         {
@@ -18952,7 +18952,7 @@
             "filename" : "flowstats.p4",
             "line" : 351,
             "column" : 8,
-            "source_fragment" : "meta.meta_k_ary.est_row_2 = (meta.meta_k_ary.sketch_2 - (meta.meta_k_ary.sum / 262144)"
+            "source_fragment" : "meta.meta_k_ary.est_row_2 = (meta.meta_k_ary.sketch_2 - (meta.meta_k_ary.sum / REG_SKETCH_SIZE)"
           }
         },
         {
@@ -19014,7 +19014,7 @@
             "filename" : "flowstats.p4",
             "line" : 352,
             "column" : 8,
-            "source_fragment" : "meta.meta_k_ary.est_row_3 = (meta.meta_k_ary.sketch_3 - (meta.meta_k_ary.sum / 262144)"
+            "source_fragment" : "meta.meta_k_ary.est_row_3 = (meta.meta_k_ary.sketch_3 - (meta.meta_k_ary.sum / REG_SKETCH_SIZE)"
           }
         },
         {
@@ -19076,7 +19076,7 @@
             "filename" : "flowstats.p4",
             "line" : 353,
             "column" : 8,
-            "source_fragment" : "meta.meta_k_ary.est_row_4 = (meta.meta_k_ary.sketch_4 - (meta.meta_k_ary.sum / 262144)"
+            "source_fragment" : "meta.meta_k_ary.est_row_4 = (meta.meta_k_ary.sketch_4 - (meta.meta_k_ary.sum / REG_SKETCH_SIZE)"
           }
         }
       ]
@@ -19270,7 +19270,7 @@
             "filename" : "flowstats.p4",
             "line" : 376,
             "column" : 8,
-            "source_fragment" : "meta.meta_k_ary.est_F2_row_0 = (262144 / (262144 - 1)) * (meta.meta_k_ary.est_F2_sum_0"
+            "source_fragment" : "meta.meta_k_ary.est_F2_row_0 = (REG_SKETCH_SIZE / (REG_SKETCH_SIZE - 1)) * (meta.meta_k_ary.est_F2_sum_0"
           }
         },
         {
@@ -19289,7 +19289,7 @@
             "filename" : "flowstats.p4",
             "line" : 377,
             "column" : 8,
-            "source_fragment" : "meta.meta_k_ary.est_F2_row_1 = (262144 / (262144 - 1)) * (meta.meta_k_ary.est_F2_sum_1"
+            "source_fragment" : "meta.meta_k_ary.est_F2_row_1 = (REG_SKETCH_SIZE / (REG_SKETCH_SIZE - 1)) * (meta.meta_k_ary.est_F2_sum_1"
           }
         },
         {
@@ -19308,7 +19308,7 @@
             "filename" : "flowstats.p4",
             "line" : 378,
             "column" : 8,
-            "source_fragment" : "meta.meta_k_ary.est_F2_row_2 = (262144 / (262144 - 1)) * (meta.meta_k_ary.est_F2_sum_2"
+            "source_fragment" : "meta.meta_k_ary.est_F2_row_2 = (REG_SKETCH_SIZE / (REG_SKETCH_SIZE - 1)) * (meta.meta_k_ary.est_F2_sum_2"
           }
         },
         {
@@ -19327,7 +19327,7 @@
             "filename" : "flowstats.p4",
             "line" : 379,
             "column" : 8,
-            "source_fragment" : "meta.meta_k_ary.est_F2_row_3 = (262144 / (262144 - 1)) * (meta.meta_k_ary.est_F2_sum_3"
+            "source_fragment" : "meta.meta_k_ary.est_F2_row_3 = (REG_SKETCH_SIZE / (REG_SKETCH_SIZE - 1)) * (meta.meta_k_ary.est_F2_sum_3"
           }
         },
         {
@@ -19346,7 +19346,7 @@
             "filename" : "flowstats.p4",
             "line" : 380,
             "column" : 8,
-            "source_fragment" : "meta.meta_k_ary.est_F2_row_4 = (262144 / (262144 - 1)) * (meta.meta_k_ary.est_F2_sum_4"
+            "source_fragment" : "meta.meta_k_ary.est_F2_row_4 = (REG_SKETCH_SIZE / (REG_SKETCH_SIZE - 1)) * (meta.meta_k_ary.est_F2_sum_4"
           }
         }
       ]

@@ -13,24 +13,24 @@
 
 control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
 
-    register<bit<32>>(262144) cm_register_0;
-    register<bit<32>>(262144) cm_register_1;  
-    register<bit<32>>(262144) cm_register_2;  
-    register<bit<32>>(262144) cm_register_final;
+    register<bit<32>>(REG_SKETCH_SIZE)  cm_register_0;
+    register<bit<32>>(REG_SKETCH_SIZE)  cm_register_1;  
+    register<bit<32>>(REG_SKETCH_SIZE)  cm_register_2;  
+    register<bit<32>>(REG_SKETCH_SIZE)  cm_register_final;
     
-    register<bit<32>>(262144) bm_register_0;
+    register<bit<32>>(REG_SKETCH_SIZE)  bm_register_0;
     // Bitmap register for the source address.
-    register<bit<32>>(262144) bm_register_1;
+    register<bit<32>>(REG_SKETCH_SIZE)  bm_register_1;
     // Bitmap register for the destination address.
-    register<bit<32>>(262144) bm_register_2;
+    register<bit<32>>(REG_SKETCH_SIZE)  bm_register_2;
 
-    register<bit<32>>(262144) k_ary_register_0;
-    register<bit<32>>(262144) k_ary_register_1;
-    register<bit<32>>(262144) k_ary_register_2;
-    register<bit<32>>(262144) k_ary_register_3;
-    register<bit<32>>(262144) k_ary_register_4;
-    register<bit<32>>(262144) k_ary_register_estimate;
-    register<bit<32>>(10)     k_ary_register_final;
+    register<bit<32>>(REG_SKETCH_SIZE)  k_ary_register_0;
+    register<bit<32>>(REG_SKETCH_SIZE)  k_ary_register_1;
+    register<bit<32>>(REG_SKETCH_SIZE)  k_ary_register_2;
+    register<bit<32>>(REG_SKETCH_SIZE)  k_ary_register_3;
+    register<bit<32>>(REG_SKETCH_SIZE)  k_ary_register_4;
+    register<bit<32>>(REG_SKETCH_SIZE)  k_ary_register_estimate;
+    register<bit<32>>(10)               k_ary_register_final;
 
     bit<32> cm_hash_0;
     bit<32> cm_hash_1;
@@ -79,7 +79,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr}, 
-            (bit<32>)262144);
+            (bit<32>)REG_SKETCH_SIZE);
         meta.meta_cm.hash_0 = cm_hash_0;
     }
 
@@ -88,7 +88,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr}, 
-            (bit<32>)262144);
+            (bit<32>)REG_SKETCH_SIZE);
         meta.meta_cm.hash_1 = cm_hash_1;
     }
 
@@ -97,7 +97,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr},
-            (bit<32>)262144);
+            (bit<32>)REG_SKETCH_SIZE);
         meta.meta_cm.hash_2 = cm_hash_2;
     }      
 
@@ -127,7 +127,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             HashAlgorithm.crc32_custom,
             (bit<32>)0,
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.meta.l4_src_port, (bit<32>)meta.meta.l4_dst_port},
-            (bit<32>)262144);
+            (bit<32>)REG_SKETCH_SIZE);
         meta.meta_bm.hash_0 = bm_hash_0;
     }
 
@@ -136,7 +136,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
             {hdr.ipv4.src_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.meta.l4_src_port}, 
-            (bit<32>)262144);
+            (bit<32>)REG_SKETCH_SIZE);
         meta.meta_bm.hash_1 = bm_hash_1;
     }
 
@@ -145,7 +145,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
             {hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.meta.l4_dst_port}, 
-            (bit<32>)262144);
+            (bit<32>)REG_SKETCH_SIZE);
         meta.meta_bm.hash_2 = bm_hash_2;
     }          
 
@@ -172,7 +172,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr}, 
-            (bit<32>)262144);
+            (bit<32>)REG_SKETCH_SIZE);
         meta.meta_k_ary.hash_0 = k_ary_hash_0;
     }
 
@@ -181,7 +181,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr}, 
-            (bit<32>)262144);
+            (bit<32>)REG_SKETCH_SIZE);
         meta.meta_k_ary.hash_1 = k_ary_hash_1;
     }
 
@@ -190,7 +190,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr}, 
-            (bit<32>)262144);
+            (bit<32>)REG_SKETCH_SIZE);
         meta.meta_k_ary.hash_2 = k_ary_hash_2;
     }
 
@@ -199,7 +199,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr}, 
-            (bit<32>)262144);
+            (bit<32>)REG_SKETCH_SIZE);
         meta.meta_k_ary.hash_3 = k_ary_hash_3;
     }
 
@@ -208,7 +208,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr}, 
-            (bit<32>)262144);
+            (bit<32>)REG_SKETCH_SIZE);
         meta.meta_k_ary.hash_4 = k_ary_hash_4;
     }
 
@@ -346,11 +346,11 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 
         // Calculate the estimate for each row.
 
-        meta.meta_k_ary.est_row_0 = (meta.meta_k_ary.sketch_0 - (meta.meta_k_ary.sum / 262144)) / (1 - (1 / 262144));
-        meta.meta_k_ary.est_row_1 = (meta.meta_k_ary.sketch_1 - (meta.meta_k_ary.sum / 262144)) / (1 - (1 / 262144));
-        meta.meta_k_ary.est_row_2 = (meta.meta_k_ary.sketch_2 - (meta.meta_k_ary.sum / 262144)) / (1 - (1 / 262144));
-        meta.meta_k_ary.est_row_3 = (meta.meta_k_ary.sketch_3 - (meta.meta_k_ary.sum / 262144)) / (1 - (1 / 262144));
-        meta.meta_k_ary.est_row_4 = (meta.meta_k_ary.sketch_4 - (meta.meta_k_ary.sum / 262144)) / (1 - (1 / 262144));
+        meta.meta_k_ary.est_row_0 = (meta.meta_k_ary.sketch_0 - (meta.meta_k_ary.sum / REG_SKETCH_SIZE)) / (1 - (1 / REG_SKETCH_SIZE));
+        meta.meta_k_ary.est_row_1 = (meta.meta_k_ary.sketch_1 - (meta.meta_k_ary.sum / REG_SKETCH_SIZE)) / (1 - (1 / REG_SKETCH_SIZE));
+        meta.meta_k_ary.est_row_2 = (meta.meta_k_ary.sketch_2 - (meta.meta_k_ary.sum / REG_SKETCH_SIZE)) / (1 - (1 / REG_SKETCH_SIZE));
+        meta.meta_k_ary.est_row_3 = (meta.meta_k_ary.sketch_3 - (meta.meta_k_ary.sum / REG_SKETCH_SIZE)) / (1 - (1 / REG_SKETCH_SIZE));
+        meta.meta_k_ary.est_row_4 = (meta.meta_k_ary.sketch_4 - (meta.meta_k_ary.sum / REG_SKETCH_SIZE)) / (1 - (1 / REG_SKETCH_SIZE));
     }
 
     action action_k_ary_estimate_write() {
@@ -373,11 +373,11 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 
         // Calculate the estimate F2 for each row.
 
-        meta.meta_k_ary.est_F2_row_0 = (262144 / (262144 - 1)) * (meta.meta_k_ary.est_F2_sum_0) - (1 / (262144 - 1)) * (meta.meta_k_ary.sum * meta.meta_k_ary.sum);
-        meta.meta_k_ary.est_F2_row_1 = (262144 / (262144 - 1)) * (meta.meta_k_ary.est_F2_sum_1) - (1 / (262144 - 1)) * (meta.meta_k_ary.sum * meta.meta_k_ary.sum);
-        meta.meta_k_ary.est_F2_row_2 = (262144 / (262144 - 1)) * (meta.meta_k_ary.est_F2_sum_2) - (1 / (262144 - 1)) * (meta.meta_k_ary.sum * meta.meta_k_ary.sum);
-        meta.meta_k_ary.est_F2_row_3 = (262144 / (262144 - 1)) * (meta.meta_k_ary.est_F2_sum_3) - (1 / (262144 - 1)) * (meta.meta_k_ary.sum * meta.meta_k_ary.sum);
-        meta.meta_k_ary.est_F2_row_4 = (262144 / (262144 - 1)) * (meta.meta_k_ary.est_F2_sum_4) - (1 / (262144 - 1)) * (meta.meta_k_ary.sum * meta.meta_k_ary.sum);
+        meta.meta_k_ary.est_F2_row_0 = (REG_SKETCH_SIZE / (REG_SKETCH_SIZE - 1)) * (meta.meta_k_ary.est_F2_sum_0) - (1 / (REG_SKETCH_SIZE - 1)) * (meta.meta_k_ary.sum * meta.meta_k_ary.sum);
+        meta.meta_k_ary.est_F2_row_1 = (REG_SKETCH_SIZE / (REG_SKETCH_SIZE - 1)) * (meta.meta_k_ary.est_F2_sum_1) - (1 / (REG_SKETCH_SIZE - 1)) * (meta.meta_k_ary.sum * meta.meta_k_ary.sum);
+        meta.meta_k_ary.est_F2_row_2 = (REG_SKETCH_SIZE / (REG_SKETCH_SIZE - 1)) * (meta.meta_k_ary.est_F2_sum_2) - (1 / (REG_SKETCH_SIZE - 1)) * (meta.meta_k_ary.sum * meta.meta_k_ary.sum);
+        meta.meta_k_ary.est_F2_row_3 = (REG_SKETCH_SIZE / (REG_SKETCH_SIZE - 1)) * (meta.meta_k_ary.est_F2_sum_3) - (1 / (REG_SKETCH_SIZE - 1)) * (meta.meta_k_ary.sum * meta.meta_k_ary.sum);
+        meta.meta_k_ary.est_F2_row_4 = (REG_SKETCH_SIZE / (REG_SKETCH_SIZE - 1)) * (meta.meta_k_ary.est_F2_sum_4) - (1 / (REG_SKETCH_SIZE - 1)) * (meta.meta_k_ary.sum * meta.meta_k_ary.sum);
     }
 
     action action_k_ary_estimate_F2_write() {
@@ -392,7 +392,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             HashAlgorithm.crc32_custom, 
             (bit<32>)0, 
             {hdr.ipv4.src_addr, hdr.ipv4.dst_addr}, 
-            (bit<32>)262144);
+            (bit<32>)REG_SKETCH_SIZE);
         meta.meta.ping_hash = ping_hash;
     } 
 
