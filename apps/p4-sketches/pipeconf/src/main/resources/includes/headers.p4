@@ -69,68 +69,75 @@ struct headers_t {
     packet_in_header_t packet_in;
 }
 
-header meta_header {
+header meta_t {
     bit<16> l4_src_port;
     bit<16> l4_dst_port;
     bit<32> ping_hash;
 }
 
-header meta_cm_header {
-    bit<32> hash_0;
-    bit<32> hash_1;
-    bit<32> hash_2;
-    bit<32> sketch_0;
-    bit<32> sketch_1;
-    bit<32> sketch_2;
-    bit<32> sketch_final;
+header cm_meta_t {
+    bit<32> cm_0_hash;
+    bit<32> cm_1_hash;
+    bit<32> cm_2_hash;
+    bit<32> cm_0_sketch;
+    bit<32> cm_1_sketch;
+    bit<32> cm_2_sketch;
+    bit<32> cm_final_sketch;
 }
 
-header meta_bm_header {
-    bit<32> hash_0;
-    bit<32> hash_1;
-    bit<32> hash_2;
-    bit<32> sketch_0;
-    bit<32> sketch_1;
-    bit<32> sketch_2;
-} 
+header bm_meta_t {
+    bit<32> bm_0_hash;
+    bit<32> bm_1_hash;
+    bit<32> bm_2_hash;
+    bit<32> bm_0_sketch;
+    bit<32> bm_1_sketch;
+    bit<32> bm_2_sketch;
+}
 
-header meta_k_ary_header {
-    bit<32> hash_0;
-    bit<32> hash_1;
-    bit<32> hash_2;
-    bit<32> hash_3;
-    bit<32> hash_4;
-    bit<32> sketch_0;
-    bit<32> sketch_1;
-    bit<32> sketch_2;
-    bit<32> sketch_3;
-    bit<32> sketch_4;
-    bit<32> est_row_0;
-    bit<32> est_row_1;
-    bit<32> est_row_2;
-    bit<32> est_row_3;
-    bit<32> est_row_4;
-    bit<32> est_F2_sum_0;
-    bit<32> est_F2_sum_1;
-    bit<32> est_F2_sum_2;
-    bit<32> est_F2_sum_3;
-    bit<32> est_F2_sum_4;
-    bit<32> est_F2_row_0;
-    bit<32> est_F2_row_1;
-    bit<32> est_F2_row_2;
-    bit<32> est_F2_row_3;
-    bit<32> est_F2_row_4; 
-    bit<32> median;
-    bit<32> estimate;   
-    bit<32> estimate_F2;
-    bit<32> sum;
-    bit<32> final;
-    bit<32> alert;
-} 
+header k_ary_meta_t {
+    bit<32> t_interval;
+    bit<32> k_ary_sum;
+    bit<32> k_ary_median;
+    bit<32> k_ary_0_hash;
+    bit<32> k_ary_1_hash;
+    bit<32> k_ary_2_hash;
+    bit<32> k_ary_3_hash;
+    bit<32> k_ary_4_hash;
+    bit<32> k_ary_0_sketch;
+    bit<32> k_ary_1_sketch;
+    bit<32> k_ary_2_sketch;
+    bit<32> k_ary_3_sketch;
+    bit<32> k_ary_4_sketch;
+    bit<32> k_ary_0_sketch_old;
+    bit<32> k_ary_1_sketch_old;
+    bit<32> k_ary_2_sketch_old;
+    bit<32> k_ary_3_sketch_old;
+    bit<32> k_ary_4_sketch_old;    
+    bit<32> k_ary_0_forecast;
+    bit<32> k_ary_1_forecast;
+    bit<32> k_ary_2_forecast;
+    bit<32> k_ary_3_forecast;
+    bit<32> k_ary_4_forecast;
+    bit<32> k_ary_0_error_sketch;
+    bit<32> k_ary_1_error_sketch;
+    bit<32> k_ary_2_error_sketch;
+    bit<32> k_ary_3_error_sketch;
+    bit<32> k_ary_4_error_sketch;
+    bit<32> k_ary_0_est_row;
+    bit<32> k_ary_1_est_row;
+    bit<32> k_ary_2_est_row;
+    bit<32> k_ary_3_est_row;
+    bit<32> k_ary_4_est_row;
+    bit<32> k_ary_0_est_F2_sum;
+    bit<32> k_ary_1_est_F2_sum;
+    bit<32> k_ary_2_est_F2_sum;
+    bit<32> k_ary_3_est_F2_sum;
+    bit<32> k_ary_4_est_F2_sum;    
+}
 
 struct metadata_t {
-    meta_header             meta;
-    meta_cm_header          meta_cm;
-    meta_bm_header          meta_bm;
-    meta_k_ary_header       meta_k_ary;  
+    meta_t          meta;
+    cm_meta_t       cm_meta;
+    bm_meta_t       bm_meta;
+    k_ary_meta_t    k_ary_meta;
 }
