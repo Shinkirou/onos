@@ -149,14 +149,9 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16819938
-    annotations: "@defaultonly"
-    scope: DEFAULT_ONLY
-  }
-  action_refs {
     id: 16829385
   }
-  const_default_action_id: 16819938
+  const_default_action_id: 16829385
   size: 8192
 }
 tables {
@@ -222,20 +217,14 @@ tables {
   }
   match_fields {
     id: 3
-    name: "is_ipv4"
-    bitwidth: 1
-    match_type: EXACT
+    name: "eth_type"
+    bitwidth: 16
+    match_type: TERNARY
   }
   match_fields {
     id: 4
-    name: "is_ipv6"
-    bitwidth: 1
-    match_type: EXACT
-  }
-  match_fields {
-    id: 5
-    name: "is_mpls"
-    bitwidth: 1
+    name: "ip_eth_type"
+    bitwidth: 16
     match_type: EXACT
   }
   action_refs {
@@ -322,8 +311,6 @@ tables {
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
-  const_default_action_id: 16819938
-  direct_resource_ids: 318811107
   size: 1024
 }
 tables {
@@ -868,7 +855,7 @@ counters {
     alias: "c_terminated"
   }
   spec {
-    unit: PACKETS
+    unit: BYTES
   }
   size: 8192
 }
@@ -879,7 +866,7 @@ counters {
     alias: "c_dropped"
   }
   spec {
-    unit: PACKETS
+    unit: BYTES
   }
   size: 8192
 }
@@ -901,7 +888,7 @@ counters {
     alias: "c_line_rx"
   }
   spec {
-    unit: BOTH
+    unit: BYTES
   }
   size: 8192
 }
@@ -934,7 +921,7 @@ counters {
     alias: "c_line_tx"
   }
   spec {
-    unit: BOTH
+    unit: BYTES
   }
   size: 8192
 }
@@ -981,17 +968,6 @@ direct_counters {
     unit: BOTH
   }
   direct_table_id: 33574274
-}
-direct_counters {
-  preamble {
-    id: 318811107
-    name: "FabricIngress.forwarding.routing_v4_counter"
-    alias: "routing_v4_counter"
-  }
-  spec {
-    unit: BOTH
-  }
-  direct_table_id: 33562650
 }
 direct_counters {
   preamble {

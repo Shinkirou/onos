@@ -33,8 +33,8 @@ control bng_ingress_upstream(
         inout fabric_metadata_t fmeta,
         inout standard_metadata_t smeta) {
 
-    counter(BNG_MAX_SUBSC, CounterType.packets) c_terminated;
-    counter(BNG_MAX_SUBSC, CounterType.packets) c_dropped;
+    counter(BNG_MAX_SUBSC, CounterType.bytes) c_terminated;
+    counter(BNG_MAX_SUBSC, CounterType.bytes) c_dropped;
     counter(BNG_MAX_SUBSC, CounterType.packets) c_control;
 
     // TABLE: t_pppoe_cp
@@ -64,8 +64,7 @@ control bng_ingress_upstream(
 
     @hidden
     action term_enabled(bit<16> eth_type) {
-        hdr.inner_vlan_tag.eth_type = eth_type;
-        fmeta.last_eth_type = eth_type;
+        hdr.eth_type.value = eth_type;
         hdr.pppoe.setInvalid();
         c_terminated.count(fmeta.bng.line_id);
     }
@@ -147,7 +146,7 @@ control bng_ingress_downstream(
         inout fabric_metadata_t fmeta,
         inout standard_metadata_t smeta) {
 
-    counter(BNG_MAX_SUBSC, CounterType.packets_and_bytes) c_line_rx;
+    counter(BNG_MAX_SUBSC, CounterType.bytes) c_line_rx;
 
     meter(BNG_MAX_SUBSC, MeterType.bytes) m_besteff;
     meter(BNG_MAX_SUBSC, MeterType.bytes) m_prio;
@@ -262,12 +261,12 @@ control bng_egress_downstream(
         inout fabric_metadata_t fmeta,
         inout standard_metadata_t smeta) {
 
-    counter(BNG_MAX_SUBSC, CounterType.packets_and_bytes) c_line_tx;
+    counter(BNG_MAX_SUBSC, CounterType.bytes) c_line_tx;
 
     @hidden
     action encap() {
-        // Here we add PPPoE and modify the inner_vlan_tag Ethernet Type.
-        hdr.inner_vlan_tag.eth_type = ETHERTYPE_PPPOES;
+        // Here we add PPPoE and modify the Ethernet Type.
+        hdr.eth_type.value = ETHERTYPE_PPPOES;
         hdr.pppoe.setValid();
         hdr.pppoe.version = 4w1;
         hdr.pppoe.type_id = 4w1;
@@ -311,9 +310,6 @@ control bng_ingress(
         bng_ingress_upstream() upstream;
         bng_ingress_downstream() downstream;
 
-        vlan_id_t s_tag = 0;
-        vlan_id_t c_tag = 0;
-
         // TABLE: t_line_map
         // Map s_tag and c_tag to a line ID to uniquely identify a subscriber
 
@@ -323,29 +319,19 @@ control bng_ingress(
 
         table t_line_map {
             key = {
-                s_tag : exact @name("s_tag");
-                c_tag : exact @name("c_tag");
+                fmeta.bng.s_tag : exact @name("s_tag");
+                fmeta.bng.c_tag : exact @name("c_tag");
             }
              actions = {
-                @defaultonly nop;
                 set_line;
             }
             size = BNG_MAX_SUBSC;
-            const default_action = nop;
+            // By default set the line ID to 0
+            const default_action = set_line(0);
         }
 
         apply {
-            if(hdr.pppoe.isValid()) {
-                s_tag = hdr.vlan_tag.vlan_id;
-                c_tag = hdr.inner_vlan_tag.vlan_id;
-            } else {
-                // We expect the packet to be downstream,
-                // the tags are set by the next stage in the metadata.
-                s_tag = fmeta.vlan_id;
-                c_tag = fmeta.inner_vlan_id;
-            }
-
-            // First map the double VLAN tags to a line ID
+             // First map the double VLAN tags to a line ID
             // If table miss line ID will be 0.
             t_line_map.apply();
 

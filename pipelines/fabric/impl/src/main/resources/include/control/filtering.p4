@@ -48,14 +48,16 @@ control Filtering (inout parsed_headers_t hdr,
         permit();
     }
 
-    // FIXME: remove the use of ternary match on valid inner VLAN.
+    // FIXME: remove the use of ternary match on inner VLAN.
     // Use multi-table approach to remove ternary matching
     table ingress_port_vlan {
         key = {
             standard_metadata.ingress_port : exact @name("ig_port");
             hdr.vlan_tag.isValid()         : exact @name("vlan_is_valid");
             hdr.vlan_tag.vlan_id           : ternary @name("vlan_id");
+#ifdef WITH_DOUBLE_VLAN_TERMINATION
             hdr.inner_vlan_tag.vlan_id     : ternary @name("inner_vlan_id");
+#endif // WITH_DOUBLE_VLAN_TERMINATION
         }
         actions = {
             deny();
@@ -91,9 +93,8 @@ control Filtering (inout parsed_headers_t hdr,
         key = {
             standard_metadata.ingress_port : exact @name("ig_port");
             hdr.ethernet.dst_addr          : ternary @name("eth_dst");
-            fabric_metadata.is_ipv4        : exact @name("is_ipv4");
-            fabric_metadata.is_ipv6        : exact @name("is_ipv6");
-            fabric_metadata.is_mpls        : exact @name("is_mpls");
+            hdr.eth_type.value             : ternary @name("eth_type");
+            fabric_metadata.ip_eth_type    : exact @name("ip_eth_type");
         }
         actions = {
             set_forwarding_type;
@@ -124,22 +125,6 @@ control Filtering (inout parsed_headers_t hdr,
             // parser). In any case, if we are forwarding via MPLS, ttl will be
             // decremented in egress.
             fabric_metadata.mpls_ttl = DEFAULT_MPLS_TTL + 1;
-        }
-
-        // Set last_eth_type checking the validity of the L2.5 headers
-        if (hdr.mpls.isValid()) {
-            fabric_metadata.last_eth_type = ETHERTYPE_MPLS;
-        } else {
-            if (hdr.vlan_tag.isValid()) {
-#if defined(WITH_XCONNECT) || defined(WITH_BNG) || defined(WITH_DOUBLE_VLAN_TERMINATION)
-                if(hdr.inner_vlan_tag.isValid()) {
-                    fabric_metadata.last_eth_type = hdr.inner_vlan_tag.eth_type;
-                } else
-#endif //  WITH_XCONNECT || WITH_BNG || WITH_DOUBLE_VLAN_TERMINATION
-                    fabric_metadata.last_eth_type = hdr.vlan_tag.eth_type;
-            } else {
-                fabric_metadata.last_eth_type = hdr.ethernet.eth_type;
-            }
         }
 
         ingress_port_vlan.apply();

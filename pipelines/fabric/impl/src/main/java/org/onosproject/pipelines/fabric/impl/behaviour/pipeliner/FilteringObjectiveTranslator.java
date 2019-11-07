@@ -17,7 +17,6 @@
 package org.onosproject.pipelines.fabric.impl.behaviour.pipeliner;
 
 import com.google.common.collect.Lists;
-import org.onlab.packet.EthType;
 import org.onlab.packet.Ethernet;
 import org.onlab.packet.MacAddress;
 import org.onlab.packet.VlanId;
@@ -33,17 +32,23 @@ import org.onosproject.net.flow.criteria.EthCriterion;
 import org.onosproject.net.flow.criteria.PiCriterion;
 import org.onosproject.net.flow.criteria.PortCriterion;
 import org.onosproject.net.flow.criteria.VlanIdCriterion;
+import org.onosproject.net.flow.instructions.Instructions;
+import org.onosproject.net.flow.instructions.L2ModificationInstruction;
 import org.onosproject.net.flowobjective.FilteringObjective;
+import org.onosproject.net.flowobjective.Objective;
 import org.onosproject.net.flowobjective.ObjectiveError;
 import org.onosproject.net.pi.runtime.PiAction;
 import org.onosproject.net.pi.runtime.PiActionParam;
 import org.onosproject.pipelines.fabric.impl.behaviour.FabricCapabilities;
 import org.onosproject.pipelines.fabric.impl.behaviour.FabricConstants;
+import org.onosproject.pipelines.fabric.impl.behaviour.FabricUtils;
 
 import java.util.Collection;
 import java.util.List;
 
 import static java.lang.String.format;
+import static org.onosproject.net.flow.criteria.Criterion.Type.INNER_VLAN_VID;
+import static org.onosproject.net.flow.criteria.Criterion.Type.VLAN_VID;
 import static org.onosproject.pipelines.fabric.impl.behaviour.FabricUtils.criterion;
 
 /**
@@ -59,6 +64,8 @@ class FilteringObjectiveTranslator
 
     private static final byte[] ONE = new byte[]{1};
     private static final byte[] ZERO = new byte[]{0};
+
+    private static final short ETH_TYPE_EXACT_MASK = (short) 0xFFFF;
 
     private static final PiAction DENY = PiAction.builder()
             .withId(FabricConstants.FABRIC_INGRESS_FILTERING_DENY)
@@ -94,9 +101,51 @@ class FilteringObjectiveTranslator
                 obj.conditions(), Criterion.Type.ETH_DST_MASKED);
 
         ingressPortVlanRule(obj, inPort, outerVlan, innerVlan, resultBuilder);
-        fwdClassifierRules(obj, inPort, ethDst, ethDstMasked, resultBuilder);
-
+        if (shouldAddFwdClassifierRule(obj)) {
+            fwdClassifierRules(obj, inPort, ethDst, ethDstMasked, resultBuilder);
+        } else {
+            log.debug("Skipping fwd classifier rules for device {}.", deviceId);
+        }
         return resultBuilder.build();
+    }
+
+    private boolean shouldAddFwdClassifierRule(FilteringObjective obj) {
+        // NOTE: in fabric pipeline the forwarding classifier acts similarly
+        // to the TMAC table of OFDPA that matches on input port.
+
+        // Forwarding classifier rules should be added to translation when:
+        // - the operation is ADD OR
+        // - it doesn't refer to double tagged traffic OR
+        // - it refers to double tagged traffic
+        //     and SR is triggering the removal of forwarding classifier rules.
+        return obj.op() == Objective.Operation.ADD ||
+                !isDoubleTagged(obj) ||
+                (isDoubleTagged(obj) && isLastDoubleTaggedForPort(obj));
+    }
+
+    /**
+     * Check if the given filtering objective is the last filtering objective
+     * for a double-tagged host for a specific port.
+     * <p>
+     * {@see org.onosproject.segmentrouting.RoutingRulePopulator#buildDoubleTaggedFilteringObj()}
+     * {@see org.onosproject.segmentrouting.RoutingRulePopulator#processDoubleTaggedFilter()}
+     *
+     * @param obj Filtering objective to check.
+     * @return True if SR is signaling to remove the forwarding classifier rule,
+     * false otherwise.
+     */
+    private boolean isLastDoubleTaggedForPort(FilteringObjective obj) {
+        Instructions.MetadataInstruction meta = obj.meta().writeMetadata();
+        // SR is setting this metadata when a double tagged filtering objective
+        // is removed and no other hosts is sharing the same input port.
+        return (meta != null && (meta.metadata() & meta.metadataMask()) == 1);
+    }
+
+    private boolean isDoubleTagged(FilteringObjective obj) {
+        return obj.meta() != null &&
+                FabricUtils.l2Instruction(obj.meta(), L2ModificationInstruction.L2SubType.VLAN_POP) != null &&
+                FabricUtils.criterion(obj.conditions(), VLAN_VID) != null &&
+                FabricUtils.criterion(obj.conditions(), INNER_VLAN_VID) != null;
     }
 
     private void ingressPortVlanRule(
@@ -111,6 +160,12 @@ class FilteringObjectiveTranslator
                 && !outerVlanCriterion.vlanId().equals(VlanId.NONE);
         final boolean innerVlanValid = innerVlanCriterion != null
                 && !innerVlanCriterion.vlanId().equals(VlanId.NONE);
+
+        if (innerVlanValid && !capabilities.supportDoubleVlanTerm()) {
+            throw new FabricPipelinerException(
+                    "Found 2 VLAN IDs, but the pipeline does not support double VLAN termination",
+                    ObjectiveError.UNSUPPORTED);
+        }
 
         final PiCriterion piCriterion = PiCriterion.builder()
                 .matchExact(FabricConstants.HDR_VLAN_IS_VALID, outerVlanValid ? ONE : ZERO)
@@ -163,7 +218,7 @@ class FilteringObjectiveTranslator
         } else {
             final MacAddress dstMac = ethDstCriterion.mac();
             flowRules.addAll(ipFwdClassifierRules(inPort, dstMac, obj));
-            flowRules.add(mplsFwdClassifierRule(inPort, dstMac, obj));
+            flowRules.addAll(mplsFwdClassifierRules(inPort, dstMac, obj));
         }
 
         for (FlowRule f : flowRules) {
@@ -207,21 +262,58 @@ class FilteringObjectiveTranslator
         return flowRules;
     }
 
-    private FlowRule mplsFwdClassifierRule(
+    private Collection<FlowRule> mplsFwdClassifierRules(
             PortNumber inPort, MacAddress dstMac, FilteringObjective obj)
             throws FabricPipelinerException {
-        return fwdClassifierRule(
-                inPort, Ethernet.MPLS_UNICAST, dstMac, null,
-                fwdClassifierTreatment(FWD_MPLS), obj);
+        // Forwarding classifier for MPLS is composed of 2 rules
+        // with higher priority wrt standard forwarding classifier rules,
+        // this is due to overlap on ternary matching.
+        TrafficTreatment treatment = fwdClassifierTreatment(FWD_MPLS);
+        final PiCriterion ethTypeMplsIpv4 = PiCriterion.builder()
+                .matchTernary(FabricConstants.HDR_ETH_TYPE,
+                              Ethernet.MPLS_UNICAST, ETH_TYPE_EXACT_MASK)
+                .matchExact(FabricConstants.HDR_IP_ETH_TYPE,
+                            Ethernet.TYPE_IPV4)
+                .build();
+        final TrafficSelector selectorMplsIpv4 = DefaultTrafficSelector.builder()
+                .matchInPort(inPort)
+                .matchPi(ethTypeMplsIpv4)
+                .matchEthDstMasked(dstMac, MacAddress.EXACT_MASK)
+                .build();
+
+        final PiCriterion ethTypeMplsIpv6 = PiCriterion.builder()
+                .matchTernary(FabricConstants.HDR_ETH_TYPE,
+                              Ethernet.MPLS_UNICAST, ETH_TYPE_EXACT_MASK)
+                .matchExact(FabricConstants.HDR_IP_ETH_TYPE,
+                            Ethernet.TYPE_IPV6)
+                .build();
+        final TrafficSelector selectorMplsIpv6 = DefaultTrafficSelector.builder()
+                .matchInPort(inPort)
+                .matchPi(ethTypeMplsIpv6)
+                .matchEthDstMasked(dstMac, MacAddress.EXACT_MASK)
+                .build();
+
+        return List.of(
+                flowRule(obj, FabricConstants.FABRIC_INGRESS_FILTERING_FWD_CLASSIFIER,
+                         selectorMplsIpv4, treatment, obj.priority() + 1),
+                flowRule(obj, FabricConstants.FABRIC_INGRESS_FILTERING_FWD_CLASSIFIER,
+                         selectorMplsIpv6, treatment, obj.priority() + 1)
+        );
     }
 
     private FlowRule fwdClassifierRule(
             PortNumber inPort, short ethType, MacAddress dstMac, MacAddress dstMacMask,
             TrafficTreatment treatment, FilteringObjective obj)
             throws FabricPipelinerException {
+        // Match on ip_eth_type that is the eth_type of the L3 protocol.
+        // i.e., if the packet has an IP header, ip_eth_type should
+        // contain the corresponding eth_type (for IPv4 or IPv6)
+        final PiCriterion ethTypeCriterion = PiCriterion.builder()
+                .matchExact(FabricConstants.HDR_IP_ETH_TYPE, ethType)
+                .build();
         final TrafficSelector selector = DefaultTrafficSelector.builder()
                 .matchInPort(inPort)
-                .matchPi(mapEthTypeFwdClassifier(ethType))
+                .matchPi(ethTypeCriterion)
                 .matchEthDstMasked(dstMac, dstMacMask == null
                         ? MacAddress.EXACT_MASK : dstMacMask)
                 .build();
@@ -240,39 +332,5 @@ class FilteringObjectiveTranslator
                 .piTableAction(action)
                 .build();
 
-    }
-
-    static PiCriterion mapEthTypeFwdClassifier(short ethType) {
-        // Map the Ethernet type to the validity bits of the fabric pipeline
-        switch (EthType.EtherType.lookup(ethType)) {
-            case IPV4: {
-                return PiCriterion.builder()
-                        .matchExact(FabricConstants.HDR_IS_IPV4, ONE)
-                        .matchExact(FabricConstants.HDR_IS_IPV6, ZERO)
-                        .matchExact(FabricConstants.HDR_IS_MPLS, ZERO)
-                        .build();
-            }
-            case IPV6: {
-                return PiCriterion.builder()
-                        .matchExact(FabricConstants.HDR_IS_IPV4, ZERO)
-                        .matchExact(FabricConstants.HDR_IS_IPV6, ONE)
-                        .matchExact(FabricConstants.HDR_IS_MPLS, ZERO)
-                        .build();
-            }
-            case MPLS_UNICAST: {
-                return PiCriterion.builder()
-                        .matchExact(FabricConstants.HDR_IS_IPV4, ZERO)
-                        .matchExact(FabricConstants.HDR_IS_IPV6, ZERO)
-                        .matchExact(FabricConstants.HDR_IS_MPLS, ONE)
-                        .build();
-            }
-            default: {
-                return PiCriterion.builder()
-                        .matchExact(FabricConstants.HDR_IS_IPV4, ZERO)
-                        .matchExact(FabricConstants.HDR_IS_IPV6, ZERO)
-                        .matchExact(FabricConstants.HDR_IS_MPLS, ZERO)
-                        .build();
-            }
-        }
     }
 }
