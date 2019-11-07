@@ -73,7 +73,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
     // You can see this as the main function applied to every packet received by the switch.
     apply {
         if (standard_metadata.ingress_port == CPU_PORT) {
-            
+
             // Packet received from CPU_PORT, this is a packet-out sent by the controller. 
             // Skip table processing, set the egress port as requested by the controller (packet_out header) and remove the packet_out header.           
             standard_metadata.egress_spec = hdr.packet_out.egress_port;
