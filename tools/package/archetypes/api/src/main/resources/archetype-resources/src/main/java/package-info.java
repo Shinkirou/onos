@@ -1,5 +1,8 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
 /*
- * Copyright 2018-present Open Networking Foundation
+ * Copyright ${year}-present Open Networking Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +16,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
- * checkstyle runner for BuckDaemon.
+ * The ${artifactId} application.
  */
-package org.onosproject.checkstyle;
+package ${package};

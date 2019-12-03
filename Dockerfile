@@ -1,5 +1,5 @@
 ARG JDK_VER=11
-ARG BAZEL_VER=0.27.0
+ARG BAZEL_VER=1.0.0
 ARG JOBS=2
 
 # First stage is the build environment.
@@ -60,6 +60,9 @@ LABEL org.label-schema.name="ONOS" \
       org.label-scheme.vendor="Open Networking Foundation" \
       org.label-schema.schema-version="1.0" \
       maintainer="onos-dev@onosproject.org"
+
+RUN apt-get update && apt-get install -y curl && \
+	rm -rf /var/lib/apt/lists/*
 
 # Install ONOS in /root/onos
 COPY --from=builder /output/ /root/onos/

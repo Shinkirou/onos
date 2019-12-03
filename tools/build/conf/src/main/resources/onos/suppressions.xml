@@ -32,6 +32,7 @@
     <suppress files="org.onosproject.driver.pipeline.*" checks="AbbreviationAsWordInName" />
     <suppress files="org.onosproject.driver.pipeline.ofdpa.Ofdpa2GroupHandler.java" checks="FileLength" />
     <suppress files="org.onosproject.segmentrouting.*" checks="AbbreviationAsWordInName" />
+    <suppress files="org.onosproject.segmentrouting.DefaultRoutingHandler.java" checks="FileLength" />
 
     <!-- These files carry AT&T copyrights -->
     <suppress files="org.onlab.packet.EAP" checks="RegexpHeader" />
@@ -61,7 +62,5 @@
     <!-- Suppressions for yangutils generated code -->
     <suppress files="org.onosproject.yang.gen.v1.*" checks="Javadoc.*" />
 
-    <!-- Suppress checks for Maven-generated code -->
-    <suppress files="[/\\]target[/\\]" checks=".*"/>
-
+    <suppress files="ApiDocRegistrator.java" checks="JavadocPackage" />
 </suppressions>
