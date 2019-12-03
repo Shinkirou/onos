@@ -1,0 +1,659 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33606914
+    name: "c_ingress.t_l2_fwd"
+    alias: "t_l2_fwd"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.ingress_port"
+    bitwidth: 9
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ethernet.dst_addr"
+    bitwidth: 48
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "hdr.ethernet.src_addr"
+    bitwidth: 48
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "hdr.ethernet.ether_type"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "hdr.ipv4.protocol"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 6
+    name: "hdr.ipv4.src_addr"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 7
+    name: "hdr.ipv4.dst_addr"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 8
+    name: "hdr.tcp.src_port"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 9
+    name: "hdr.tcp.dst_port"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 10
+    name: "hdr.udp.src_port"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 11
+    name: "hdr.udp.dst_port"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 12
+    name: "hdr.icmp.type"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 13
+    name: "hdr.icmp.code"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 16831479
+  }
+  action_refs {
+    id: 16822540
+  }
+  action_refs {
+    id: 16808599
+  }
+  action_refs {
+    id: 16800567
+  }
+  direct_resource_ids: 318778805
+  size: 524288
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16780871
+    name: "c_ingress.cm.cm_ip_0_hash"
+    alias: "cm_ip_0_hash"
+  }
+}
+actions {
+  preamble {
+    id: 16840806
+    name: "c_ingress.cm.cm_ip_1_hash"
+    alias: "cm_ip_1_hash"
+  }
+}
+actions {
+  preamble {
+    id: 16805096
+    name: "c_ingress.cm.cm_ip_2_hash"
+    alias: "cm_ip_2_hash"
+  }
+}
+actions {
+  preamble {
+    id: 16822576
+    name: "c_ingress.cm.cm_5t_0_hash"
+    alias: "cm_5t_0_hash"
+  }
+}
+actions {
+  preamble {
+    id: 16833659
+    name: "c_ingress.cm.cm_5t_1_hash"
+    alias: "cm_5t_1_hash"
+  }
+}
+actions {
+  preamble {
+    id: 16805725
+    name: "c_ingress.cm.cm_5t_2_hash"
+    alias: "cm_5t_2_hash"
+  }
+}
+actions {
+  preamble {
+    id: 16828066
+    name: "c_ingress.cm.cm_incr"
+    alias: "cm_incr"
+  }
+}
+actions {
+  preamble {
+    id: 16826523
+    name: "c_ingress.cm.cm_register_write"
+    alias: "cm_register_write"
+  }
+}
+actions {
+  preamble {
+    id: 16777379
+    name: "c_ingress.bm.bm_0_hash"
+    alias: "bm_0_hash"
+  }
+}
+actions {
+  preamble {
+    id: 16792044
+    name: "c_ingress.bm.bm_1_hash"
+    alias: "bm_1_hash"
+  }
+}
+actions {
+  preamble {
+    id: 16789814
+    name: "c_ingress.bm.bm_2_hash"
+    alias: "bm_2_hash"
+  }
+}
+actions {
+  preamble {
+    id: 16799452
+    name: "c_ingress.bm.bm_check_pair"
+    alias: "bm_check_pair"
+  }
+}
+actions {
+  preamble {
+    id: 16794337
+    name: "c_ingress.bm.bm_new_pair"
+    alias: "bm_new_pair"
+  }
+}
+actions {
+  preamble {
+    id: 16784673
+    name: "c_ingress.threshold.threshold_hash"
+    alias: "threshold_hash"
+  }
+}
+actions {
+  preamble {
+    id: 16800818
+    name: "c_ingress.threshold.threshold_hash2"
+    alias: "threshold_hash2"
+  }
+}
+actions {
+  preamble {
+    id: 16795833
+    name: "c_ingress.threshold.threshold_hash3"
+    alias: "threshold_hash3"
+  }
+}
+actions {
+  preamble {
+    id: 16786239
+    name: "c_ingress.threshold.threshold_hash4"
+    alias: "threshold_hash4"
+  }
+}
+actions {
+  preamble {
+    id: 16826159
+    name: "c_ingress.threshold.check_flow_time"
+    alias: "check_flow_time"
+  }
+}
+actions {
+  preamble {
+    id: 16834620
+    name: "c_ingress.threshold.traffic_counter_incr"
+    alias: "traffic_counter_incr"
+  }
+}
+actions {
+  preamble {
+    id: 16793073
+    name: "c_ingress.threshold.traffic_flow_incr"
+    alias: "traffic_flow_incr"
+  }
+}
+actions {
+  preamble {
+    id: 16794414
+    name: "c_ingress.threshold.time_flow_update"
+    alias: "time_flow_update"
+  }
+}
+actions {
+  preamble {
+    id: 16793179
+    name: "c_ingress.threshold.flow_traffic_reset"
+    alias: "flow_traffic_reset"
+  }
+}
+actions {
+  preamble {
+    id: 16833540
+    name: "c_ingress.threshold.check_flow_global_traffic"
+    alias: "check_flow_global_traffic"
+  }
+}
+actions {
+  preamble {
+    id: 16829361
+    name: "c_ingress.threshold.send_to_cpu_threshold"
+    alias: "send_to_cpu_threshold"
+  }
+}
+actions {
+  preamble {
+    id: 16822540
+    name: "c_ingress.send_to_cpu"
+    alias: "send_to_cpu"
+  }
+}
+actions {
+  preamble {
+    id: 16831479
+    name: "c_ingress.set_out_port"
+    alias: "set_out_port"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 16808599
+    name: "c_ingress._drop"
+    alias: "_drop"
+  }
+}
+counters {
+  preamble {
+    id: 302003196
+    name: "c_ingress.tx_port_counter"
+    alias: "tx_port_counter"
+  }
+  spec {
+    unit: BOTH
+  }
+  size: 255
+}
+counters {
+  preamble {
+    id: 302045227
+    name: "c_ingress.rx_port_counter"
+    alias: "rx_port_counter"
+  }
+  spec {
+    unit: BOTH
+  }
+  size: 255
+}
+direct_counters {
+  preamble {
+    id: 318778805
+    name: "c_ingress.l2_fwd_counter"
+    alias: "l2_fwd_counter"
+  }
+  spec {
+    unit: BOTH
+  }
+  direct_table_id: 33606914
+}
+controller_packet_metadata {
+  preamble {
+    id: 67146229
+    name: "packet_in"
+    alias: "packet_in"
+    annotations: "@controller_header(\"packet_in\")"
+  }
+  metadata {
+    id: 1
+    name: "ingress_port"
+    bitwidth: 9
+  }
+  metadata {
+    id: 2
+    name: "timestamp"
+    bitwidth: 48
+  }
+  metadata {
+    id: 3
+    name: "ip_src"
+    bitwidth: 32
+  }
+  metadata {
+    id: 4
+    name: "ip_dst"
+    bitwidth: 32
+  }
+  metadata {
+    id: 5
+    name: "ip_proto"
+    bitwidth: 9
+  }
+  metadata {
+    id: 6
+    name: "port_src"
+    bitwidth: 16
+  }
+  metadata {
+    id: 7
+    name: "port_dst"
+    bitwidth: 16
+  }
+  metadata {
+    id: 8
+    name: "icmp_type"
+    bitwidth: 9
+  }
+  metadata {
+    id: 9
+    name: "icmp_code"
+    bitwidth: 9
+  }
+  metadata {
+    id: 10
+    name: "cm_ip"
+    bitwidth: 32
+  }
+  metadata {
+    id: 11
+    name: "cm_5t"
+    bitwidth: 32
+  }
+  metadata {
+    id: 12
+    name: "bm_src"
+    bitwidth: 32
+  }
+  metadata {
+    id: 13
+    name: "bm_dst"
+    bitwidth: 32
+  }
+  metadata {
+    id: 14
+    name: "_padding"
+    bitwidth: 4
+  }
+}
+controller_packet_metadata {
+  preamble {
+    id: 67121543
+    name: "packet_out"
+    alias: "packet_out"
+    annotations: "@controller_header(\"packet_out\")"
+  }
+  metadata {
+    id: 1
+    name: "egress_port"
+    bitwidth: 9
+  }
+  metadata {
+    id: 2
+    name: "_padding"
+    bitwidth: 7
+  }
+}
+registers {
+  preamble {
+    id: 369116793
+    name: "c_ingress.cm.cm_ip_0_register"
+    alias: "cm_ip_0_register"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369123174
+    name: "c_ingress.cm.cm_ip_1_register"
+    alias: "cm_ip_1_register"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369101889
+    name: "c_ingress.cm.cm_ip_2_register"
+    alias: "cm_ip_2_register"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369132846
+    name: "c_ingress.cm.cm_ip_final_register"
+    alias: "cm_ip_final_register"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369146886
+    name: "c_ingress.cm.cm_5t_0_register"
+    alias: "cm_5t_0_register"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369119033
+    name: "c_ingress.cm.cm_5t_1_register"
+    alias: "cm_5t_1_register"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369125664
+    name: "c_ingress.cm.cm_5t_2_register"
+    alias: "cm_5t_2_register"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369162274
+    name: "c_ingress.cm.cm_5t_final_register"
+    alias: "cm_5t_final_register"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369151813
+    name: "c_ingress.bm.bm_0_register"
+    alias: "bm_0_register"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369153585
+    name: "c_ingress.bm.bm_1_register"
+    alias: "bm_1_register"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369138825
+    name: "c_ingress.bm.bm_2_register"
+    alias: "bm_2_register"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369136612
+    name: "c_ingress.threshold.traffic_global_register"
+    alias: "traffic_global_register"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 1
+}
+registers {
+  preamble {
+    id: 369123768
+    name: "c_ingress.threshold.traffic_global_flow_register"
+    alias: "traffic_global_flow_register"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369154740
+    name: "c_ingress.threshold.traffic_flow_register"
+    alias: "traffic_flow_register"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369110585
+    name: "c_ingress.threshold.time_flow_register"
+    alias: "time_flow_register"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 48
+      }
+    }
+  }
+  size: 262144
+}
+type_info {
+}
