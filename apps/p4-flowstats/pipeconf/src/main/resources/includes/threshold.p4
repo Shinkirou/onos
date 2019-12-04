@@ -1,49 +1,17 @@
 control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
 
+    // Stores the total packet count.
     register<bit<32>>(1)  traffic_global_register;
 
+    // Stores the total packet count, excluding the packets in the current stage (for each flow).
     register<bit<32>>(REG_SKETCH_SIZE)  traffic_global_flow_register;
+    // Stores the packet count for the current stage (for each flow).
     register<bit<32>>(REG_SKETCH_SIZE)  traffic_flow_register;
+    // Store the timestamp corresponding to the beginning of the current stage (for each flow).
     register<bit<48>>(REG_SKETCH_SIZE)  time_flow_register;
 
-    action threshold_hash() {
-        hash(meta.threshold_meta.flow_hash, 
-            HashAlgorithm.crc32_custom, 
-            (bit<32>)0, 
-            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.meta.l4_src_port, (bit<32>)meta.meta.l4_dst_port}, 
-            (bit<32>)REG_SKETCH_SIZE);        
-    }
-
-    action threshold_hash2() {
-        hash(meta.threshold_meta.flow_hash2, 
-            HashAlgorithm.crc32_custom, 
-            (bit<32>)0, 
-            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr}, 
-            (bit<32>)REG_SKETCH_SIZE);        
-    }
-
-    action threshold_hash3() {
-        hash(meta.threshold_meta.flow_hash3, 
-            HashAlgorithm.crc32_custom, 
-            (bit<32>)0, 
-            {hdr.ipv4.src_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.meta.l4_src_port}, 
-            (bit<32>)REG_SKETCH_SIZE);        
-    }        
-
-    action threshold_hash4() {
-        hash(meta.threshold_meta.flow_hash4, 
-            HashAlgorithm.crc32_custom, 
-            (bit<32>)0, 
-            {hdr.ipv4.dst_addr, (bit<32>)hdr.ipv4.protocol, (bit<32>)meta.meta.l4_dst_port}, 
-            (bit<32>)REG_SKETCH_SIZE);        
-    }
-
-    action check_flow_time() {
-        time_flow_register.read(meta.threshold_meta.flow_time, (bit<32>)meta.threshold_meta.flow_hash); 
-    }
-
     // Increase the global traffic counter.
-    action traffic_counter_incr() {
+    action global_traffic_counter_incr() {
 
         traffic_global_register.read(meta.threshold_meta.global_traffic, (bit<32>)0); 
         meta.threshold_meta.global_traffic = meta.threshold_meta.global_traffic + 1;
@@ -51,21 +19,27 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
 
     // Increase the traffic counter for a specific flow.
-    action traffic_flow_incr() {
+    action flow_traffic_counter_incr() {
 
         traffic_flow_register.read(meta.threshold_meta.flow_traffic, (bit<32>)meta.threshold_meta.flow_hash);
         meta.threshold_meta.flow_traffic = meta.threshold_meta.flow_traffic + 1;
         traffic_flow_register.write((bit<32>)meta.threshold_meta.flow_hash, meta.threshold_meta.flow_traffic);
     }
 
+    // Update the time value for the current flow with the global timestamp.
     action time_flow_update() {
         time_flow_register.write((bit<32>)meta.threshold_meta.flow_hash, standard_metadata.ingress_global_timestamp); 
     }
 
-    action flow_traffic_reset() {
+    // Reset the counters for a specific flow.
+    action flow_traffic_counter_reset() {
         traffic_flow_register.write((bit<32>)meta.threshold_meta.flow_hash, 0);
         traffic_global_flow_register.write((bit<32>)meta.threshold_meta.flow_hash, meta.threshold_meta.global_traffic);
     }
+
+    action check_flow_time() {
+        time_flow_register.read(meta.threshold_meta.flow_time, (bit<32>)meta.threshold_meta.flow_hash); 
+    }    
 
     action check_flow_global_traffic() {
         traffic_global_flow_register.read(meta.threshold_meta.flow_global_traffic, (bit<32>)meta.threshold_meta.flow_hash);
@@ -94,29 +68,38 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
 
 	apply {
 
-        threshold_hash();
-        threshold_hash2();
-        threshold_hash3();
-        threshold_hash4();
+        // The current threshold hash has already been calculated for the cm sketch.
+        meta.threshold_meta.flow_hash = meta.cm_meta.cm_5t_0_hash;
 
-        traffic_counter_incr();
-        traffic_flow_incr();
+        global_traffic_counter_incr();
+        flow_traffic_counter_incr();
 
+        // Obtain the last time value stored for the current flow.
         check_flow_time();
 
+        // If the last time value stored is 0, the current flow is considered new.
+        // We then update its time value with the current global timestamp.  
         if (meta.threshold_meta.flow_time == (bit<48>)0) {
             time_flow_update();
         }
 
+        // Verify if more than x microseconds have elapsed since the last threshold check for the current flow.
         if ((standard_metadata.ingress_global_timestamp - meta.threshold_meta.flow_time) > (bit<48>)5000000) {
             
+            // Obtain the global traffic value corresponding to the last stage for the current flow.
             check_flow_global_traffic();
 
+            // Check if the flow traffic at the current stage corresponds to more than 10% of the total traffic.
+            // If so, we send the current flow stats to the controller.
             if ((meta.threshold_meta.flow_traffic * 10) > (meta.threshold_meta.global_traffic - meta.threshold_meta.flow_global_traffic)) {
 
+                // Specify a packet_in header containing all flow stats.
                 send_to_cpu_threshold();
+
+                // As the threshold has been exceeded, a new phase will start for the current flow.
+                // As such, we update the time value and reset the traffic counters.
                 time_flow_update();
-                flow_traffic_reset();
+                flow_traffic_counter_reset();
             }
         }
 	}

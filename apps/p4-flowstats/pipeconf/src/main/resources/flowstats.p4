@@ -55,10 +55,13 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             hdr.ipv4.protocol               : ternary;
             hdr.ipv4.src_addr               : ternary;
             hdr.ipv4.dst_addr               : ternary;
-            hdr.tcp.src_port                : ternary;
-            hdr.tcp.dst_port                : ternary;
             hdr.udp.src_port                : ternary;
             hdr.udp.dst_port                : ternary;
+            hdr.tcp.src_port                : ternary;
+            hdr.tcp.dst_port                : ternary;
+            hdr.tcp.res                     : ternary;
+            hdr.tcp.ecn                     : ternary;
+            hdr.tcp.ctrl                    : ternary;
             hdr.icmp.type                   : ternary;
             hdr.icmp.code                   : ternary;
         }

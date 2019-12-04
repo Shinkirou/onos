@@ -22,13 +22,6 @@
         ["tmp_15", 32, false],
         ["tmp_16", 32, false],
         ["tmp_17", 32, false],
-        ["tmp_18", 32, false],
-        ["tmp_19", 32, false],
-        ["tmp_20", 32, false],
-        ["tmp_21", 32, false],
-        ["tmp_22", 32, false],
-        ["tmp_23", 32, false],
-        ["tmp_24", 32, false],
         ["tmp", 1, false],
         ["hasReturned", 1, false],
         ["_padding_1", 6, false]
@@ -243,9 +236,6 @@
       "id" : 13,
       "fields" : [
         ["flow_hash", 32, false],
-        ["flow_hash2", 32, false],
-        ["flow_hash3", 32, false],
-        ["flow_hash4", 32, false],
         ["flow_traffic", 32, false],
         ["flow_global_traffic", 32, false],
         ["global_traffic", 32, false],
@@ -816,7 +806,7 @@
       "id" : 11,
       "source_info" : {
         "filename" : "includes/threshold.p4",
-        "line" : 3,
+        "line" : 4,
         "column" : 25,
         "source_fragment" : "traffic_global_register"
       },
@@ -828,7 +818,7 @@
       "id" : 12,
       "source_info" : {
         "filename" : "includes/threshold.p4",
-        "line" : 5,
+        "line" : 7,
         "column" : 39,
         "source_fragment" : "traffic_global_flow_register"
       },
@@ -840,7 +830,7 @@
       "id" : 13,
       "source_info" : {
         "filename" : "includes/threshold.p4",
-        "line" : 6,
+        "line" : 9,
         "column" : 39,
         "source_fragment" : "traffic_flow_register"
       },
@@ -852,7 +842,7 @@
       "id" : 14,
       "source_info" : {
         "filename" : "includes/threshold.p4",
-        "line" : 7,
+        "line" : 11,
         "column" : 39,
         "source_fragment" : "time_flow_register"
       },
@@ -1049,86 +1039,6 @@
         {
           "type" : "field",
           "value" : ["scalars", "tmp_15"]
-        }
-      ]
-    },
-    {
-      "name" : "calc_8",
-      "id" : 9,
-      "algo" : "crc32_custom",
-      "input" : [
-        {
-          "type" : "field",
-          "value" : ["ipv4", "src_addr"]
-        },
-        {
-          "type" : "field",
-          "value" : ["ipv4", "dst_addr"]
-        },
-        {
-          "type" : "field",
-          "value" : ["scalars", "tmp_16"]
-        },
-        {
-          "type" : "field",
-          "value" : ["scalars", "tmp_17"]
-        },
-        {
-          "type" : "field",
-          "value" : ["scalars", "tmp_18"]
-        }
-      ]
-    },
-    {
-      "name" : "calc_9",
-      "id" : 10,
-      "algo" : "crc32_custom",
-      "input" : [
-        {
-          "type" : "field",
-          "value" : ["ipv4", "src_addr"]
-        },
-        {
-          "type" : "field",
-          "value" : ["ipv4", "dst_addr"]
-        }
-      ]
-    },
-    {
-      "name" : "calc_10",
-      "id" : 11,
-      "algo" : "crc32_custom",
-      "input" : [
-        {
-          "type" : "field",
-          "value" : ["ipv4", "src_addr"]
-        },
-        {
-          "type" : "field",
-          "value" : ["scalars", "tmp_19"]
-        },
-        {
-          "type" : "field",
-          "value" : ["scalars", "tmp_20"]
-        }
-      ]
-    },
-    {
-      "name" : "calc_11",
-      "id" : 12,
-      "algo" : "crc32_custom",
-      "input" : [
-        {
-          "type" : "field",
-          "value" : ["ipv4", "dst_addr"]
-        },
-        {
-          "type" : "field",
-          "value" : ["scalars", "tmp_21"]
-        },
-        {
-          "type" : "field",
-          "value" : ["scalars", "tmp_22"]
         }
       ]
     }
@@ -2784,398 +2694,8 @@
       ]
     },
     {
-      "name" : "c_ingress.threshold.threshold_hash",
+      "name" : "c_ingress.threshold.global_traffic_counter_incr",
       "id" : 14,
-      "runtime_data" : [],
-      "primitives" : [
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "tmp_16"]
-            },
-            {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "field",
-                    "value" : ["ipv4", "protocol"]
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0xffffffff"
-                  }
-                }
-              }
-            }
-          ],
-          "source_info" : {
-            "filename" : "includes/threshold.p4",
-            "line" : 13,
-            "column" : 51,
-            "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "tmp_17"]
-            },
-            {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "field",
-                    "value" : ["userMetadata.meta", "l4_src_port"]
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0xffffffff"
-                  }
-                }
-              }
-            }
-          ],
-          "source_info" : {
-            "filename" : "includes/threshold.p4",
-            "line" : 13,
-            "column" : 79,
-            "source_fragment" : "(bit<32>)meta.meta.l4_src_port"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "tmp_18"]
-            },
-            {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "field",
-                    "value" : ["userMetadata.meta", "l4_dst_port"]
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0xffffffff"
-                  }
-                }
-              }
-            }
-          ],
-          "source_info" : {
-            "filename" : "includes/threshold.p4",
-            "line" : 13,
-            "column" : 111,
-            "source_fragment" : "(bit<32>)meta.meta.l4_dst_port"
-          }
-        },
-        {
-          "op" : "modify_field_with_hash_based_offset",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["userMetadata.threshold_meta", "flow_hash"]
-            },
-            {
-              "type" : "hexstr",
-              "value" : "0x00000000"
-            },
-            {
-              "type" : "calculation",
-              "value" : "calc_8"
-            },
-            {
-              "type" : "hexstr",
-              "value" : "0x00040000"
-            }
-          ],
-          "source_info" : {
-            "filename" : "includes/threshold.p4",
-            "line" : 10,
-            "column" : 8,
-            "source_fragment" : "hash(meta.threshold_meta.flow_hash, ..."
-          }
-        }
-      ]
-    },
-    {
-      "name" : "c_ingress.threshold.threshold_hash2",
-      "id" : 15,
-      "runtime_data" : [],
-      "primitives" : [
-        {
-          "op" : "modify_field_with_hash_based_offset",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["userMetadata.threshold_meta", "flow_hash2"]
-            },
-            {
-              "type" : "hexstr",
-              "value" : "0x00000000"
-            },
-            {
-              "type" : "calculation",
-              "value" : "calc_9"
-            },
-            {
-              "type" : "hexstr",
-              "value" : "0x00040000"
-            }
-          ],
-          "source_info" : {
-            "filename" : "includes/threshold.p4",
-            "line" : 18,
-            "column" : 8,
-            "source_fragment" : "hash(meta.threshold_meta.flow_hash2, ..."
-          }
-        }
-      ]
-    },
-    {
-      "name" : "c_ingress.threshold.threshold_hash3",
-      "id" : 16,
-      "runtime_data" : [],
-      "primitives" : [
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "tmp_19"]
-            },
-            {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "field",
-                    "value" : ["ipv4", "protocol"]
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0xffffffff"
-                  }
-                }
-              }
-            }
-          ],
-          "source_info" : {
-            "filename" : "includes/threshold.p4",
-            "line" : 29,
-            "column" : 32,
-            "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "tmp_20"]
-            },
-            {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "field",
-                    "value" : ["userMetadata.meta", "l4_src_port"]
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0xffffffff"
-                  }
-                }
-              }
-            }
-          ],
-          "source_info" : {
-            "filename" : "includes/threshold.p4",
-            "line" : 29,
-            "column" : 60,
-            "source_fragment" : "(bit<32>)meta.meta.l4_src_port"
-          }
-        },
-        {
-          "op" : "modify_field_with_hash_based_offset",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["userMetadata.threshold_meta", "flow_hash3"]
-            },
-            {
-              "type" : "hexstr",
-              "value" : "0x00000000"
-            },
-            {
-              "type" : "calculation",
-              "value" : "calc_10"
-            },
-            {
-              "type" : "hexstr",
-              "value" : "0x00040000"
-            }
-          ],
-          "source_info" : {
-            "filename" : "includes/threshold.p4",
-            "line" : 26,
-            "column" : 8,
-            "source_fragment" : "hash(meta.threshold_meta.flow_hash3, ..."
-          }
-        }
-      ]
-    },
-    {
-      "name" : "c_ingress.threshold.threshold_hash4",
-      "id" : 17,
-      "runtime_data" : [],
-      "primitives" : [
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "tmp_21"]
-            },
-            {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "field",
-                    "value" : ["ipv4", "protocol"]
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0xffffffff"
-                  }
-                }
-              }
-            }
-          ],
-          "source_info" : {
-            "filename" : "includes/threshold.p4",
-            "line" : 37,
-            "column" : 32,
-            "source_fragment" : "(bit<32>)hdr.ipv4.protocol"
-          }
-        },
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["scalars", "tmp_22"]
-            },
-            {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "field",
-                    "value" : ["userMetadata.meta", "l4_dst_port"]
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0xffffffff"
-                  }
-                }
-              }
-            }
-          ],
-          "source_info" : {
-            "filename" : "includes/threshold.p4",
-            "line" : 37,
-            "column" : 60,
-            "source_fragment" : "(bit<32>)meta.meta.l4_dst_port"
-          }
-        },
-        {
-          "op" : "modify_field_with_hash_based_offset",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["userMetadata.threshold_meta", "flow_hash4"]
-            },
-            {
-              "type" : "hexstr",
-              "value" : "0x00000000"
-            },
-            {
-              "type" : "calculation",
-              "value" : "calc_11"
-            },
-            {
-              "type" : "hexstr",
-              "value" : "0x00040000"
-            }
-          ],
-          "source_info" : {
-            "filename" : "includes/threshold.p4",
-            "line" : 34,
-            "column" : 8,
-            "source_fragment" : "hash(meta.threshold_meta.flow_hash4, ..."
-          }
-        }
-      ]
-    },
-    {
-      "name" : "c_ingress.threshold.check_flow_time",
-      "id" : 18,
-      "runtime_data" : [],
-      "primitives" : [
-        {
-          "op" : "register_read",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["userMetadata.threshold_meta", "flow_time"]
-            },
-            {
-              "type" : "register_array",
-              "value" : "c_ingress.threshold.time_flow_register"
-            },
-            {
-              "type" : "field",
-              "value" : ["userMetadata.threshold_meta", "flow_hash"]
-            }
-          ],
-          "source_info" : {
-            "filename" : "includes/threshold.p4",
-            "line" : 42,
-            "column" : 8,
-            "source_fragment" : "time_flow_register.read(meta.threshold_meta.flow_time, (bit<32>)meta.threshold_meta.flow_hash)"
-          }
-        }
-      ]
-    },
-    {
-      "name" : "c_ingress.threshold.traffic_counter_incr",
-      "id" : 19,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -3196,7 +2716,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 48,
+            "line" : 16,
             "column" : 8,
             "source_fragment" : "traffic_global_register.read(meta.threshold_meta.global_traffic, (bit<32>)0)"
           }
@@ -3238,7 +2758,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 49,
+            "line" : 17,
             "column" : 8,
             "source_fragment" : "meta.threshold_meta.global_traffic = meta.threshold_meta.global_traffic + 1"
           }
@@ -3261,7 +2781,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 50,
+            "line" : 18,
             "column" : 8,
             "source_fragment" : "traffic_global_register.write((bit<32>)0, meta.threshold_meta.global_traffic)"
           }
@@ -3269,8 +2789,8 @@
       ]
     },
     {
-      "name" : "c_ingress.threshold.traffic_flow_incr",
-      "id" : 20,
+      "name" : "c_ingress.threshold.flow_traffic_counter_incr",
+      "id" : 15,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -3291,7 +2811,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 56,
+            "line" : 24,
             "column" : 8,
             "source_fragment" : "traffic_flow_register.read(meta.threshold_meta.flow_traffic, (bit<32>)meta.threshold_meta.flow_hash)"
           }
@@ -3333,7 +2853,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 57,
+            "line" : 25,
             "column" : 8,
             "source_fragment" : "meta.threshold_meta.flow_traffic = meta.threshold_meta.flow_traffic + 1"
           }
@@ -3356,7 +2876,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 58,
+            "line" : 26,
             "column" : 8,
             "source_fragment" : "traffic_flow_register.write((bit<32>)meta.threshold_meta.flow_hash, meta.threshold_meta.flow_traffic)"
           }
@@ -3365,7 +2885,7 @@
     },
     {
       "name" : "c_ingress.threshold.time_flow_update",
-      "id" : 21,
+      "id" : 16,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -3386,7 +2906,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 62,
+            "line" : 31,
             "column" : 8,
             "source_fragment" : "time_flow_register.write((bit<32>)meta.threshold_meta.flow_hash, standard_metadata.ingress_global_timestamp)"
           }
@@ -3395,7 +2915,7 @@
     },
     {
       "name" : "c_ingress.threshold.time_flow_update",
-      "id" : 22,
+      "id" : 17,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -3416,7 +2936,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 62,
+            "line" : 31,
             "column" : 8,
             "source_fragment" : "time_flow_register.write((bit<32>)meta.threshold_meta.flow_hash, standard_metadata.ingress_global_timestamp)"
           }
@@ -3424,8 +2944,8 @@
       ]
     },
     {
-      "name" : "c_ingress.threshold.flow_traffic_reset",
-      "id" : 23,
+      "name" : "c_ingress.threshold.flow_traffic_counter_reset",
+      "id" : 18,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -3446,7 +2966,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 66,
+            "line" : 36,
             "column" : 8,
             "source_fragment" : "traffic_flow_register.write((bit<32>)meta.threshold_meta.flow_hash, 0)"
           }
@@ -3469,7 +2989,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 67,
+            "line" : 37,
             "column" : 8,
             "source_fragment" : "traffic_global_flow_register.write((bit<32>)meta.threshold_meta.flow_hash, meta.threshold_meta.global_traffic)"
           }
@@ -3477,8 +2997,38 @@
       ]
     },
     {
+      "name" : "c_ingress.threshold.check_flow_time",
+      "id" : 19,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "register_read",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["userMetadata.threshold_meta", "flow_time"]
+            },
+            {
+              "type" : "register_array",
+              "value" : "c_ingress.threshold.time_flow_register"
+            },
+            {
+              "type" : "field",
+              "value" : ["userMetadata.threshold_meta", "flow_hash"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "includes/threshold.p4",
+            "line" : 41,
+            "column" : 8,
+            "source_fragment" : "time_flow_register.read(meta.threshold_meta.flow_time, (bit<32>)meta.threshold_meta.flow_hash)"
+          }
+        }
+      ]
+    },
+    {
       "name" : "c_ingress.threshold.check_flow_global_traffic",
-      "id" : 24,
+      "id" : 20,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -3499,7 +3049,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 71,
+            "line" : 45,
             "column" : 8,
             "source_fragment" : "traffic_global_flow_register.read(meta.threshold_meta.flow_global_traffic, (bit<32>)meta.threshold_meta.flow_hash)"
           }
@@ -3508,7 +3058,7 @@
     },
     {
       "name" : "c_ingress.threshold.send_to_cpu_threshold",
-      "id" : 25,
+      "id" : 21,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -3540,7 +3090,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 79,
+            "line" : 53,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.setValid()"
           }
@@ -3559,7 +3109,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 80,
+            "line" : 54,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.ingress_port = standard_metadata.ingress_port"
           }
@@ -3578,7 +3128,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 81,
+            "line" : 55,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.timestamp = standard_metadata.ingress_global_timestamp"
           }
@@ -3597,7 +3147,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 82,
+            "line" : 56,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.ip_src = hdr.ipv4.src_addr"
           }
@@ -3616,7 +3166,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 83,
+            "line" : 57,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.ip_dst = hdr.ipv4.dst_addr"
           }
@@ -3648,7 +3198,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 84,
+            "line" : 58,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.ip_proto = (bit<9>)hdr.ipv4.protocol"
           }
@@ -3667,7 +3217,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 85,
+            "line" : 59,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.port_src = meta.meta.l4_src_port"
           }
@@ -3686,7 +3236,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 86,
+            "line" : 60,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.port_dst = meta.meta.l4_dst_port"
           }
@@ -3718,7 +3268,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 87,
+            "line" : 61,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.icmp_type = (bit<9>)hdr.icmp.type"
           }
@@ -3750,7 +3300,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 88,
+            "line" : 62,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.icmp_code = (bit<9>)hdr.icmp.code"
           }
@@ -3769,7 +3319,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 89,
+            "line" : 63,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.cm_ip = meta.cm_meta.cm_ip_final_sketch"
           }
@@ -3788,7 +3338,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 90,
+            "line" : 64,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.cm_5t = meta.cm_meta.cm_5t_final_sketch"
           }
@@ -3807,7 +3357,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 91,
+            "line" : 65,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.bm_src = meta.bm_meta.bm_1_sketch"
           }
@@ -3826,7 +3376,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 92,
+            "line" : 66,
             "column" : 8,
             "source_fragment" : "hdr.packet_in.bm_dst = meta.bm_meta.bm_2_sketch"
           }
@@ -3835,7 +3385,7 @@
     },
     {
       "name" : "c_ingress.send_to_cpu",
-      "id" : 26,
+      "id" : 22,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -3895,7 +3445,7 @@
     },
     {
       "name" : "c_ingress.set_out_port",
-      "id" : 27,
+      "id" : 23,
       "runtime_data" : [
         {
           "name" : "port",
@@ -3926,13 +3476,13 @@
     },
     {
       "name" : "c_ingress._drop",
-      "id" : 28,
+      "id" : 24,
       "runtime_data" : [],
       "primitives" : []
     },
     {
       "name" : "act",
-      "id" : 29,
+      "id" : 25,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -3949,7 +3499,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 83,
+            "line" : 86,
             "column" : 12,
             "source_fragment" : "standard_metadata.egress_spec = hdr.packet_out.egress_port"
           }
@@ -3964,7 +3514,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 84,
+            "line" : 87,
             "column" : 12,
             "source_fragment" : "hdr.packet_out.setInvalid()"
           }
@@ -3973,7 +3523,7 @@
     },
     {
       "name" : "act_0",
-      "id" : 30,
+      "id" : 26,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -4003,7 +3553,7 @@
     },
     {
       "name" : "act_1",
-      "id" : 31,
+      "id" : 27,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -4033,7 +3583,7 @@
     },
     {
       "name" : "act_2",
-      "id" : 32,
+      "id" : 28,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -4059,7 +3609,7 @@
     },
     {
       "name" : "act_3",
-      "id" : 33,
+      "id" : 29,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -4104,7 +3654,7 @@
     },
     {
       "name" : "act_4",
-      "id" : 34,
+      "id" : 30,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -4130,7 +3680,7 @@
     },
     {
       "name" : "act_5",
-      "id" : 35,
+      "id" : 31,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -4156,7 +3706,7 @@
     },
     {
       "name" : "act_6",
-      "id" : 36,
+      "id" : 32,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -4182,7 +3732,33 @@
     },
     {
       "name" : "act_7",
-      "id" : 37,
+      "id" : 33,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["userMetadata.threshold_meta", "flow_hash"]
+            },
+            {
+              "type" : "field",
+              "value" : ["userMetadata.cm_meta", "cm_5t_0_hash"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "includes/threshold.p4",
+            "line" : 72,
+            "column" : 8,
+            "source_fragment" : "meta.threshold_meta.flow_hash = meta.cm_meta.cm_5t_0_hash"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "act_8",
+      "id" : 34,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -4209,7 +3785,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 98,
+            "line" : 101,
             "column" : 16,
             "source_fragment" : "return"
           }
@@ -4217,8 +3793,8 @@
       ]
     },
     {
-      "name" : "act_8",
-      "id" : 38,
+      "name" : "act_9",
+      "id" : 35,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -4247,8 +3823,8 @@
       ]
     },
     {
-      "name" : "act_9",
-      "id" : 39,
+      "name" : "act_10",
+      "id" : 36,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -4256,7 +3832,7 @@
           "parameters" : [
             {
               "type" : "field",
-              "value" : ["scalars", "tmp_23"]
+              "value" : ["scalars", "tmp_16"]
             },
             {
               "type" : "expression",
@@ -4278,7 +3854,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 103,
+            "line" : 106,
             "column" : 34,
             "source_fragment" : "(bit<32>) standard_metadata.egress_spec"
           }
@@ -4292,12 +3868,12 @@
             },
             {
               "type" : "field",
-              "value" : ["scalars", "tmp_23"]
+              "value" : ["scalars", "tmp_16"]
             }
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 103,
+            "line" : 106,
             "column" : 12,
             "source_fragment" : "tx_port_counter.count((bit<32>) standard_metadata.egress_spec)"
           }
@@ -4305,8 +3881,8 @@
       ]
     },
     {
-      "name" : "act_10",
-      "id" : 40,
+      "name" : "act_11",
+      "id" : 37,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -4314,7 +3890,7 @@
           "parameters" : [
             {
               "type" : "field",
-              "value" : ["scalars", "tmp_24"]
+              "value" : ["scalars", "tmp_17"]
             },
             {
               "type" : "expression",
@@ -4336,7 +3912,7 @@
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 106,
+            "line" : 109,
             "column" : 34,
             "source_fragment" : "(bit<32>) standard_metadata.ingress_port"
           }
@@ -4350,12 +3926,12 @@
             },
             {
               "type" : "field",
-              "value" : ["scalars", "tmp_24"]
+              "value" : ["scalars", "tmp_17"]
             }
           ],
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 106,
+            "line" : 109,
             "column" : 12,
             "source_fragment" : "rx_port_counter.count((bit<32>) standard_metadata.ingress_port)"
           }
@@ -4385,14 +3961,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [38],
-          "actions" : ["act_8"],
+          "action_ids" : [35],
+          "actions" : ["act_9"],
           "base_default_next" : "node_3",
           "next_tables" : {
-            "act_8" : "node_3"
+            "act_9" : "node_3"
           },
           "default_entry" : {
-            "action_id" : 38,
+            "action_id" : 35,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -4403,7 +3979,7 @@
           "id" : 1,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 83,
+            "line" : 86,
             "column" : 42,
             "source_fragment" : "= hdr.packet_out.egress_port; ..."
           },
@@ -4414,14 +3990,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [29],
+          "action_ids" : [25],
           "actions" : ["act"],
-          "base_default_next" : "node_48",
+          "base_default_next" : "node_45",
           "next_tables" : {
-            "act" : "node_48"
+            "act" : "node_45"
           },
           "default_entry" : {
-            "action_id" : 29,
+            "action_id" : 25,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -4481,6 +4057,18 @@
             },
             {
               "match_type" : "ternary",
+              "name" : "hdr.udp.src_port",
+              "target" : ["udp", "src_port"],
+              "mask" : null
+            },
+            {
+              "match_type" : "ternary",
+              "name" : "hdr.udp.dst_port",
+              "target" : ["udp", "dst_port"],
+              "mask" : null
+            },
+            {
+              "match_type" : "ternary",
               "name" : "hdr.tcp.src_port",
               "target" : ["tcp", "src_port"],
               "mask" : null
@@ -4493,14 +4081,20 @@
             },
             {
               "match_type" : "ternary",
-              "name" : "hdr.udp.src_port",
-              "target" : ["udp", "src_port"],
+              "name" : "hdr.tcp.res",
+              "target" : ["tcp", "res"],
               "mask" : null
             },
             {
               "match_type" : "ternary",
-              "name" : "hdr.udp.dst_port",
-              "target" : ["udp", "dst_port"],
+              "name" : "hdr.tcp.ecn",
+              "target" : ["tcp", "ecn"],
+              "mask" : null
+            },
+            {
+              "match_type" : "ternary",
+              "name" : "hdr.tcp.ctrl",
+              "target" : ["tcp", "ctrl"],
               "mask" : null
             },
             {
@@ -4522,7 +4116,7 @@
           "with_counters" : true,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [27, 26, 28, 0],
+          "action_ids" : [23, 22, 24, 0],
           "actions" : ["c_ingress.set_out_port", "c_ingress.send_to_cpu", "c_ingress._drop", "NoAction"],
           "base_default_next" : null,
           "next_tables" : {
@@ -4546,14 +4140,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [30],
+          "action_ids" : [26],
           "actions" : ["act_0"],
           "base_default_next" : "node_8",
           "next_tables" : {
             "act_0" : "node_8"
           },
           "default_entry" : {
-            "action_id" : 30,
+            "action_id" : 26,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -4569,14 +4163,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [31],
+          "action_ids" : [27],
           "actions" : ["act_1"],
           "base_default_next" : "node_8",
           "next_tables" : {
             "act_1" : "node_8"
           },
           "default_entry" : {
-            "action_id" : 31,
+            "action_id" : 27,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -4801,14 +4395,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [33],
+          "action_ids" : [29],
           "actions" : ["act_3"],
           "base_default_next" : "node_17",
           "next_tables" : {
             "act_3" : "node_17"
           },
           "default_entry" : {
-            "action_id" : 33,
+            "action_id" : 29,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -4830,14 +4424,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [32],
+          "action_ids" : [28],
           "actions" : ["act_2"],
           "base_default_next" : "node_19",
           "next_tables" : {
             "act_2" : "node_19"
           },
           "default_entry" : {
-            "action_id" : 32,
+            "action_id" : 28,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -4859,14 +4453,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [34],
+          "action_ids" : [30],
           "actions" : ["act_4"],
           "base_default_next" : "node_21",
           "next_tables" : {
             "act_4" : "node_21"
           },
           "default_entry" : {
-            "action_id" : 34,
+            "action_id" : 30,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -4888,14 +4482,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [35],
+          "action_ids" : [31],
           "actions" : ["act_5"],
           "base_default_next" : "node_23",
           "next_tables" : {
             "act_5" : "node_23"
           },
           "default_entry" : {
-            "action_id" : 35,
+            "action_id" : 31,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -4917,14 +4511,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [36],
+          "action_ids" : [32],
           "actions" : ["act_6"],
           "base_default_next" : "tbl_cm_cm_register_write",
           "next_tables" : {
             "act_6" : "tbl_cm_cm_register_write"
           },
           "default_entry" : {
-            "action_id" : 36,
+            "action_id" : 32,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -5093,9 +4687,9 @@
           "direct_meters" : null,
           "action_ids" : [13],
           "actions" : ["c_ingress.bm.bm_new_pair"],
-          "base_default_next" : "tbl_threshold_threshold_hash",
+          "base_default_next" : "tbl_act_8",
           "next_tables" : {
-            "c_ingress.bm.bm_new_pair" : "tbl_threshold_threshold_hash"
+            "c_ingress.bm.bm_new_pair" : "tbl_act_8"
           },
           "default_entry" : {
             "action_id" : 13,
@@ -5105,13 +4699,42 @@
           }
         },
         {
-          "name" : "tbl_threshold_threshold_hash",
+          "name" : "tbl_act_8",
           "id" : 23,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 97,
+            "line" : 72,
+            "column" : 38,
+            "source_fragment" : "="
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [33],
+          "actions" : ["act_7"],
+          "base_default_next" : "tbl_threshold_global_traffic_counter_incr",
+          "next_tables" : {
+            "act_7" : "tbl_threshold_global_traffic_counter_incr"
+          },
+          "default_entry" : {
+            "action_id" : 33,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "tbl_threshold_global_traffic_counter_incr",
+          "id" : 24,
+          "source_info" : {
+            "filename" : "includes/threshold.p4",
+            "line" : 74,
             "column" : 8,
-            "source_fragment" : "threshold_hash()"
+            "source_fragment" : "global_traffic_counter_incr()"
           },
           "key" : [],
           "match_type" : "exact",
@@ -5121,10 +4744,10 @@
           "support_timeout" : false,
           "direct_meters" : null,
           "action_ids" : [14],
-          "actions" : ["c_ingress.threshold.threshold_hash"],
-          "base_default_next" : "tbl_threshold_threshold_hash2",
+          "actions" : ["c_ingress.threshold.global_traffic_counter_incr"],
+          "base_default_next" : "tbl_threshold_flow_traffic_counter_incr",
           "next_tables" : {
-            "c_ingress.threshold.threshold_hash" : "tbl_threshold_threshold_hash2"
+            "c_ingress.threshold.global_traffic_counter_incr" : "tbl_threshold_flow_traffic_counter_incr"
           },
           "default_entry" : {
             "action_id" : 14,
@@ -5134,13 +4757,13 @@
           }
         },
         {
-          "name" : "tbl_threshold_threshold_hash2",
-          "id" : 24,
+          "name" : "tbl_threshold_flow_traffic_counter_incr",
+          "id" : 25,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 98,
+            "line" : 75,
             "column" : 8,
-            "source_fragment" : "threshold_hash2()"
+            "source_fragment" : "flow_traffic_counter_incr()"
           },
           "key" : [],
           "match_type" : "exact",
@@ -5150,10 +4773,10 @@
           "support_timeout" : false,
           "direct_meters" : null,
           "action_ids" : [15],
-          "actions" : ["c_ingress.threshold.threshold_hash2"],
-          "base_default_next" : "tbl_threshold_threshold_hash3",
+          "actions" : ["c_ingress.threshold.flow_traffic_counter_incr"],
+          "base_default_next" : "tbl_threshold_check_flow_time",
           "next_tables" : {
-            "c_ingress.threshold.threshold_hash2" : "tbl_threshold_threshold_hash3"
+            "c_ingress.threshold.flow_traffic_counter_incr" : "tbl_threshold_check_flow_time"
           },
           "default_entry" : {
             "action_id" : 15,
@@ -5163,127 +4786,11 @@
           }
         },
         {
-          "name" : "tbl_threshold_threshold_hash3",
-          "id" : 25,
-          "source_info" : {
-            "filename" : "includes/threshold.p4",
-            "line" : 99,
-            "column" : 8,
-            "source_fragment" : "threshold_hash3()"
-          },
-          "key" : [],
-          "match_type" : "exact",
-          "type" : "simple",
-          "max_size" : 1024,
-          "with_counters" : false,
-          "support_timeout" : false,
-          "direct_meters" : null,
-          "action_ids" : [16],
-          "actions" : ["c_ingress.threshold.threshold_hash3"],
-          "base_default_next" : "tbl_threshold_threshold_hash4",
-          "next_tables" : {
-            "c_ingress.threshold.threshold_hash3" : "tbl_threshold_threshold_hash4"
-          },
-          "default_entry" : {
-            "action_id" : 16,
-            "action_const" : true,
-            "action_data" : [],
-            "action_entry_const" : true
-          }
-        },
-        {
-          "name" : "tbl_threshold_threshold_hash4",
+          "name" : "tbl_threshold_check_flow_time",
           "id" : 26,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 100,
-            "column" : 8,
-            "source_fragment" : "threshold_hash4()"
-          },
-          "key" : [],
-          "match_type" : "exact",
-          "type" : "simple",
-          "max_size" : 1024,
-          "with_counters" : false,
-          "support_timeout" : false,
-          "direct_meters" : null,
-          "action_ids" : [17],
-          "actions" : ["c_ingress.threshold.threshold_hash4"],
-          "base_default_next" : "tbl_threshold_traffic_counter_incr",
-          "next_tables" : {
-            "c_ingress.threshold.threshold_hash4" : "tbl_threshold_traffic_counter_incr"
-          },
-          "default_entry" : {
-            "action_id" : 17,
-            "action_const" : true,
-            "action_data" : [],
-            "action_entry_const" : true
-          }
-        },
-        {
-          "name" : "tbl_threshold_traffic_counter_incr",
-          "id" : 27,
-          "source_info" : {
-            "filename" : "includes/threshold.p4",
-            "line" : 102,
-            "column" : 8,
-            "source_fragment" : "traffic_counter_incr()"
-          },
-          "key" : [],
-          "match_type" : "exact",
-          "type" : "simple",
-          "max_size" : 1024,
-          "with_counters" : false,
-          "support_timeout" : false,
-          "direct_meters" : null,
-          "action_ids" : [19],
-          "actions" : ["c_ingress.threshold.traffic_counter_incr"],
-          "base_default_next" : "tbl_threshold_traffic_flow_incr",
-          "next_tables" : {
-            "c_ingress.threshold.traffic_counter_incr" : "tbl_threshold_traffic_flow_incr"
-          },
-          "default_entry" : {
-            "action_id" : 19,
-            "action_const" : true,
-            "action_data" : [],
-            "action_entry_const" : true
-          }
-        },
-        {
-          "name" : "tbl_threshold_traffic_flow_incr",
-          "id" : 28,
-          "source_info" : {
-            "filename" : "includes/threshold.p4",
-            "line" : 103,
-            "column" : 8,
-            "source_fragment" : "traffic_flow_incr()"
-          },
-          "key" : [],
-          "match_type" : "exact",
-          "type" : "simple",
-          "max_size" : 1024,
-          "with_counters" : false,
-          "support_timeout" : false,
-          "direct_meters" : null,
-          "action_ids" : [20],
-          "actions" : ["c_ingress.threshold.traffic_flow_incr"],
-          "base_default_next" : "tbl_threshold_check_flow_time",
-          "next_tables" : {
-            "c_ingress.threshold.traffic_flow_incr" : "tbl_threshold_check_flow_time"
-          },
-          "default_entry" : {
-            "action_id" : 20,
-            "action_const" : true,
-            "action_data" : [],
-            "action_entry_const" : true
-          }
-        },
-        {
-          "name" : "tbl_threshold_check_flow_time",
-          "id" : 29,
-          "source_info" : {
-            "filename" : "includes/threshold.p4",
-            "line" : 105,
+            "line" : 78,
             "column" : 8,
             "source_fragment" : "check_flow_time()"
           },
@@ -5294,14 +4801,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [18],
+          "action_ids" : [19],
           "actions" : ["c_ingress.threshold.check_flow_time"],
-          "base_default_next" : "node_39",
+          "base_default_next" : "node_36",
           "next_tables" : {
-            "c_ingress.threshold.check_flow_time" : "node_39"
+            "c_ingress.threshold.check_flow_time" : "node_36"
           },
           "default_entry" : {
-            "action_id" : 18,
+            "action_id" : 19,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -5309,10 +4816,10 @@
         },
         {
           "name" : "tbl_threshold_time_flow_update",
-          "id" : 30,
+          "id" : 27,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 108,
+            "line" : 83,
             "column" : 12,
             "source_fragment" : "time_flow_update()"
           },
@@ -5323,14 +4830,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [21],
+          "action_ids" : [16],
           "actions" : ["c_ingress.threshold.time_flow_update"],
-          "base_default_next" : "node_41",
+          "base_default_next" : "node_38",
           "next_tables" : {
-            "c_ingress.threshold.time_flow_update" : "node_41"
+            "c_ingress.threshold.time_flow_update" : "node_38"
           },
           "default_entry" : {
-            "action_id" : 21,
+            "action_id" : 16,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -5338,10 +4845,10 @@
         },
         {
           "name" : "tbl_threshold_check_flow_global_traffic",
-          "id" : 31,
+          "id" : 28,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 113,
+            "line" : 90,
             "column" : 12,
             "source_fragment" : "check_flow_global_traffic()"
           },
@@ -5352,14 +4859,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [24],
+          "action_ids" : [20],
           "actions" : ["c_ingress.threshold.check_flow_global_traffic"],
-          "base_default_next" : "node_43",
+          "base_default_next" : "node_40",
           "next_tables" : {
-            "c_ingress.threshold.check_flow_global_traffic" : "node_43"
+            "c_ingress.threshold.check_flow_global_traffic" : "node_40"
           },
           "default_entry" : {
-            "action_id" : 24,
+            "action_id" : 20,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -5367,10 +4874,10 @@
         },
         {
           "name" : "tbl_threshold_send_to_cpu_threshold",
-          "id" : 32,
+          "id" : 29,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 117,
+            "line" : 97,
             "column" : 16,
             "source_fragment" : "send_to_cpu_threshold()"
           },
@@ -5381,14 +4888,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [25],
+          "action_ids" : [21],
           "actions" : ["c_ingress.threshold.send_to_cpu_threshold"],
           "base_default_next" : "tbl_threshold_time_flow_update_0",
           "next_tables" : {
             "c_ingress.threshold.send_to_cpu_threshold" : "tbl_threshold_time_flow_update_0"
           },
           "default_entry" : {
-            "action_id" : 25,
+            "action_id" : 21,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -5396,10 +4903,10 @@
         },
         {
           "name" : "tbl_threshold_time_flow_update_0",
-          "id" : 33,
+          "id" : 30,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 118,
+            "line" : 101,
             "column" : 16,
             "source_fragment" : "time_flow_update()"
           },
@@ -5410,27 +4917,27 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [22],
+          "action_ids" : [17],
           "actions" : ["c_ingress.threshold.time_flow_update"],
-          "base_default_next" : "tbl_threshold_flow_traffic_reset",
+          "base_default_next" : "tbl_threshold_flow_traffic_counter_reset",
           "next_tables" : {
-            "c_ingress.threshold.time_flow_update" : "tbl_threshold_flow_traffic_reset"
+            "c_ingress.threshold.time_flow_update" : "tbl_threshold_flow_traffic_counter_reset"
           },
           "default_entry" : {
-            "action_id" : 22,
+            "action_id" : 17,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_threshold_flow_traffic_reset",
-          "id" : 34,
+          "name" : "tbl_threshold_flow_traffic_counter_reset",
+          "id" : 31,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 119,
+            "line" : 102,
             "column" : 16,
-            "source_fragment" : "flow_traffic_reset()"
+            "source_fragment" : "flow_traffic_counter_reset()"
           },
           "key" : [],
           "match_type" : "exact",
@@ -5439,25 +4946,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [23],
-          "actions" : ["c_ingress.threshold.flow_traffic_reset"],
-          "base_default_next" : "tbl_act_8",
+          "action_ids" : [18],
+          "actions" : ["c_ingress.threshold.flow_traffic_counter_reset"],
+          "base_default_next" : "tbl_act_9",
           "next_tables" : {
-            "c_ingress.threshold.flow_traffic_reset" : "tbl_act_8"
+            "c_ingress.threshold.flow_traffic_counter_reset" : "tbl_act_9"
           },
           "default_entry" : {
-            "action_id" : 23,
+            "action_id" : 18,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_act_8",
-          "id" : 35,
+          "name" : "tbl_act_9",
+          "id" : 32,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 98,
+            "line" : 101,
             "column" : 16,
             "source_fragment" : "return"
           },
@@ -5468,25 +4975,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [37],
-          "actions" : ["act_7"],
-          "base_default_next" : "node_48",
+          "action_ids" : [34],
+          "actions" : ["act_8"],
+          "base_default_next" : "node_45",
           "next_tables" : {
-            "act_7" : "node_48"
+            "act_8" : "node_45"
           },
           "default_entry" : {
-            "action_id" : 37,
+            "action_id" : 34,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_act_9",
-          "id" : 36,
+          "name" : "tbl_act_10",
+          "id" : 33,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 103,
+            "line" : 106,
             "column" : 12,
             "source_fragment" : "tx_port_counter.count((bit<32>) standard_metadata.egress_spec)"
           },
@@ -5497,25 +5004,25 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [39],
-          "actions" : ["act_9"],
-          "base_default_next" : "node_51",
+          "action_ids" : [36],
+          "actions" : ["act_10"],
+          "base_default_next" : "node_48",
           "next_tables" : {
-            "act_9" : "node_51"
+            "act_10" : "node_48"
           },
           "default_entry" : {
-            "action_id" : 39,
+            "action_id" : 36,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
           }
         },
         {
-          "name" : "tbl_act_10",
-          "id" : 37,
+          "name" : "tbl_act_11",
+          "id" : 34,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 106,
+            "line" : 109,
             "column" : 12,
             "source_fragment" : "rx_port_counter.count((bit<32>) standard_metadata.ingress_port)"
           },
@@ -5526,14 +5033,14 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [40],
-          "actions" : ["act_10"],
+          "action_ids" : [37],
+          "actions" : ["act_11"],
           "base_default_next" : null,
           "next_tables" : {
-            "act_10" : null
+            "act_11" : null
           },
           "default_entry" : {
-            "action_id" : 40,
+            "action_id" : 37,
             "action_const" : true,
             "action_data" : [],
             "action_entry_const" : true
@@ -5547,7 +5054,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 79,
+            "line" : 82,
             "column" : 12,
             "source_fragment" : "standard_metadata.ingress_port == CPU_PORT"
           },
@@ -5583,7 +5090,7 @@
             }
           },
           "true_next" : "tbl_cm_cm_ip_0_hash",
-          "false_next" : "node_48"
+          "false_next" : "node_45"
         },
         {
           "name" : "node_17",
@@ -5713,14 +5220,14 @@
             }
           },
           "true_next" : "tbl_bm_bm_new_pair",
-          "false_next" : "tbl_threshold_threshold_hash"
+          "false_next" : "tbl_act_8"
         },
         {
-          "name" : "node_39",
+          "name" : "node_36",
           "id" : 7,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 107,
+            "line" : 82,
             "column" : 12,
             "source_fragment" : "meta.threshold_meta.flow_time == (bit<48>)0"
           },
@@ -5739,14 +5246,14 @@
             }
           },
           "true_next" : "tbl_threshold_time_flow_update",
-          "false_next" : "node_41"
+          "false_next" : "node_38"
         },
         {
-          "name" : "node_41",
+          "name" : "node_38",
           "id" : 8,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 111,
+            "line" : 87,
             "column" : 12,
             "source_fragment" : "(standard_metadata.ingress_global_timestamp - meta.threshold_meta.flow_time) > (bit<48>)5000000"
           },
@@ -5785,14 +5292,14 @@
             }
           },
           "true_next" : "tbl_threshold_check_flow_global_traffic",
-          "false_next" : "tbl_act_8"
+          "false_next" : "tbl_act_9"
         },
         {
-          "name" : "node_43",
+          "name" : "node_40",
           "id" : 9,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 115,
+            "line" : 94,
             "column" : 16,
             "source_fragment" : "(meta.threshold_meta.flow_traffic * 10) > (meta.threshold_meta.global_traffic - meta.threshold_meta.flow_global_traffic)"
           },
@@ -5851,10 +5358,10 @@
             }
           },
           "true_next" : "tbl_threshold_send_to_cpu_threshold",
-          "false_next" : "tbl_act_8"
+          "false_next" : "tbl_act_9"
         },
         {
-          "name" : "node_48",
+          "name" : "node_45",
           "id" : 10,
           "expression" : {
             "type" : "expression",
@@ -5875,14 +5382,14 @@
             }
           },
           "false_next" : null,
-          "true_next" : "node_49"
+          "true_next" : "node_46"
         },
         {
-          "name" : "node_49",
+          "name" : "node_46",
           "id" : 11,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 102,
+            "line" : 105,
             "column" : 12,
             "source_fragment" : "standard_metadata.egress_spec < 255"
           },
@@ -5900,15 +5407,15 @@
               }
             }
           },
-          "true_next" : "tbl_act_9",
-          "false_next" : "node_51"
+          "true_next" : "tbl_act_10",
+          "false_next" : "node_48"
         },
         {
-          "name" : "node_51",
+          "name" : "node_48",
           "id" : 12,
           "source_info" : {
             "filename" : "flowstats.p4",
-            "line" : 105,
+            "line" : 108,
             "column" : 12,
             "source_fragment" : "standard_metadata.ingress_port < 255"
           },
@@ -5927,7 +5434,7 @@
             }
           },
           "false_next" : null,
-          "true_next" : "tbl_act_10"
+          "true_next" : "tbl_act_11"
         }
       ]
     },
@@ -5936,7 +5443,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "flowstats.p4",
-        "line" : 115,
+        "line" : 118,
         "column" : 8,
         "source_fragment" : "c_egress"
       },

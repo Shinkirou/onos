@@ -162,9 +162,6 @@ header k_ary_meta_t {
 
 header threshold_meta_t {
     bit<32> flow_hash;
-    bit<32> flow_hash2;
-    bit<32> flow_hash3;
-    bit<32> flow_hash4;
     bit<32> flow_traffic;
     bit<32> flow_global_traffic;
     bit<32> global_traffic;

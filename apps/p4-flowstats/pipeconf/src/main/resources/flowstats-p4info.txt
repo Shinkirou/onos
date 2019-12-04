@@ -51,36 +51,54 @@ tables {
   }
   match_fields {
     id: 8
-    name: "hdr.tcp.src_port"
-    bitwidth: 16
-    match_type: TERNARY
-  }
-  match_fields {
-    id: 9
-    name: "hdr.tcp.dst_port"
-    bitwidth: 16
-    match_type: TERNARY
-  }
-  match_fields {
-    id: 10
     name: "hdr.udp.src_port"
     bitwidth: 16
     match_type: TERNARY
   }
   match_fields {
-    id: 11
+    id: 9
     name: "hdr.udp.dst_port"
     bitwidth: 16
     match_type: TERNARY
   }
   match_fields {
+    id: 10
+    name: "hdr.tcp.src_port"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 11
+    name: "hdr.tcp.dst_port"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
     id: 12
+    name: "hdr.tcp.res"
+    bitwidth: 3
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 13
+    name: "hdr.tcp.ecn"
+    bitwidth: 3
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 14
+    name: "hdr.tcp.ctrl"
+    bitwidth: 6
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 15
     name: "hdr.icmp.type"
     bitwidth: 8
     match_type: TERNARY
   }
   match_fields {
-    id: 13
+    id: 16
     name: "hdr.icmp.code"
     bitwidth: 8
     match_type: TERNARY
@@ -200,51 +218,16 @@ actions {
 }
 actions {
   preamble {
-    id: 16784673
-    name: "c_ingress.threshold.threshold_hash"
-    alias: "threshold_hash"
+    id: 16801801
+    name: "c_ingress.threshold.global_traffic_counter_incr"
+    alias: "global_traffic_counter_incr"
   }
 }
 actions {
   preamble {
-    id: 16800818
-    name: "c_ingress.threshold.threshold_hash2"
-    alias: "threshold_hash2"
-  }
-}
-actions {
-  preamble {
-    id: 16795833
-    name: "c_ingress.threshold.threshold_hash3"
-    alias: "threshold_hash3"
-  }
-}
-actions {
-  preamble {
-    id: 16786239
-    name: "c_ingress.threshold.threshold_hash4"
-    alias: "threshold_hash4"
-  }
-}
-actions {
-  preamble {
-    id: 16826159
-    name: "c_ingress.threshold.check_flow_time"
-    alias: "check_flow_time"
-  }
-}
-actions {
-  preamble {
-    id: 16834620
-    name: "c_ingress.threshold.traffic_counter_incr"
-    alias: "traffic_counter_incr"
-  }
-}
-actions {
-  preamble {
-    id: 16793073
-    name: "c_ingress.threshold.traffic_flow_incr"
-    alias: "traffic_flow_incr"
+    id: 16786913
+    name: "c_ingress.threshold.flow_traffic_counter_incr"
+    alias: "flow_traffic_counter_incr"
   }
 }
 actions {
@@ -256,9 +239,16 @@ actions {
 }
 actions {
   preamble {
-    id: 16793179
-    name: "c_ingress.threshold.flow_traffic_reset"
-    alias: "flow_traffic_reset"
+    id: 16827318
+    name: "c_ingress.threshold.flow_traffic_counter_reset"
+    alias: "flow_traffic_counter_reset"
+  }
+}
+actions {
+  preamble {
+    id: 16826159
+    name: "c_ingress.threshold.check_flow_time"
+    alias: "check_flow_time"
   }
 }
 actions {
