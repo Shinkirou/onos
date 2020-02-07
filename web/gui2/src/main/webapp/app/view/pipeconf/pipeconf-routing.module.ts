@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-present Open Networking Foundation
+ * Copyright 2019-present Open Networking Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,20 @@
  * limitations under the License.
  */
 
-/**
- * Fabric pipeconf service implementations.
- */
-package org.onosproject.pipelines.fabric.impl.service;
+import {NgModule} from '@angular/core';
+import {PipeconfComponent} from './pipeconf/pipeconf.component';
+import {RouterModule, Routes} from '@angular/router';
+
+const pipeconfRoutes: Routes = [
+    {
+        path: '',
+        component: PipeconfComponent
+    }
+];
+
+@NgModule({
+    imports: [RouterModule.forChild(pipeconfRoutes)],
+    exports: [RouterModule]
+})
+export class PipeconfRoutingModule {
+}

@@ -36,7 +36,7 @@ import { LogService } from '../../log.service';
     './tooltip.css', './button-theme.css'
     ]
 })
-export class IconComponent implements OnInit, OnChanges {
+export class IconComponent implements OnChanges {
     @Input() iconId: string;
     @Input() iconSize: number = 20;
     @Input() toolTip: string = undefined;
@@ -50,14 +50,6 @@ export class IconComponent implements OnInit, OnChanges {
         private log: LogService
     ) {
         // Note: iconId is not available until initialization
-        this.log.debug('IconComponent constructed');
-    }
-
-    /**
-     * Icons are loaded in to the DOM under iconDefs
-     */
-    ngOnInit() {
-        this.is.loadIconDef(this.iconId);
     }
 
     /**
@@ -66,18 +58,5 @@ export class IconComponent implements OnInit, OnChanges {
      */
     ngOnChanges() {
         this.is.loadIconDef(this.iconId);
-    }
-
-    /**
-     * Get the corresponding iconTag from the glyphMapping in the iconService
-     * @returns The iconTag corresponding to the iconId of this instance
-     */
-    iconTag(): string {
-        const iconIdStr: string = glyphMapping.get(this.iconId);
-        if (iconIdStr) {
-            return '#' + iconIdStr;
-        } else {
-            return '#' + this.iconId;
-        }
     }
 }
