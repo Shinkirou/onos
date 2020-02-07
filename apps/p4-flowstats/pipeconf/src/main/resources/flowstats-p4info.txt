@@ -127,44 +127,44 @@ actions {
 }
 actions {
   preamble {
-    id: 16780871
-    name: "c_ingress.cm.cm_ip_0_hash"
-    alias: "cm_ip_0_hash"
+    id: 16831450
+    name: "c_ingress.cm.hash_ip_0"
+    alias: "hash_ip_0"
   }
 }
 actions {
   preamble {
-    id: 16840806
-    name: "c_ingress.cm.cm_ip_1_hash"
-    alias: "cm_ip_1_hash"
+    id: 16789981
+    name: "c_ingress.cm.hash_ip_1"
+    alias: "hash_ip_1"
   }
 }
 actions {
   preamble {
-    id: 16805096
-    name: "c_ingress.cm.cm_ip_2_hash"
-    alias: "cm_ip_2_hash"
+    id: 16800329
+    name: "c_ingress.cm.hash_ip_2"
+    alias: "hash_ip_2"
   }
 }
 actions {
   preamble {
-    id: 16822576
-    name: "c_ingress.cm.cm_5t_0_hash"
-    alias: "cm_5t_0_hash"
+    id: 16784467
+    name: "c_ingress.cm.hash_5t_0"
+    alias: "hash_5t_0"
   }
 }
 actions {
   preamble {
-    id: 16833659
-    name: "c_ingress.cm.cm_5t_1_hash"
-    alias: "cm_5t_1_hash"
+    id: 16824622
+    name: "c_ingress.cm.hash_5t_1"
+    alias: "hash_5t_1"
   }
 }
 actions {
   preamble {
-    id: 16805725
-    name: "c_ingress.cm.cm_5t_2_hash"
-    alias: "cm_5t_2_hash"
+    id: 16813875
+    name: "c_ingress.cm.hash_5t_2"
+    alias: "hash_5t_2"
   }
 }
 actions {
@@ -183,23 +183,23 @@ actions {
 }
 actions {
   preamble {
-    id: 16777379
-    name: "c_ingress.bm.bm_0_hash"
-    alias: "bm_0_hash"
+    id: 16839622
+    name: "c_ingress.bm.hash_0"
+    alias: "bm.hash_0"
   }
 }
 actions {
   preamble {
-    id: 16792044
-    name: "c_ingress.bm.bm_1_hash"
-    alias: "bm_1_hash"
+    id: 16783109
+    name: "c_ingress.bm.hash_1"
+    alias: "bm.hash_1"
   }
 }
 actions {
   preamble {
-    id: 16789814
-    name: "c_ingress.bm.bm_2_hash"
-    alias: "bm_2_hash"
+    id: 16820459
+    name: "c_ingress.bm.hash_2"
+    alias: "bm.hash_2"
   }
 }
 actions {
@@ -214,6 +214,83 @@ actions {
     id: 16794337
     name: "c_ingress.bm.bm_new_pair"
     alias: "bm_new_pair"
+  }
+}
+actions {
+  preamble {
+    id: 16835118
+    name: "c_ingress.ams.hash_0"
+    alias: "ams.hash_0"
+  }
+}
+actions {
+  preamble {
+    id: 16778923
+    name: "c_ingress.ams.hash_1"
+    alias: "ams.hash_1"
+  }
+}
+actions {
+  preamble {
+    id: 16824523
+    name: "c_ingress.ams.hash_2"
+    alias: "ams.hash_2"
+  }
+}
+actions {
+  preamble {
+    id: 16833966
+    name: "c_ingress.ams.hash_3"
+    alias: "hash_3"
+  }
+}
+actions {
+  preamble {
+    id: 16822077
+    name: "c_ingress.ams.hash_g_0"
+    alias: "hash_g_0"
+  }
+}
+actions {
+  preamble {
+    id: 16828602
+    name: "c_ingress.ams.hash_g_1"
+    alias: "hash_g_1"
+  }
+}
+actions {
+  preamble {
+    id: 16835606
+    name: "c_ingress.ams.hash_g_2"
+    alias: "hash_g_2"
+  }
+}
+actions {
+  preamble {
+    id: 16777501
+    name: "c_ingress.ams.hash_g_3"
+    alias: "hash_g_3"
+  }
+}
+actions {
+  preamble {
+    id: 16831766
+    name: "c_ingress.ams.ams_update"
+    alias: "ams_update"
+  }
+}
+actions {
+  preamble {
+    id: 16787395
+    name: "c_ingress.ams.ams_register_write"
+    alias: "ams_register_write"
+  }
+}
+actions {
+  preamble {
+    id: 16826202
+    name: "c_ingress.ams.ams_median"
+    alias: "ams_median"
   }
 }
 actions {
@@ -339,7 +416,7 @@ controller_packet_metadata {
   metadata {
     id: 2
     name: "timestamp"
-    bitwidth: 48
+    bitwidth: 64
   }
   metadata {
     id: 3
@@ -368,38 +445,43 @@ controller_packet_metadata {
   }
   metadata {
     id: 8
+    name: "tcp_flags"
+    bitwidth: 12
+  }
+  metadata {
+    id: 9
     name: "icmp_type"
     bitwidth: 9
   }
   metadata {
-    id: 9
+    id: 10
     name: "icmp_code"
     bitwidth: 9
   }
   metadata {
-    id: 10
+    id: 11
     name: "cm_ip"
     bitwidth: 32
   }
   metadata {
-    id: 11
+    id: 12
     name: "cm_5t"
     bitwidth: 32
   }
   metadata {
-    id: 12
+    id: 13
     name: "bm_src"
     bitwidth: 32
   }
   metadata {
-    id: 13
+    id: 14
     name: "bm_dst"
     bitwidth: 32
   }
   metadata {
-    id: 14
-    name: "_padding"
-    bitwidth: 4
+    id: 15
+    name: "ams"
+    bitwidth: 32
   }
 }
 controller_packet_metadata {
@@ -422,9 +504,9 @@ controller_packet_metadata {
 }
 registers {
   preamble {
-    id: 369116793
-    name: "c_ingress.cm.cm_ip_0_register"
-    alias: "cm_ip_0_register"
+    id: 369129813
+    name: "c_ingress.cm.register_ip_0"
+    alias: "register_ip_0"
   }
   type_spec {
     bitstring {
@@ -437,9 +519,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369123174
-    name: "c_ingress.cm.cm_ip_1_register"
-    alias: "cm_ip_1_register"
+    id: 369101696
+    name: "c_ingress.cm.register_ip_1"
+    alias: "register_ip_1"
   }
   type_spec {
     bitstring {
@@ -452,9 +534,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369101889
-    name: "c_ingress.cm.cm_ip_2_register"
-    alias: "cm_ip_2_register"
+    id: 369111070
+    name: "c_ingress.cm.register_ip_2"
+    alias: "register_ip_2"
   }
   type_spec {
     bitstring {
@@ -467,9 +549,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369132846
-    name: "c_ingress.cm.cm_ip_final_register"
-    alias: "cm_ip_final_register"
+    id: 369117925
+    name: "c_ingress.cm.register_ip_final"
+    alias: "register_ip_final"
   }
   type_spec {
     bitstring {
@@ -482,9 +564,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369146886
-    name: "c_ingress.cm.cm_5t_0_register"
-    alias: "cm_5t_0_register"
+    id: 369102533
+    name: "c_ingress.cm.register_5t_0"
+    alias: "register_5t_0"
   }
   type_spec {
     bitstring {
@@ -497,9 +579,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369119033
-    name: "c_ingress.cm.cm_5t_1_register"
-    alias: "cm_5t_1_register"
+    id: 369099725
+    name: "c_ingress.cm.register_5t_1"
+    alias: "register_5t_1"
   }
   type_spec {
     bitstring {
@@ -512,9 +594,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369125664
-    name: "c_ingress.cm.cm_5t_2_register"
-    alias: "cm_5t_2_register"
+    id: 369109107
+    name: "c_ingress.cm.register_5t_2"
+    alias: "register_5t_2"
   }
   type_spec {
     bitstring {
@@ -527,9 +609,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369162274
-    name: "c_ingress.cm.cm_5t_final_register"
-    alias: "cm_5t_final_register"
+    id: 369107773
+    name: "c_ingress.cm.register_5t_final"
+    alias: "register_5t_final"
   }
   type_spec {
     bitstring {
@@ -542,9 +624,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369151813
-    name: "c_ingress.bm.bm_0_register"
-    alias: "bm_0_register"
+    id: 369104579
+    name: "c_ingress.bm.register_0"
+    alias: "bm.register_0"
   }
   type_spec {
     bitstring {
@@ -557,9 +639,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369153585
-    name: "c_ingress.bm.bm_1_register"
-    alias: "bm_1_register"
+    id: 369130481
+    name: "c_ingress.bm.register_1"
+    alias: "bm.register_1"
   }
   type_spec {
     bitstring {
@@ -572,9 +654,99 @@ registers {
 }
 registers {
   preamble {
-    id: 369138825
-    name: "c_ingress.bm.bm_2_register"
-    alias: "bm_2_register"
+    id: 369155964
+    name: "c_ingress.bm.register_2"
+    alias: "bm.register_2"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369108953
+    name: "c_ingress.ams.register_0"
+    alias: "ams.register_0"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369163337
+    name: "c_ingress.ams.register_1"
+    alias: "ams.register_1"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369143530
+    name: "c_ingress.ams.register_2"
+    alias: "ams.register_2"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369132448
+    name: "c_ingress.ams.register_3"
+    alias: "register_3"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369103739
+    name: "c_ingress.ams.register_sum"
+    alias: "register_sum"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 4
+}
+registers {
+  preamble {
+    id: 369130731
+    name: "c_ingress.ams.register_final"
+    alias: "register_final"
   }
   type_spec {
     bitstring {

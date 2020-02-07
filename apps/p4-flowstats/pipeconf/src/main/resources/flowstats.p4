@@ -8,6 +8,7 @@
 #include "includes/deparser.p4"
 #include "includes/cmSketch.p4"
 #include "includes/bmSketch.p4"
+#include "includes/amsSketch.p4"
 #include "includes/threshold.p4"
 
 //------------------------------------------------------------------------------
@@ -24,6 +25,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 	// control blocks instantiations
 	c_cmSketch()    cm;
     c_bmSketch()    bm;
+    c_amsSketch()   ams;
     c_threshold()   threshold;
     // c_karySketch()  kary;
 
@@ -93,6 +95,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
   
 				cm.apply(hdr, meta, standard_metadata);                 
                 bm.apply(hdr, meta, standard_metadata); 
+                ams.apply(hdr, meta, standard_metadata);
 
                 threshold.apply(hdr, meta, standard_metadata);           
 

@@ -55,19 +55,21 @@ header icmp_t {
 @controller_header("packet_in")
 header packet_in_header_t {
     bit<9>  ingress_port;
-    bit<48> timestamp;
+    bit<64> timestamp;
     bit<32> ip_src;
     bit<32> ip_dst;
     bit<9>  ip_proto;
     bit<16> port_src;
     bit<16> port_dst;
+    bit<12> tcp_flags;
     bit<9>  icmp_type;
     bit<9>  icmp_code;
     bit<32> cm_ip;
     bit<32> cm_5t;
     bit<32> bm_src;
     bit<32> bm_dst;
-    bit<4>  _padding;
+    bit<32> ams;
+    // bit<4>  _padding;
 }
 
 // Packet-out header. Prepended to packets received by the controller and used
@@ -94,74 +96,94 @@ header meta_t {
 }
 
 header cm_meta_t {
-    bit<32> cm_ip_0_hash;
-    bit<32> cm_ip_1_hash;
-    bit<32> cm_ip_2_hash;
-    bit<32> cm_ip_0_sketch;
-    bit<32> cm_ip_1_sketch;
-    bit<32> cm_ip_2_sketch;
-    bit<32> cm_ip_final_sketch;
-    bit<32> cm_5t_0_hash;
-    bit<32> cm_5t_1_hash;
-    bit<32> cm_5t_2_hash;
-    bit<32> cm_5t_0_sketch;
-    bit<32> cm_5t_1_sketch;
-    bit<32> cm_5t_2_sketch;
-    bit<32> cm_5t_final_sketch;
+    bit<32> hash_ip_0;
+    bit<32> hash_ip_1;
+    bit<32> hash_ip_2;
+    bit<32> sketch_ip_0;
+    bit<32> sketch_ip_1;
+    bit<32> sketch_ip_2;
+    bit<32> sketch_ip_final;
+    bit<32> hash_5t_0;
+    bit<32> hash_5t_1;
+    bit<32> hash_5t_2;
+    bit<32> sketch_5t_0;
+    bit<32> sketch_5t_1;
+    bit<32> sketch_5t_2;
+    bit<32> sketch_5t_final;
 }
 
 header bm_meta_t {
-    bit<32> bm_0_hash;
-    bit<32> bm_1_hash;
-    bit<32> bm_2_hash;
-    bit<32> bm_0_sketch;
-    bit<32> bm_1_sketch;
-    bit<32> bm_2_sketch;
+    bit<32> hash_0;
+    bit<32> hash_1;
+    bit<32> hash_2;
+    bit<32> sketch_0;
+    bit<32> sketch_1;
+    bit<32> sketch_2;
 }
 
 header k_ary_meta_t {
     bit<32> t_interval;
-    bit<32> k_ary_sum;
-    bit<32> k_ary_median;
-    bit<32> k_ary_0_hash;
-    bit<32> k_ary_1_hash;
-    bit<32> k_ary_2_hash;
-    bit<32> k_ary_3_hash;
-    bit<32> k_ary_4_hash;
-    bit<32> k_ary_0_sketch;
-    bit<32> k_ary_1_sketch;
-    bit<32> k_ary_2_sketch;
-    bit<32> k_ary_3_sketch;
-    bit<32> k_ary_4_sketch;
-    bit<32> k_ary_0_sketch_old;
-    bit<32> k_ary_1_sketch_old;
-    bit<32> k_ary_2_sketch_old;
-    bit<32> k_ary_3_sketch_old;
-    bit<32> k_ary_4_sketch_old;    
-    bit<32> k_ary_0_forecast;
-    bit<32> k_ary_1_forecast;
-    bit<32> k_ary_2_forecast;
-    bit<32> k_ary_3_forecast;
-    bit<32> k_ary_4_forecast;
-    bit<32> k_ary_0_error_sketch;
-    bit<32> k_ary_1_error_sketch;
-    bit<32> k_ary_2_error_sketch;
-    bit<32> k_ary_3_error_sketch;
-    bit<32> k_ary_4_error_sketch;
+    bit<32> sum;
+    bit<32> median;
+    bit<32> hash_0;
+    bit<32> hash_1;
+    bit<32> hash_2;
+    bit<32> hash_3;
+    bit<32> hash_4;
+    bit<32> sketch_0;
+    bit<32> sketch_1;
+    bit<32> sketch_2;
+    bit<32> sketch_3;
+    bit<32> sketch_4;
+    bit<32> sketch_old_0;
+    bit<32> sketch_old_1;
+    bit<32> sketch_old_2;
+    bit<32> sketch_old_3;
+    bit<32> sketch_old_4;    
+    bit<32> forecast_0;
+    bit<32> forecast_1;
+    bit<32> forecast_2;
+    bit<32> forecast_3;
+    bit<32> forecast_4;
+    bit<32> error_0;
+    bit<32> error_1;
+    bit<32> error_2;
+    bit<32> error_3;
+    bit<32> error_4;
     bit<32> est_row_0;
     bit<32> est_row_1;
     bit<32> est_row_2;
     bit<32> est_row_3;
     bit<32> est_row_4;
-    bit<32> k_ary_0_est_F2_sum;
-    bit<32> k_ary_1_est_F2_sum;
-    bit<32> k_ary_2_est_F2_sum;
-    bit<32> k_ary_3_est_F2_sum;
-    bit<32> k_ary_4_est_F2_sum;    
+    bit<32> est_F2_sum_0;
+    bit<32> est_F2_sum_1;
+    bit<32> est_F2_sum_2;
+    bit<32> est_F2_sum_3;
+    bit<32> est_F2_sum_4;    
+}
+
+header ams_meta_t {
+    bit<32> hash_0;
+    bit<32> hash_1;
+    bit<32> hash_2;
+    bit<32> hash_3;
+    bit<32> hash_g_0;
+    bit<32> hash_g_1;
+    bit<32> hash_g_2;
+    bit<32> hash_g_3;
+    bit<32> sketch_0;
+    bit<32> sketch_1;
+    bit<32> sketch_2;
+    bit<32> sketch_3;
+    bit<32> sum_0;
+    bit<32> sum_1;
+    bit<32> sum_2;
+    bit<32> sum_3;
+    bit<32> sketch_final;
 }
 
 header threshold_meta_t {
-    bit<32> flow_hash;
+    bit<32> hash_flow;
     bit<32> flow_traffic;
     bit<32> flow_global_traffic;
     bit<32> global_traffic;
@@ -171,8 +193,9 @@ header threshold_meta_t {
 
 struct metadata_t {
     meta_t              meta;
-    cm_meta_t           cm_meta;
-    bm_meta_t           bm_meta;
-    k_ary_meta_t        k_ary_meta;
-    threshold_meta_t    threshold_meta;
+    cm_meta_t           cm;
+    bm_meta_t           bm;
+    k_ary_meta_t        k_ary;
+    ams_meta_t          ams;
+    threshold_meta_t    threshold;
 }
