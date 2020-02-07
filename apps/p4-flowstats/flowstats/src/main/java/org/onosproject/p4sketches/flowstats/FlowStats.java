@@ -201,8 +201,7 @@ public class FlowStats {
             icmpCodeString = Short.toString(((IcmpCodeCriterion) flowRule.selector().getCriterion(Type.ICMPV4_CODE)).icmpCode());
         } catch (NullPointerException e) {
             e.printStackTrace();
-        }
-                                                 
+        }                                        
 
         if (ethSrcString.equals("") || ethDstString.equals("") || ipSrcString.equals("")  || ipDstString.equals("")) {
             return;
@@ -266,7 +265,15 @@ public class FlowStats {
 
     private Long checkFlowUpdate(Long flowPackets, Long flowId) {
 
-        Long flowPacketsOld = Long.parseLong(flowPacketsMap.get(flowId));
+        Long flowPacketsOld = 0L;
+
+        try {
+            flowPacketsOld = Long.parseLong(flowPacketsMap.get(flowId));    
+        } catch(NumberFormatException e) {
+            e.printStackTrace();
+            return 0L;
+        }
+        
         
         if ((flowPackets.equals(0L)) && (flowPacketsOld.equals(0L))) {
             return 1L;

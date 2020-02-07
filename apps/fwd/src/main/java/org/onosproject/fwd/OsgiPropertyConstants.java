@@ -26,8 +26,9 @@ public final class OsgiPropertyConstants {
     static final String  PACKET_OUT_OFPP_TABLE  = "packetOutOfppTable";
     static final boolean PACKET_OUT_OFPP_TABLE_DEFAULT = false;
 
+    // Changed flow timeout from 10s to 999999 (effectively removing timeout).
     static final String FLOW_TIMEOUT = "flowTimeout";
-    static final int FLOW_TIMEOUT_DEFAULT = 10;
+    static final int FLOW_TIMEOUT_DEFAULT = 999999;
 
     static final String FLOW_PRIORITY = "flowPriority";
     static final int FLOW_PRIORITY_DEFAULT = 10;

@@ -68,6 +68,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.io.IOException;
+import java.nio.LongBuffer;
+
+import java.net.InetAddress;
 
 /**
  * Implementation of a pipeline interpreter for the flowstats.p4 program.
@@ -89,12 +92,14 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     private static final String IP_PROTO            = "ip_proto";
     private static final String PORT_SRC            = "port_src";
     private static final String PORT_DST            = "port_dst";
+    private static final String TCP_FLAGS           = "tcp_flags";
     private static final String ICMP_TYPE           = "icmp_type";
     private static final String ICMP_CODE           = "icmp_code";
     private static final String CM_IP               = "cm_ip";
     private static final String CM_5T               = "cm_5t";
     private static final String BM_SRC              = "bm_src";
     private static final String BM_DST              = "bm_dst";
+    private static final String AMS                 = "ams";
     private static final int PORT_FIELD_BITWIDTH    = 9;
 
     private static final String TCP     = "tcp";
@@ -111,6 +116,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     private static final PiMatchFieldId TCP_DST_ID      = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "dst_port");
     private static final PiMatchFieldId UDP_SRC_ID      = PiMatchFieldId.of(HDR + DOT + UDP + DOT + "src_port");
     private static final PiMatchFieldId UDP_DST_ID      = PiMatchFieldId.of(HDR + DOT + UDP + DOT + "dst_port");
+    private static final PiMatchFieldId TCP_FLAGS_ID    = PiMatchFieldId.of(HDR + DOT + TCP + DOT + "flags");
     private static final PiMatchFieldId ICMP_TYPE_ID    = PiMatchFieldId.of(HDR + DOT + ICMP + DOT + "type");
     private static final PiMatchFieldId ICMP_CODE_ID    = PiMatchFieldId.of(HDR + DOT + ICMP + DOT + "code");
     private static final PiMatchFieldId ETH_TYPE_ID     = PiMatchFieldId.of(HDR + DOT + ETHERNET + DOT + "ether_type");
@@ -140,9 +146,18 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                     .put(Criterion.Type.TCP_DST, TCP_DST_ID)
                     .put(Criterion.Type.UDP_SRC, UDP_SRC_ID)
                     .put(Criterion.Type.UDP_DST, UDP_DST_ID)
+                    .put(Criterion.Type.TCP_FLAGS, TCP_FLAGS_ID)
                     .put(Criterion.Type.ICMPV4_TYPE, ICMP_TYPE_ID)
                     .put(Criterion.Type.ICMPV4_CODE, ICMP_CODE_ID)
                     .build();
+
+    private static final int sizeOfIntInHalfBytes = 8;
+    private static final int numberOfBitsInAHalfByte = 4;
+    private static final int halfByte = 0x0F;
+    private static final char[] hexDigits = { 
+    '0', '1', '2', '3', '4', '5', '6', '7', 
+    '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+    };
 
     @Override
     public Optional<PiMatchFieldId> mapCriterionType(Criterion.Type type) {
@@ -280,6 +295,11 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                 .findFirst(); 
 
         // Returns the ingress port packet metadata.
+        Optional<PiPacketMetadata> packetMetadataTcpFlags = packetIn.metadatas().stream()
+                .filter(metadata -> metadata.id().toString().equals(TCP_FLAGS))
+                .findFirst();                
+
+        // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadataIcmpType = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(ICMP_TYPE))
                 .findFirst(); 
@@ -307,51 +327,101 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
         // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadataBmDst = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(BM_DST))
-                .findFirst();                                                                                                                
+                .findFirst();   
+
+        // Returns the ingress port packet metadata.
+        Optional<PiPacketMetadata> packetMetadataAms = packetIn.metadatas().stream()
+                .filter(metadata -> metadata.id().toString().equals(AMS))
+                .findFirst();                                                                                                                               
 
         try {
 
             String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS").format(new Date());
             String currentUsersHomeDir = System.getProperty("user.home");
             String otherFolder = currentUsersHomeDir + File.separator + "Documents" + File.separator + "flow-stats" + File.separator;
-            java.nio.file.Path txtPath = Paths.get(otherFolder + "threshold" + ".txt");             
+            java.nio.file.Path txtPath = Paths.get(otherFolder + "threshold" + ".csv");             
 
             if (packetMetadataIpDst.isPresent() && packetMetadataIpSrc.isPresent()) {
 
                 ByteBuffer tsBB = packetMetadataTs.get().value().asReadOnlyBuffer();
-                int ts = tsBB.getInt();
-                short ts1 = tsBB.getShort();
-                int ts1Int = ts1;
-                String tsString = Integer.toString(ts); 
-                String ts1String = Integer.toString(ts1Int);
+                long ts = tsBB.getLong();
+                String tsString = Long.toString(ts);
                 
                 ByteBuffer ipSrcBB = packetMetadataIpSrc.get().value().asReadOnlyBuffer();
                 int ipSrc = ipSrcBB.getInt();
-                String ipSrcString = Integer.toString(ipSrc);
+                String ipSrcHex = decToHex(ipSrc);
+                String ipSrcString = InetAddress.getByAddress(hexStringToByteArray(ipSrcHex)).toString().split("/")[1];
 
                 ByteBuffer ipDstBB = packetMetadataIpDst.get().value().asReadOnlyBuffer();
                 int ipDst = ipDstBB.getInt();
-                String ipDstString = Integer.toString(ipDst);
+                String ipDstHex = decToHex(ipDst);
+                String ipDstString = InetAddress.getByAddress(hexStringToByteArray(ipDstHex)).toString().split("/")[1];
 
                 ByteBuffer ipProtoBB = packetMetadataIpProto.get().value().asReadOnlyBuffer();
                 short ipProto = ipProtoBB.getShort();
-                String ipProtoString = Short.toString(ipProto);                
+                String ipProtoString = "";
+                if (ipProto > 0) {
+                    ipProtoString = Short.toString(ipProto);
+                } else {
+                    String ipProtoHex = decToHex(ipProto & 0xffff);
+                    int ipProtoParsed = (int) Long.parseLong(ipProtoHex, 16);
+                    ipProtoString = Integer.toString(ipProtoParsed);
+                }
 
                 ByteBuffer portSrcBB = packetMetadataPortSrc.get().value().asReadOnlyBuffer();
                 short portSrc = portSrcBB.getShort();
-                String portSrcString = Short.toString(portSrc);
+                String portSrcString = "";
+                if (portSrc > 0) {
+                    portSrcString = Short.toString(portSrc);
+                } else {
+                    String portSrcHex = decToHex(portSrc & 0xffff);
+                    int portSrcParsed = (int) Long.parseLong(portSrcHex, 16);
+                    portSrcString = Integer.toString(portSrcParsed);
+                }
 
                 ByteBuffer portDstBB = packetMetadataPortDst.get().value().asReadOnlyBuffer();
                 short portDst = portDstBB.getShort();
-                String portDstString = Short.toString(portDst);
+                String portDstString = "";
+                if (portDst > 0) {
+                    portDstString = Short.toString(portDst);
+                } else {
+                    String portDstHex = decToHex(portDst & 0xffff);
+                    int portDstParsed = (int) Long.parseLong(portDstHex, 16);
+                    portDstString = Integer.toString(portDstParsed);
+                }
+
+                ByteBuffer tcpFlagsBB = packetMetadataTcpFlags.get().value().asReadOnlyBuffer();
+                short tcpFlags = tcpFlagsBB.getShort();
+                String tcpFlagsString = "";
+                if (tcpFlags > 0) {
+                    tcpFlagsString = Short.toString(tcpFlags);
+                } else {
+                    String tcpFlagsHex = decToHex(tcpFlags & 0xffff);
+                    int tcpFlagsParsed = (int) Long.parseLong(tcpFlagsHex, 16);
+                    tcpFlagsString = Integer.toString(tcpFlagsParsed);
+                }                                                
 
                 ByteBuffer icmpTypeBB = packetMetadataIcmpType.get().value().asReadOnlyBuffer();
                 short icmpType = icmpTypeBB.getShort();
-                String icmpTypeString = Short.toString(icmpType);
+                String icmpTypeString = "";
+                if (icmpType > 0) {
+                    icmpTypeString = Short.toString(icmpType);
+                } else {
+                    String icmpTypeHex = decToHex(icmpType & 0xffff);
+                    int icmpTypeParsed = (int) Long.parseLong(icmpTypeHex, 16);
+                    icmpTypeString = Integer.toString(icmpTypeParsed);
+                }
 
                 ByteBuffer icmpCodeBB = packetMetadataIcmpCode.get().value().asReadOnlyBuffer();
                 short icmpCode = icmpCodeBB.getShort();
-                String icmpCodeString = Short.toString(icmpCode);                
+                String icmpCodeString = ""; 
+                if (icmpCode > 0) {
+                    icmpCodeString = Short.toString(icmpCode);
+                } else {
+                    String icmpCodeHex = decToHex(icmpCode & 0xffff);
+                    int icmpCodeParsed = (int) Long.parseLong(icmpCodeHex, 16);
+                    icmpCodeString = Integer.toString(icmpCodeParsed);
+                }                               
 
                 ByteBuffer cmIpBB = packetMetadataCmIp.get().value().asReadOnlyBuffer();
                 int cmIp = cmIpBB.getInt();
@@ -367,23 +437,28 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
                 ByteBuffer bmDstBB = packetMetadataBmDst.get().value().asReadOnlyBuffer();
                 int bmDst = bmDstBB.getInt();
-                String bmDstString = Integer.toString(bmDst);                                                                                
+                String bmDstString = Integer.toString(bmDst);
+
+                ByteBuffer amsBB = packetMetadataAms.get().value().asReadOnlyBuffer();
+                int ams = amsBB.getInt();
+                String amsString = Integer.toString(ams);                                                                                                
 
                 if ((ipSrc != 0) && (ipDst != 0)) {
 
                     String flowStats =  tsString + "," + 
-                                        ts1String + "," + 
                                         ipSrcString + "," +
                                         ipDstString + "," + 
                                         ipProtoString + "," +
                                         portSrcString + "," + 
-                                        portDstString + "," + 
+                                        portDstString + "," +
+                                        tcpFlagsString + "," + 
                                         icmpTypeString + "," +
                                         icmpCodeString + "," +
                                         cmIpString + "," +
                                         cm5tString + "," +
                                         bmSrcString + "," +
-                                        bmDstString;
+                                        bmDstString + "," + 
+                                        amsString;
                     
                     Files.write(txtPath, Arrays.asList(flowStats), StandardCharsets.UTF_8,
                     Files.exists(txtPath) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);                    
@@ -426,4 +501,26 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                     "Port number %d too big, %s", portNumber, e.getMessage()));
         }
     }
+
+    public static String decToHex(int dec) {
+        StringBuilder hexBuilder = new StringBuilder(sizeOfIntInHalfBytes);
+        hexBuilder.setLength(sizeOfIntInHalfBytes);
+        for (int i = sizeOfIntInHalfBytes - 1; i >= 0; --i)
+        {
+          int j = dec & halfByte;
+          hexBuilder.setCharAt(i, hexDigits[j]);
+          dec >>= numberOfBitsInAHalfByte;
+        }
+        return hexBuilder.toString(); 
+    }
+
+    public static byte[] hexStringToByteArray(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                                 + Character.digit(s.charAt(i+1), 16));
+        }
+        return data;
+    }    
 }
