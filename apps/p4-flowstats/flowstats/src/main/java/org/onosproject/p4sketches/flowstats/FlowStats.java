@@ -94,17 +94,6 @@ public class FlowStats {
 
     private static Map<Long,String> flowPacketsMap  = new ConcurrentHashMap<Long,String>();
     private static Map<Long,String> flowBytesMap    = new ConcurrentHashMap<Long,String>();
-    private static Map<Long,String> flowEthSrcMap   = new ConcurrentHashMap<Long,String>();
-    private static Map<Long,String> flowEthDstMap   = new ConcurrentHashMap<Long,String>();
-    private static Map<Long,String> flowIpSrcMap    = new ConcurrentHashMap<Long,String>();
-    private static Map<Long,String> flowIpDstMap    = new ConcurrentHashMap<Long,String>();
-    private static Map<Long,String> flowIpProtoMap  = new ConcurrentHashMap<Long,String>();
-    private static Map<Long,String> flowTcpSrcMap   = new ConcurrentHashMap<Long,String>();
-    private static Map<Long,String> flowTcpDstMap   = new ConcurrentHashMap<Long,String>();
-    private static Map<Long,String> flowUdpSrcMap   = new ConcurrentHashMap<Long,String>();
-    private static Map<Long,String> flowUdpDstMap   = new ConcurrentHashMap<Long,String>();
-    private static Map<Long,String> flowIcmpTypeMap = new ConcurrentHashMap<Long,String>();
-    private static Map<Long,String> flowIcmpCodeMap = new ConcurrentHashMap<Long,String>();
 
     // Aux structs for the space-saving algorithm flow count. 
     private static Long globalMinFlowCount = 1L;
@@ -166,39 +155,12 @@ public class FlowStats {
         String ethDstString     = "";
         String ipSrcString      = "";
         String ipDstString      = "";
-        String ipProtocolString = "";
-        String portSrcString    = "";
-        String portDstString    = "";
-        String icmpTypeString   = "";
-        String icmpCodeString   = "";
 
         try {
             ethSrcString = ((EthCriterion) flowRule.selector().getCriterion(Type.ETH_SRC)).mac().toString();     
             ethDstString = ((EthCriterion) flowRule.selector().getCriterion(Type.ETH_DST)).mac().toString(); 
             ipSrcString  = ((IPCriterion) flowRule.selector().getCriterion(Type.IPV4_SRC)).ip().address().toString();  
             ipDstString  = ((IPCriterion) flowRule.selector().getCriterion(Type.IPV4_DST)).ip().address().toString();
-            ipProtocolString = Short.toString(((IPProtocolCriterion) flowRule.selector().getCriterion(Type.IP_PROTO)).protocol());      
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            portSrcString = ((TcpPortCriterion) flowRule.selector().getCriterion(Type.TCP_SRC)).tcpPort().toString();
-            portDstString = ((TcpPortCriterion) flowRule.selector().getCriterion(Type.TCP_DST)).tcpPort().toString();        
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            portSrcString = ((UdpPortCriterion) flowRule.selector().getCriterion(Type.UDP_SRC)).udpPort().toString();
-            portDstString = ((UdpPortCriterion) flowRule.selector().getCriterion(Type.UDP_DST)).udpPort().toString();         
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            icmpTypeString = Short.toString(((IcmpTypeCriterion) flowRule.selector().getCriterion(Type.ICMPV4_TYPE)).icmpType());       
-            icmpCodeString = Short.toString(((IcmpCodeCriterion) flowRule.selector().getCriterion(Type.ICMPV4_CODE)).icmpCode());
         } catch (NullPointerException e) {
             e.printStackTrace();
         }                                        
@@ -208,8 +170,8 @@ public class FlowStats {
         }
 
         if ((ipSrcString.equals("10.0.0.1")) && (ipDstString.equals("10.0.0.2"))) {
-            Thread threadWriteToFile = new Thread(runnable);
-            threadWriteToFile.start();
+            // Thread threadWriteToFile = new Thread(runnable);
+            // threadWriteToFile.start();
             flowRuleService.removeFlowRules(flowRule);
             return;
         }
@@ -226,23 +188,6 @@ public class FlowStats {
         String flowBytesString   = Long.toString(flowEntry.bytes());
 
         Long flowId = flowRule.id().value();
-
-        flowEthSrcMap.putIfAbsent(flowId, ethSrcString);
-        flowEthDstMap.putIfAbsent(flowId, ethDstString);
-        flowIpSrcMap.putIfAbsent(flowId, ipSrcString);
-        flowIpDstMap.putIfAbsent(flowId, ipDstString);
-        flowIpProtoMap.putIfAbsent(flowId, ipProtocolString);
-
-        if (ipProtocolString.equals("6")) {
-            flowTcpSrcMap.putIfAbsent(flowId, portSrcString);
-            flowTcpDstMap.putIfAbsent(flowId, portDstString);
-        } else if (ipProtocolString.equals("17")) {
-            flowUdpSrcMap.putIfAbsent(flowId, portSrcString);
-            flowUdpDstMap.putIfAbsent(flowId, portDstString);
-        } else if (ipProtocolString.equals("1")) {
-            flowIcmpTypeMap.putIfAbsent(flowId, icmpTypeString);
-            flowIcmpCodeMap.putIfAbsent(flowId, icmpCodeString);
-        }
 
         // Compares the number of packets stored in the flow map with the current controller value.
         // checkFlowUpdate returns the number of new packets belonging to the flow.
@@ -319,6 +264,7 @@ public class FlowStats {
         }
     }
 
+    /*
     Runnable runnable = () -> {
         
         try {
@@ -371,6 +317,7 @@ public class FlowStats {
             e.printStackTrace();
         }
     };
+    */
 
     private FlowEntry getFlowEntry(FlowRule flowRule) {
         
