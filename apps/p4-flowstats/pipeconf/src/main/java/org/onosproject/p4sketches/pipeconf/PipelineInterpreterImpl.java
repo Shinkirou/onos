@@ -72,6 +72,11 @@ import java.nio.LongBuffer;
 
 import java.net.InetAddress;
 
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  * Implementation of a pipeline interpreter for the flowstats.p4 program.
  */
@@ -445,23 +450,25 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
                 if ((ipSrc != 0) && (ipDst != 0)) {
 
-                    String flowStats =  tsString + "," + 
-                                        ipSrcString + "," +
-                                        ipDstString + "," + 
-                                        ipProtoString + "," +
-                                        portSrcString + "," + 
-                                        portDstString + "," +
-                                        tcpFlagsString + "," + 
-                                        icmpTypeString + "," +
-                                        icmpCodeString + "," +
-                                        cmIpString + "," +
-                                        cm5tString + "," +
-                                        bmSrcString + "," +
-                                        bmDstString + "," + 
-                                        amsString;
-                    
-                    Files.write(txtPath, Arrays.asList(flowStats), StandardCharsets.UTF_8,
-                    Files.exists(txtPath) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);                    
+                    String flowStats = "{\"timestamp\": \"" + tsString + "\" , " +
+                                        "\"ipSrc\": \"" + ipSrcString + "\" , " +
+                                        "\"ipDst\": \"" + ipDstString + "\" , " +
+                                        "\"ipProto\": \"" + ipProtoString + "\" , " +
+                                        "\"srcPort\": \"" + portSrcString + "\" , " +
+                                        "\"dstPort\": \"" + portDstString + "\" , " +
+                                        "\"tcpFlags\": \"" + tcpFlagsString + "\" , " +
+                                        "\"icmpType\": \"" + icmpTypeString + "\" , " +
+                                        "\"icmpCode\": \"" + icmpCodeString + "\" , " +
+                                        "\"cmIp\": \"" + cmIpString + "\" , " +
+                                        "\"cm5t\": \"" + cm5tString + "\" , " +
+                                        "\"bmSrc\": \"" + bmSrcString + "\" , " +
+                                        "\"bmDst\": \"" + bmDstString + "\" , " +
+                                        "\"ams\": \"" + amsString + "\"}";
+
+                    flowstatsPost(flowStats);
+
+                    // Files.write(txtPath, Arrays.asList(flowStats), StandardCharsets.UTF_8,
+                    // Files.exists(txtPath) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);                    
                 }
             }
         } catch (IOException e) {
@@ -522,5 +529,38 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                                  + Character.digit(s.charAt(i+1), 16));
         }
         return data;
-    }    
+    }
+
+    public void flowstatsPost(String flowstats) {
+
+        HttpURLConnection conn = null;
+        DataOutputStream os = null;
+
+        try {
+
+            URL url = new URL("http://127.0.0.1:5000/add/"); //important to add the trailing slash after add
+
+            byte[] postData = flowstats.getBytes(StandardCharsets.UTF_8);
+            
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setDoOutput(true);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty( "charset", "utf-8");
+            conn.setRequestProperty("Content-Length", Integer.toString(flowstats.length()));
+            
+            os = new DataOutputStream(conn.getOutputStream());
+            os.write(postData);
+            os.flush();
+
+            if (conn.getResponseCode() != 200) {
+                throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+            }
+
+            conn.disconnect();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }        
+    }
 }
