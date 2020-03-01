@@ -15,6 +15,7 @@
  */
 package org.onosproject.store.flow.impl;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -39,10 +40,12 @@ import org.onlab.util.Tools;
 import org.onosproject.cluster.ClusterService;
 import org.onosproject.cluster.NodeId;
 import org.onosproject.net.DeviceId;
+import org.onosproject.net.device.DeviceService;
 import org.onosproject.net.flow.FlowEntry;
 import org.onosproject.net.flow.FlowId;
 import org.onosproject.net.flow.FlowRule;
 import org.onosproject.net.flow.StoredFlowEntry;
+import org.onosproject.net.flow.FlowRuleStoreException;
 import org.onosproject.store.LogicalTimestamp;
 import org.onosproject.store.cluster.messaging.ClusterCommunicationService;
 import org.onosproject.store.cluster.messaging.MessageSubject;
@@ -73,6 +76,7 @@ public class DeviceFlowTable {
         .register(LogicalTimestamp.class)
         .register(Timestamped.class)
         .build());
+    private static final int GET_FLOW_ENTRIES_TIMEOUT = 15; // seconds
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -83,6 +87,7 @@ public class DeviceFlowTable {
 
     private final DeviceId deviceId;
     private final ClusterCommunicationService clusterCommunicator;
+    private final DeviceService deviceService;
     private final LifecycleManager lifecycleManager;
     private final ScheduledExecutorService scheduler;
     private final Executor executor;
@@ -115,6 +120,7 @@ public class DeviceFlowTable {
         ClusterService clusterService,
         ClusterCommunicationService clusterCommunicator,
         LifecycleManager lifecycleManager,
+        DeviceService deviceService,
         ScheduledExecutorService scheduler,
         Executor executor,
         long backupPeriod,
@@ -122,6 +128,7 @@ public class DeviceFlowTable {
         this.deviceId = deviceId;
         this.clusterCommunicator = clusterCommunicator;
         this.lifecycleManager = lifecycleManager;
+        this.deviceService = deviceService;
         this.scheduler = scheduler;
         this.executor = executor;
         this.localNodeId = clusterService.getLocalNode().id();
@@ -243,7 +250,10 @@ public class DeviceFlowTable {
                 getFlowsSubject,
                 SERIALIZER::encode,
                 SERIALIZER::decode,
-                replicaInfo.master());
+                replicaInfo.master(),
+                Duration.ofSeconds(GET_FLOW_ENTRIES_TIMEOUT));
+        } else if (deviceService.isAvailable(deviceId)) {
+            throw new FlowRuleStoreException("There is no master for available device " + deviceId);
         } else {
             return CompletableFuture.completedFuture(Collections.emptySet());
         }

@@ -473,6 +473,18 @@ public class SegmentRoutingManager implements SegmentRoutingService {
                 .withTimestampProvider((k, v) -> new WallClockTimestamp())
                 .build();
 
+        processor = new InternalPacketProcessor();
+        linkListener = new InternalLinkListener();
+        deviceListener = new InternalDeviceListener();
+        appCfgHandler = new AppConfigHandler(this);
+        mcastHandler = new McastHandler(this);
+        hostHandler = new HostHandler(this);
+        linkHandler = new LinkHandler(this);
+        routeHandler = new RouteHandler(this);
+        neighbourHandler = new SegmentRoutingNeighbourDispatcher(this);
+        l2TunnelHandler = new DefaultL2TunnelHandler(this);
+        topologyHandler = new TopologyHandler(this);
+
         compCfgService.preSetProperty("org.onosproject.net.group.impl.GroupManager",
                                       "purgeOnDisconnection", "true", false);
         compCfgService.preSetProperty("org.onosproject.net.flow.impl.FlowRuleManager",
@@ -502,18 +514,6 @@ public class SegmentRoutingManager implements SegmentRoutingService {
                                       "fallbackGroupPollFrequency", "3", false);
         compCfgService.registerProperties(getClass());
         modified(context);
-
-        processor = new InternalPacketProcessor();
-        linkListener = new InternalLinkListener();
-        deviceListener = new InternalDeviceListener();
-        appCfgHandler = new AppConfigHandler(this);
-        mcastHandler = new McastHandler(this);
-        hostHandler = new HostHandler(this);
-        linkHandler = new LinkHandler(this);
-        routeHandler = new RouteHandler(this);
-        neighbourHandler = new SegmentRoutingNeighbourDispatcher(this);
-        l2TunnelHandler = new DefaultL2TunnelHandler(this);
-        topologyHandler = new TopologyHandler(this);
 
         cfgService.addListener(cfgListener);
         cfgService.registerConfigFactory(deviceConfigFactory);
@@ -1572,6 +1572,7 @@ public class SegmentRoutingManager implements SegmentRoutingService {
 
         if (mastershipService.isLocalMaster(deviceId)) {
             defaultRoutingHandler.populatePortAddressingRules(deviceId);
+            defaultRoutingHandler.purgeSeenBeforeRoutes(deviceId);
             DefaultGroupHandler groupHandler = groupHandlerMap.get(deviceId);
             groupHandler.createGroupsFromVlanConfig();
             routingRulePopulator.populateSubnetBroadcastRule(deviceId);
