@@ -159,7 +159,7 @@ public class K8sIngressWatcher {
 
         @Override
         public void onClose(KubernetesClientException e) {
-            log.info("Ingress watcher OnClose: {}" + e);
+            log.warn("Ingress watcher OnClose", e);
         }
 
         private void processAddition(Ingress ingress) {
@@ -170,7 +170,9 @@ public class K8sIngressWatcher {
             log.trace("Process ingress {} creating event from API server.",
                     ingress.getMetadata().getName());
 
-            k8sIngressAdminService.createIngress(ingress);
+            if (k8sIngressAdminService.ingress(ingress.getMetadata().getUid()) == null) {
+                k8sIngressAdminService.createIngress(ingress);
+            }
         }
 
         private void processModification(Ingress ingress) {

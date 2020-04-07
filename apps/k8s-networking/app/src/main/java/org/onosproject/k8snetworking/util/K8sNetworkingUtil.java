@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -170,13 +171,13 @@ public final class K8sNetworkingUtil {
             Object jsonObject = mapper.readValue(jsonString, Object.class);
             return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
         } catch (JsonParseException e) {
-            log.debug("JsonParseException caused by {}", e);
+            log.debug("JsonParseException", e);
         } catch (JsonMappingException e) {
-            log.debug("JsonMappingException caused by {}", e);
+            log.debug("JsonMappingException", e);
         } catch (JsonProcessingException e) {
-            log.debug("JsonProcessingException caused by {}", e);
+            log.debug("JsonProcessingException", e);
         } catch (IOException e) {
-            log.debug("IOException caused by {}", e);
+            log.debug("IOException", e);
         }
         return null;
     }
@@ -492,6 +493,11 @@ public final class K8sNetworkingUtil {
      *         return 0 if there is no port number mapped with the given port name
      */
     public static int portNumberByName(Pod pod, String portName) {
+
+        if (pod == null || pod.getSpec() == null) {
+            return 0;
+        }
+
         for (Container container : pod.getSpec().getContainers()) {
             for (ContainerPort cp : container.getPorts()) {
                 if (cp.getName() != null && cp.getName().equals(portName)) {
@@ -539,6 +545,22 @@ public final class K8sNetworkingUtil {
                 adminService.updatePort(newPort);
             }
         }
+    }
+
+    /**
+     * Generates string format based on the given string length list.
+     *
+     * @param stringLengths a list of string lengths
+     * @return string format (e.g., %-28s%-15s%-24s%-20s%-15s)
+     */
+    public static String genFormatString(List<Integer> stringLengths) {
+        StringBuilder fsb = new StringBuilder();
+        stringLengths.forEach(length -> {
+            fsb.append("%-");
+            fsb.append(length);
+            fsb.append("s");
+        });
+        return fsb.toString();
     }
 
     private static int binLower(String binStr, int bits) {

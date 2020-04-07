@@ -23,12 +23,14 @@ import org.onosproject.k8snode.api.K8sApiConfig;
 import org.onosproject.k8snode.api.K8sApiConfigAdminService;
 import org.onosproject.k8snode.api.K8sNode;
 import org.onosproject.k8snode.api.K8sNodeAdminService;
+import org.onosproject.k8snode.api.K8sNodeState;
 import org.onosproject.rest.AbstractWebResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -46,6 +48,7 @@ import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 import static javax.ws.rs.core.Response.created;
 import static org.onlab.util.Tools.nullIsIllegal;
 import static org.onlab.util.Tools.readTreeFromStream;
+import static org.onosproject.k8snode.api.K8sNodeState.POST_ON_BOARD;
 import static org.onosproject.k8snode.util.K8sNodeUtil.endpoint;
 
 /**
@@ -64,6 +67,11 @@ public class K8sNodeWebResource extends AbstractWebResource {
     private static final String UPDATE = "UPDATE";
     private static final String NODE_ID = "NODE_ID";
     private static final String REMOVE = "REMOVE";
+    private static final String QUERY = "QUERY";
+    private static final String INIT = "INIT";
+    private static final String NOT_EXIST = "Not exist";
+    private static final String STATE = "State";
+    private static final String RESULT = "Result";
 
     private static final String HOST_NAME = "hostname";
     private static final String ENDPOINT = "endpoint";
@@ -158,6 +166,131 @@ public class K8sNodeWebResource extends AbstractWebResource {
         }
 
         return Response.noContent().build();
+    }
+
+
+    /**
+     * Obtains the state of the kubernetes node.
+     *
+     * @param hostname hostname of the kubernetes
+     * @return the state of the kubernetes node in Json
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("state/{hostname}")
+    public Response stateOfNode(@PathParam("hostname") String hostname) {
+        log.trace(String.format(MESSAGE_NODE, QUERY));
+
+        K8sNode k8sNode = nodeAdminService.node(hostname);
+        String nodeState = k8sNode != null ? k8sNode.state().toString() : NOT_EXIST;
+
+        return ok(mapper().createObjectNode().put(STATE, nodeState)).build();
+    }
+
+    /**
+     * Initializes kubernetes node.
+     *
+     * @param hostname hostname of kubernetes node
+     * @return 200 OK with init result, 404 not found, 500 server error
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("init/node/{hostname}")
+    public Response initNode(@PathParam("hostname") String hostname) {
+        log.trace(String.format(MESSAGE_NODE, QUERY));
+
+        K8sNode k8sNode = nodeAdminService.node(hostname);
+        if (k8sNode == null) {
+            log.error("Given node {} does not exist", hostname);
+            return Response.serverError().build();
+        }
+        K8sNode updated = k8sNode.updateState(K8sNodeState.INIT);
+        nodeAdminService.updateNode(updated);
+        return ok(mapper().createObjectNode()).build();
+    }
+
+    /**
+     * Initializes all kubernetes nodes.
+     *
+     * @return 200 OK with init result, 500 server error
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("init/all")
+    public Response initAllNodes() {
+        log.trace(String.format(MESSAGE_NODE, QUERY));
+
+        nodeAdminService.nodes()
+                .forEach(n -> {
+                    K8sNode updated = n.updateState(K8sNodeState.INIT);
+                    nodeAdminService.updateNode(updated);
+                });
+
+        return ok(mapper().createObjectNode()).build();
+    }
+
+    /**
+     * Initializes kubernetes nodes which are in the stats other than COMPLETE.
+     *
+     * @return 200 OK with init result, 500 server error
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("init/incomplete")
+    public Response initIncompleteNodes() {
+        log.trace(String.format(MESSAGE_NODE, QUERY));
+
+        nodeAdminService.nodes().stream()
+                .filter(n -> n.state() != K8sNodeState.COMPLETE)
+                .forEach(n -> {
+                    K8sNode updated = n.updateState(K8sNodeState.INIT);
+                    nodeAdminService.updateNode(updated);
+                });
+
+        return ok(mapper().createObjectNode()).build();
+    }
+
+    /**
+     * Updates a kubernetes nodes' state as post-on-board.
+     *
+     * @param hostname kubernetes node name
+     * @return 200 OK with the updated kubernetes node's config, 400 BAD_REQUEST
+     * if the JSON is malformed, and 304 NOT_MODIFIED without the updated config
+     */
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("update/postonboard/{hostname}")
+    public Response postOnBoardNode(@PathParam("hostname") String hostname) {
+        K8sNode node = nodeAdminService.node(hostname);
+        if (node != null && node.state() != POST_ON_BOARD) {
+            K8sNode updated = node.updateState(POST_ON_BOARD);
+            nodeAdminService.updateNode(updated);
+        }
+        return Response.ok().build();
+    }
+
+    /**
+     * Indicates whether all kubernetes nodes are in post-on-board state.
+     *
+     * @return 200 OK with True, or 200 OK with False
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("get/postonboard/all")
+    public Response postOnBoardNodes() {
+        long numOfAllNodes = nodeAdminService.nodes().size();
+        long numOfReadyNodes = nodeAdminService.nodes().stream()
+                .filter(n -> n.state() == POST_ON_BOARD)
+                .count();
+        boolean result;
+        if (numOfAllNodes == 0) {
+            result = false;
+        } else {
+            result = numOfAllNodes == numOfReadyNodes;
+        }
+
+        return ok(mapper().createObjectNode().put(RESULT, result)).build();
     }
 
     private Set<K8sNode> readNodeConfiguration(InputStream input) {

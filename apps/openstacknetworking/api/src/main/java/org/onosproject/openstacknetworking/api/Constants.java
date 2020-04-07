@@ -16,6 +16,7 @@
 package org.onosproject.openstacknetworking.api;
 
 import com.google.common.collect.ImmutableMap;
+import org.onlab.packet.IpAddress;
 import org.onlab.packet.MacAddress;
 
 import java.nio.charset.StandardCharsets;
@@ -68,7 +69,6 @@ public final class Constants {
     public static final String UNSUPPORTED_VENDOR = "unsupported_vendor";
 
     public static final int PRIORITY_TUNNEL_TAG_RULE = 30000;
-    public static final int PRIORITY_FLOATING_INTERNAL = 42000;
     public static final int PRIORITY_FLOATING_EXTERNAL = 41000;
     public static final int PRIORITY_STATEFUL_SNAT_RULE = 40500;
     public static final int PRIORITY_ICMP_RULE = 43000;
@@ -79,7 +79,6 @@ public final class Constants {
     public static final int PRIORITY_SNAT_RULE = 26000;
     public static final int PRIORITY_SWITCHING_RULE = 30000;
     public static final int PRIORITY_FLAT_JUMP_UPSTREAM_RULE = 41000;
-    public static final int PRIORITY_FLAT_JUMP_DOWNSTREAM_RULE = 41000;
     public static final int PRIORITY_FLAT_UPSTREAM_RULE = 41000;
     public static final int PRIORITY_FLAT_DOWNSTREAM_RULE = 42000;
     public static final int PRIORITY_DHCP_RULE = 42000;
@@ -90,11 +89,10 @@ public final class Constants {
     public static final int PRIORITY_CT_RULE = 32000;
     public static final int PRIORITY_CT_DROP_RULE = 32500;
     public static final int PRIORITY_ARP_GATEWAY_RULE = 41000;
-    public static final int PRIORITY_ARP_SUBNET_RULE = 40000;
     public static final int PRIORITY_ARP_CONTROL_RULE = 40000;
     public static final int PRIORITY_ARP_REPLY_RULE = 40000;
     public static final int PRIORITY_ARP_REQUEST_RULE = 40000;
-    public static final int PRIORITY_ARP_FLOOD_RULE = 39000;
+    public static final int PRIORITY_ARP_GROUP_RULE = 39000;
     public static final int PRIORITY_FORCED_ACL_RULE = 50000;
     public static final int PRIORITY_ICMP_PROBE_RULE = 50000;
 
@@ -146,4 +144,15 @@ public final class Constants {
         //Additional pci vendor information will be added
         return ImmutableMap.of(CAVIUM_PCI_VENDOR_INFO, PORT_NAME_PREFIX_CAVIUM);
     }
+
+    public static final boolean DEFAULT_HA_STATUS = false;
+    public static final IpAddress DEFAULT_ACTIVE_IP_ADDRESS = IpAddress.valueOf("127.0.0.1");
+
+    public static final String SECURITY_GROUP_FORMAT = "%-40s%-20s";
+    public static final String NETWORK_FORMAT = "%-40s%-20s%-20s%-8s";
+    public static final String SUBNET_FORMAT = "%-40s%-20s%-20s";
+    public static final String ROUTER_INTF_FORMAT = "%-40s%-20s%-20s";
+    public static final String PORT_FORMAT = "%-40s%-20s%-20s%-8s";
+    public static final String ROUTER_FORMAT = "%-40s%-20s%-20s%-8s";
+    public static final String FLOATING_IP_FORMAT = "%-40s%-20s%-20s";
 }

@@ -64,6 +64,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
+import static java.lang.Thread.sleep;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.onlab.packet.TpPort.tpPort;
 import static org.onlab.util.Tools.groupedThreads;
@@ -74,6 +75,9 @@ import static org.onosproject.k8snode.api.Constants.GRE;
 import static org.onosproject.k8snode.api.Constants.GRE_TUNNEL;
 import static org.onosproject.k8snode.api.Constants.INTEGRATION_BRIDGE;
 import static org.onosproject.k8snode.api.Constants.INTEGRATION_TO_EXTERNAL_BRIDGE;
+import static org.onosproject.k8snode.api.Constants.INTEGRATION_TO_LOCAL_BRIDGE;
+import static org.onosproject.k8snode.api.Constants.LOCAL_BRIDGE;
+import static org.onosproject.k8snode.api.Constants.LOCAL_TO_INTEGRATION_BRIDGE;
 import static org.onosproject.k8snode.api.Constants.PHYSICAL_EXTERNAL_BRIDGE;
 import static org.onosproject.k8snode.api.Constants.VXLAN;
 import static org.onosproject.k8snode.api.Constants.VXLAN_TUNNEL;
@@ -107,6 +111,7 @@ public class DefaultK8sNodeHandler implements K8sNodeHandler {
     private static final String DEFAULT_OF_PROTO = "tcp";
     private static final int DEFAULT_OFPORT = 6653;
     private static final int DPID_BEGIN = 3;
+    private static final long SLEEP_MS = 3000; // we wait 3s
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected CoreService coreService;
@@ -196,6 +201,9 @@ public class DefaultK8sNodeHandler implements K8sNodeHandler {
         if (!deviceService.isAvailable(k8sNode.extBridge())) {
             createBridge(k8sNode, EXTERNAL_BRIDGE, k8sNode.extBridge());
         }
+        if (!deviceService.isAvailable(k8sNode.localBridge())) {
+            createBridge(k8sNode, LOCAL_BRIDGE, k8sNode.localBridge());
+        }
     }
 
     @Override
@@ -235,6 +243,22 @@ public class DefaultK8sNodeHandler implements K8sNodeHandler {
 
     @Override
     public void processIncompleteState(K8sNode k8sNode) {
+        // do something if needed
+    }
+
+    @Override
+    public void processPreOnBoardState(K8sNode k8sNode) {
+        processInitState(k8sNode);
+        processDeviceCreatedState(k8sNode);
+    }
+
+    @Override
+    public void processOnBoardedState(K8sNode k8sNode) {
+        // do something if needed
+    }
+
+    @Override
+    public void processPostOnBoardState(K8sNode k8sNode) {
         // do something if needed
     }
 
@@ -328,23 +352,43 @@ public class DefaultK8sNodeHandler implements K8sNodeHandler {
             return;
         }
 
-        PatchDescription brIntPatchDesc =
+        // integration bridge -> external bridge
+        PatchDescription brIntExtPatchDesc =
                 DefaultPatchDescription.builder()
                 .deviceId(INTEGRATION_BRIDGE)
                 .ifaceName(INTEGRATION_TO_EXTERNAL_BRIDGE)
                 .peer(PHYSICAL_EXTERNAL_BRIDGE)
                 .build();
 
-        PatchDescription brExtPatchDesc =
+        // external bridge -> integration bridge
+        PatchDescription brExtIntPatchDesc =
                 DefaultPatchDescription.builder()
                 .deviceId(EXTERNAL_BRIDGE)
                 .ifaceName(PHYSICAL_EXTERNAL_BRIDGE)
                 .peer(INTEGRATION_TO_EXTERNAL_BRIDGE)
                 .build();
 
+        // integration bridge -> local bridge
+        PatchDescription brIntLocalPatchDesc =
+                DefaultPatchDescription.builder()
+                        .deviceId(INTEGRATION_BRIDGE)
+                        .ifaceName(INTEGRATION_TO_LOCAL_BRIDGE)
+                        .peer(LOCAL_TO_INTEGRATION_BRIDGE)
+                        .build();
+
+        // local bridge -> integration bridge
+        PatchDescription brLocalIntPatchDesc =
+                DefaultPatchDescription.builder()
+                        .deviceId(LOCAL_BRIDGE)
+                        .ifaceName(LOCAL_TO_INTEGRATION_BRIDGE)
+                        .peer(INTEGRATION_TO_LOCAL_BRIDGE)
+                        .build();
+
         InterfaceConfig ifaceConfig = device.as(InterfaceConfig.class);
-        ifaceConfig.addPatchMode(INTEGRATION_TO_EXTERNAL_BRIDGE, brIntPatchDesc);
-        ifaceConfig.addPatchMode(PHYSICAL_EXTERNAL_BRIDGE, brExtPatchDesc);
+        ifaceConfig.addPatchMode(INTEGRATION_TO_EXTERNAL_BRIDGE, brIntExtPatchDesc);
+        ifaceConfig.addPatchMode(PHYSICAL_EXTERNAL_BRIDGE, brExtIntPatchDesc);
+        ifaceConfig.addPatchMode(INTEGRATION_TO_LOCAL_BRIDGE, brIntLocalPatchDesc);
+        ifaceConfig.addPatchMode(LOCAL_TO_INTEGRATION_BRIDGE, brLocalIntPatchDesc);
     }
 
     /**
@@ -429,37 +473,67 @@ public class DefaultK8sNodeHandler implements K8sNodeHandler {
     private boolean isCurrentStateDone(K8sNode k8sNode) {
         switch (k8sNode.state()) {
             case INIT:
-                if (!isOvsdbConnected(k8sNode, ovsdbPortNum,
-                        ovsdbController, deviceService)) {
-                    return false;
-                }
-
-                return k8sNode.intgBridge() != null && k8sNode.extBridge() != null &&
-                        deviceService.isAvailable(k8sNode.intgBridge()) &&
-                        deviceService.isAvailable(k8sNode.extBridge());
+                return isInitStateDone(k8sNode);
             case DEVICE_CREATED:
-                if (k8sNode.dataIp() != null &&
-                        !isIntfEnabled(k8sNode, VXLAN_TUNNEL)) {
-                    return false;
-                }
-                if (k8sNode.dataIp() != null &&
-                        !isIntfEnabled(k8sNode, GRE_TUNNEL)) {
-                    return false;
-                }
-                if (k8sNode.dataIp() != null &&
-                        !isIntfEnabled(k8sNode, GENEVE_TUNNEL)) {
-                    return false;
-                }
-
-                return true;
+                return isDeviceCreatedStateDone(k8sNode);
+            case PRE_ON_BOARD:
+                return isInitStateDone(k8sNode) && isDeviceCreatedStateDone(k8sNode);
             case COMPLETE:
             case INCOMPLETE:
+            case ON_BOARDED:
+            case POST_ON_BOARD:
                 // always return false
                 // run init CLI to re-trigger node bootstrap
                 return false;
             default:
                 return true;
         }
+    }
+
+    private boolean isInitStateDone(K8sNode k8sNode) {
+        if (!isOvsdbConnected(k8sNode, ovsdbPortNum,
+                ovsdbController, deviceService)) {
+            return false;
+        }
+
+        try {
+            // we need to wait a while, in case interface and bridge
+            // creation requires some time
+            sleep(SLEEP_MS);
+        } catch (InterruptedException e) {
+            log.error("Exception caused during init state checking...");
+        }
+
+        return k8sNode.intgBridge() != null && k8sNode.extBridge() != null &&
+                deviceService.isAvailable(k8sNode.intgBridge()) &&
+                deviceService.isAvailable(k8sNode.extBridge()) &&
+                deviceService.isAvailable(k8sNode.localBridge());
+    }
+
+    private boolean isDeviceCreatedStateDone(K8sNode k8sNode) {
+
+        try {
+            // we need to wait a while, in case interface and bridge
+            // creation requires some time
+            sleep(SLEEP_MS);
+        } catch (InterruptedException e) {
+            log.error("Exception caused during init state checking...");
+        }
+
+        if (k8sNode.dataIp() != null &&
+                !isIntfEnabled(k8sNode, VXLAN_TUNNEL)) {
+            return false;
+        }
+        if (k8sNode.dataIp() != null &&
+                !isIntfEnabled(k8sNode, GRE_TUNNEL)) {
+            return false;
+        }
+        if (k8sNode.dataIp() != null &&
+                !isIntfEnabled(k8sNode, GENEVE_TUNNEL)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -504,6 +578,9 @@ public class DefaultK8sNodeHandler implements K8sNodeHandler {
 
         // delete external bridge from the node
         client.dropBridge(EXTERNAL_BRIDGE);
+
+        // delete local bridge from the node
+        client.dropBridge(LOCAL_BRIDGE);
 
         // disconnect ovsdb
         client.disconnect();
@@ -597,6 +674,7 @@ public class DefaultK8sNodeHandler implements K8sNodeHandler {
                         }
 
                         // TODO: also need to check the external bridge's availability
+                        // TODO: also need to check the local bridge's availability
                         if (deviceService.isAvailable(device.id())) {
                             log.debug("Integration bridge created on {}",
                                     k8sNode.hostname());

@@ -157,7 +157,7 @@ public class K8sPodWatcher {
 
         @Override
         public void onClose(KubernetesClientException e) {
-            log.info("Pod watcher OnClose: {}" + e);
+            log.warn("Pod watcher OnClose", e);
         }
 
         private void processAddition(Pod pod) {
@@ -168,7 +168,9 @@ public class K8sPodWatcher {
             log.trace("Process pod {} creating event from API server.",
                     pod.getMetadata().getName());
 
-            k8sPodAdminService.createPod(pod);
+            if (k8sPodAdminService.pod(pod.getMetadata().getUid()) == null) {
+                k8sPodAdminService.createPod(pod);
+            }
         }
 
         private void processModification(Pod pod) {

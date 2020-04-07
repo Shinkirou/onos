@@ -49,6 +49,18 @@ public final class DefaultK8sNodeTest {
     private static final IpAddress MANAGEMENT_IP = IpAddress.valueOf("10.10.10.10");
     private static final IpAddress DATA_IP = IpAddress.valueOf("20.20.20.20");
 
+    private static final String BRIDGE_INTF_1 = "eth1";
+    private static final String BRIDGE_INTF_2 = "eth2";
+
+    private static final IpAddress EXT_BRIDGE_IP_1 = IpAddress.valueOf("10.10.10.5");
+    private static final IpAddress EXT_BRIDGE_IP_2 = IpAddress.valueOf("20.20.20.5");
+
+    private static final IpAddress EXT_GATEWAY_IP_1 = IpAddress.valueOf("10.10.10.1");
+    private static final IpAddress EXT_GATEWAY_IP_2 = IpAddress.valueOf("20.20.20.1");
+
+    private static final String POD_CIDR_1 = "10.10.0.0/24";
+    private static final String POD_CIDR_2 = "20.20.0.0/24";
+
     private K8sNode refNode;
 
     private static final K8sNode K8S_NODE_1 = createNode(
@@ -56,22 +68,37 @@ public final class DefaultK8sNodeTest {
             MINION,
             DEVICE_1,
             DEVICE_1,
+            DEVICE_1,
+            BRIDGE_INTF_1,
             TEST_IP,
-            INIT);
+            INIT,
+            EXT_BRIDGE_IP_1,
+            EXT_GATEWAY_IP_1,
+            POD_CIDR_1);
     private static final K8sNode K8S_NODE_2 = createNode(
             HOSTNAME_1,
             MINION,
             DEVICE_1,
             DEVICE_1,
+            DEVICE_1,
+            BRIDGE_INTF_1,
             TEST_IP,
-            INIT);
+            INIT,
+            EXT_BRIDGE_IP_1,
+            EXT_GATEWAY_IP_1,
+            POD_CIDR_1);
     private static final K8sNode K8S_NODE_3 = createNode(
             HOSTNAME_2,
             MINION,
             DEVICE_2,
             DEVICE_2,
+            DEVICE_2,
+            BRIDGE_INTF_2,
             TEST_IP,
-            INIT);
+            INIT,
+            EXT_BRIDGE_IP_2,
+            EXT_GATEWAY_IP_2,
+            POD_CIDR_2);
 
     /**
      * Initial setup for this unit test.
@@ -85,7 +112,12 @@ public final class DefaultK8sNodeTest {
                 .dataIp(DATA_IP)
                 .intgBridge(DEVICE_1.id())
                 .extBridge(DEVICE_1.id())
+                .localBridge(DEVICE_1.id())
+                .extIntf(BRIDGE_INTF_1)
                 .state(COMPLETE)
+                .extBridgeIp(EXT_BRIDGE_IP_1)
+                .extGatewayIp(EXT_GATEWAY_IP_1)
+                .podCidr(POD_CIDR_1)
                 .build();
     }
 
@@ -108,6 +140,7 @@ public final class DefaultK8sNodeTest {
         assertSame(refNode.state(), COMPLETE);
         assertEquals(refNode.intgBridge(), DEVICE_1.id());
         assertEquals(refNode.extBridge(), DEVICE_1.id());
+        assertEquals(refNode.localBridge(), DEVICE_1.id());
     }
 
     /**
@@ -140,9 +173,14 @@ public final class DefaultK8sNodeTest {
                 .type(MINION)
                 .intgBridge(DEVICE_1.id())
                 .extBridge(DEVICE_1.id())
+                .localBridge(DEVICE_1.id())
+                .extIntf(BRIDGE_INTF_1)
                 .managementIp(TEST_IP)
                 .dataIp(TEST_IP)
                 .state(INIT)
+                .extBridgeIp(EXT_BRIDGE_IP_1)
+                .extGatewayIp(EXT_GATEWAY_IP_1)
+                .podCidr(POD_CIDR_1)
                 .build();
     }
 
@@ -155,9 +193,14 @@ public final class DefaultK8sNodeTest {
                 .hostname(HOSTNAME_1)
                 .intgBridge(DEVICE_1.id())
                 .extBridge(DEVICE_1.id())
+                .localBridge(DEVICE_1.id())
+                .extIntf(BRIDGE_INTF_1)
                 .managementIp(TEST_IP)
                 .dataIp(TEST_IP)
                 .state(INIT)
+                .extBridgeIp(EXT_BRIDGE_IP_1)
+                .extGatewayIp(EXT_GATEWAY_IP_1)
+                .podCidr(POD_CIDR_1)
                 .build();
     }
 
@@ -172,8 +215,13 @@ public final class DefaultK8sNodeTest {
                 .type(MINION)
                 .intgBridge(DEVICE_1.id())
                 .extBridge(DEVICE_1.id())
+                .localBridge(DEVICE_1.id())
+                .extIntf(BRIDGE_INTF_1)
                 .dataIp(TEST_IP)
                 .state(INIT)
+                .extBridgeIp(EXT_BRIDGE_IP_1)
+                .extGatewayIp(EXT_GATEWAY_IP_1)
+                .podCidr(POD_CIDR_1)
                 .build();
     }
 
@@ -197,15 +245,23 @@ public final class DefaultK8sNodeTest {
 
     private static K8sNode createNode(String hostname, Type type,
                                       Device intgBridge, Device extBridge,
-                                      IpAddress ipAddr, K8sNodeState state) {
+                                      Device localBridge, String bridgeIntf,
+                                      IpAddress ipAddr, K8sNodeState state,
+                                      IpAddress extBridgeIp, IpAddress extGatewayIp,
+                                      String podCidr) {
         return DefaultK8sNode.builder()
                 .hostname(hostname)
                 .type(type)
                 .intgBridge(intgBridge.id())
                 .extBridge(extBridge.id())
+                .localBridge(localBridge.id())
+                .extIntf(bridgeIntf)
                 .managementIp(ipAddr)
                 .dataIp(ipAddr)
                 .state(state)
+                .extBridgeIp(extBridgeIp)
+                .extGatewayIp(extGatewayIp)
+                .podCidr(podCidr)
                 .build();
     }
 }

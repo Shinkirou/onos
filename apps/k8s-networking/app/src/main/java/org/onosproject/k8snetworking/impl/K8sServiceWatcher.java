@@ -160,7 +160,7 @@ public class K8sServiceWatcher {
 
         @Override
         public void onClose(KubernetesClientException e) {
-            log.info("Service watcher OnClose: {}" + e);
+            log.warn("Service watcher OnClose", e);
         }
 
         private void processAddition(Service service) {
@@ -171,7 +171,10 @@ public class K8sServiceWatcher {
             log.trace("Process service {} creating event from API server.",
                     service.getMetadata().getName());
 
-            k8sServiceAdminService.createService(service);
+            if (k8sServiceAdminService.service(
+                    service.getMetadata().getUid()) == null) {
+                k8sServiceAdminService.createService(service);
+            }
         }
 
         private void processModification(Service service) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-present Open Networking Foundation
+ * Copyright 2020-present Open Networking Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.onosproject.segmentrouting.mcast;
 
 import org.onlab.packet.IpAddress;
 import org.onosproject.net.ConnectPoint;
-import org.onosproject.net.HostId;
 
 import java.util.Objects;
 
@@ -27,47 +26,31 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Key of the multicast event cache.
+ * Key of multicast path store.
  */
-class McastCacheKey {
-    // The group ip
+public class McastPathStoreKey {
+    // Identify path using group address and source
     private final IpAddress mcastIp;
-    // The sink id
-    private final HostId sinkHost;
-    // The sink connect point
-    private final ConnectPoint sink;
+    private final ConnectPoint source;
 
     /**
-     * Constructs a key for multicast event cache.
+     * Constructs the key of multicast path store.
      *
      * @param mcastIp multicast group IP address
-     * @param sink connect point of the sink
-     *
-     * @deprecated in 1.12 ("Magpie") release.
+     * @param source source connect point
      */
-    @Deprecated
-    public McastCacheKey(IpAddress mcastIp, ConnectPoint sink) {
+    public McastPathStoreKey(IpAddress mcastIp, ConnectPoint source) {
         checkNotNull(mcastIp, "mcastIp cannot be null");
-        checkNotNull(sink, "sink cannot be null");
+        checkNotNull(source, "source cannot be null");
         checkArgument(mcastIp.isMulticast(), "mcastIp must be a multicast address");
         this.mcastIp = mcastIp;
-        this.sink = sink;
-        this.sinkHost = null;
+        this.source = source;
     }
 
-    /**
-     * Constructs a key for multicast event cache.
-     *
-     * @param mcastIp multicast group IP address
-     * @param hostId id of the sink
-     */
-    public McastCacheKey(IpAddress mcastIp, HostId hostId) {
-        checkNotNull(mcastIp, "mcastIp cannot be null");
-        checkNotNull(hostId, "sink cannot be null");
-        checkArgument(mcastIp.isMulticast(), "mcastIp must be a multicast address");
-        this.mcastIp = mcastIp;
-        this.sinkHost = hostId;
-        this.sink = null;
+    // Constructor for serialization
+    private McastPathStoreKey() {
+        this.mcastIp = null;
+        this.source = null;
     }
 
     /**
@@ -80,24 +63,12 @@ class McastCacheKey {
     }
 
     /**
-     * Returns the sink of this key.
+     * Returns the device ID of this key.
      *
-     * @return connect point of the sink
-     *
-     * @deprecated in 1.12 ("Magpie") release.
+     * @return device ID
      */
-    @Deprecated
-    public ConnectPoint sink() {
-        return sink;
-    }
-
-    /**
-     * Returns the sink of this key.
-     *
-     * @return host id of the sink
-     */
-    public HostId sinkHost() {
-        return sinkHost;
+    public ConnectPoint source() {
+        return source;
     }
 
     @Override
@@ -105,27 +76,25 @@ class McastCacheKey {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof McastCacheKey)) {
+        if (!(o instanceof McastPathStoreKey)) {
             return false;
         }
-        McastCacheKey that =
-                (McastCacheKey) o;
+        McastPathStoreKey that =
+                (McastPathStoreKey) o;
         return (Objects.equals(this.mcastIp, that.mcastIp) &&
-                Objects.equals(this.sink, that.sink) &&
-                Objects.equals(this.sinkHost, that.sinkHost));
+                Objects.equals(this.source, that.source));
     }
 
     @Override
     public int hashCode() {
-         return Objects.hash(mcastIp, sink);
+         return Objects.hash(mcastIp, source);
     }
 
     @Override
     public String toString() {
         return toStringHelper(getClass())
                 .add("mcastIp", mcastIp)
-                .add("sink", sink)
-                .add("sinkHost", sinkHost)
+                .add("source", source)
                 .toString();
     }
 }

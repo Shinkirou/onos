@@ -160,7 +160,7 @@ public class K8sNamespaceWatcher {
 
         @Override
         public void onClose(KubernetesClientException e) {
-            log.info("Namespace watcher OnClose: {}" + e);
+            log.warn("Namespace watcher OnClose", e);
         }
 
         private void processAddition(Namespace namespace) {
@@ -171,7 +171,9 @@ public class K8sNamespaceWatcher {
             log.trace("Process namespace {} creating event from API server.",
                     namespace.getMetadata().getName());
 
-            k8sNamespaceAdminService.createNamespace(namespace);
+            if (k8sNamespaceAdminService.namespace(namespace.getMetadata().getUid()) == null) {
+                k8sNamespaceAdminService.createNamespace(namespace);
+            }
         }
 
         private void processModification(Namespace namespace) {
@@ -182,7 +184,9 @@ public class K8sNamespaceWatcher {
             log.trace("Process namespace {} updating event from API server.",
                     namespace.getMetadata().getName());
 
-            k8sNamespaceAdminService.updateNamespace(namespace);
+            if (k8sNamespaceAdminService.namespace(namespace.getMetadata().getUid()) != null) {
+                k8sNamespaceAdminService.updateNamespace(namespace);
+            }
         }
 
         private void processDeletion(Namespace namespace) {

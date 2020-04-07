@@ -76,6 +76,20 @@ public interface K8sNode {
     DeviceId extBridge();
 
     /**
+     * Returns the device ID of the local bridge at the node.
+     *
+     * @return device id
+     */
+    DeviceId localBridge();
+
+    /**
+     * Returns the external interface name.
+     *
+     * @return external interface name
+     */
+    String extIntf();
+
+    /**
      * Returns new kubernetes node instance with given integration bridge.
      *
      * @param deviceId  integration bridge device ID
@@ -90,6 +104,14 @@ public interface K8sNode {
      * @return updated kubernetes node
      */
     K8sNode updateExtBridge(DeviceId deviceId);
+
+    /**
+     * Returns new kubernetes node instance with given local bridge.
+     *
+     * @param deviceId local bridge device ID
+     * @return updated kubernetes node
+     */
+    K8sNode updateLocalBridge(DeviceId deviceId);
 
     /**
      * Returns the management network IP address of the node.
@@ -111,6 +133,13 @@ public interface K8sNode {
      * @return node state
      */
     K8sNodeState state();
+
+    /**
+     * Returns the POD CIDR of the node.
+     *
+     * @return POD CIDR (e.g., 10.10.0.0/24)
+     */
+    String podCidr();
 
     /**
      * Returns new kubernetes node instance with given state.
@@ -157,6 +186,41 @@ public interface K8sNode {
     PortNumber intgBridgePortNum();
 
     /**
+     * Returns the integration to external patch port number.
+     *
+     * @return patch port number
+     */
+    PortNumber intgToExtPatchPortNum();
+
+    /**
+     * Returns the integration to local patch port number.
+     *
+     * @return patch port number
+     */
+    PortNumber intgToLocalPatchPortNum();
+
+    /**
+     * Returns the local to integration patch port number.
+     *
+     * @return patch port number
+     */
+    PortNumber localToIntgPatchPortNumber();
+
+    /**
+     * Returns the external to integration patch port number.
+     *
+     * @return patch port number
+     */
+    PortNumber extToIntgPatchPortNum();
+
+    /**
+     * Returns the external bridge to router port number.
+     *
+     * @return port number, null if the port does not exist
+     */
+    PortNumber extBridgePortNum();
+
+    /**
      * Returns the integration bridge's MAC address.
      *
      * @return MAC address; null if the MAC address does not exist
@@ -190,27 +254,6 @@ public interface K8sNode {
      * @return MAC address; null if the MAC address does not exist
      */
     MacAddress extGatewayMac();
-
-    /**
-     * Returns the integration to external patch port number.
-     *
-     * @return patch port number
-     */
-    PortNumber intgToExtPatchPortNum();
-
-    /**
-     * Returns the external to integration patch port number.
-     *
-     * @return patch port number
-     */
-    PortNumber extToIntgPatchPortNum();
-
-    /**
-     * Returns the external bridge to router port number.
-     *
-     * @return port number, null if the port does not exist
-     */
-    PortNumber extBridgePortNum();
 
     /**
      * Builder of new node entity.
@@ -251,10 +294,26 @@ public interface K8sNode {
         /**
          * Returns kubernetes node builder with supplied external bridge name.
          *
-         * @param deviceId external bridge deviceID
+         * @param deviceId external bridge device ID
          * @return kubernetes node builder
          */
         Builder extBridge(DeviceId deviceId);
+
+        /**
+         * Returns kubernetes node builder with supplied local bridge name.
+         *
+         * @param deviceId local bridge device ID
+         * @return kubernetes node builder
+         */
+        Builder localBridge(DeviceId deviceId);
+
+        /**
+         * Returns kubernetes node builder with supplied external interface.
+         *
+         * @param intf external interface
+         * @return kubernetes node builder
+         */
+        Builder extIntf(String intf);
 
         /**
          * Returns kubernetes node builder with supplied management IP address.
@@ -281,11 +340,35 @@ public interface K8sNode {
         Builder state(K8sNodeState state);
 
         /**
+         * Returns kubernetes node builder with supplied external bridge IP.
+         *
+         * @param extBridgeIp external bridge IP
+         * @return kubernetes node builder
+         */
+        Builder extBridgeIp(IpAddress extBridgeIp);
+
+        /**
+         * Returns kubernetes node builder with supplied gateway IP.
+         *
+         * @param extGatewayIp external gateway IP
+         * @return kubernetes node builder
+         */
+        Builder extGatewayIp(IpAddress extGatewayIp);
+
+        /**
          * Returns kubernetes node builder with supplied external gateway MAC.
          *
          * @param extGatewayMac external gateway MAC address
          * @return kubernetes node builder
          */
         Builder extGatewayMac(MacAddress extGatewayMac);
+
+        /**
+         * Returns kubernetes node builder with supplied POD CIDR.
+         *
+         * @param podCidr POD CIDR
+         * @return kubernetes node builder
+         */
+        Builder podCidr(String podCidr);
     }
 }

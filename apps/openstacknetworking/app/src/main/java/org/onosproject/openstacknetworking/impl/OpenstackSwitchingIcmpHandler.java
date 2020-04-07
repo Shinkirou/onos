@@ -72,7 +72,7 @@ import static org.onosproject.openstacknetworking.api.Constants.OPENSTACK_NETWOR
 import static org.onosproject.openstacknetworking.api.Constants.PRIORITY_ICMP_RULE;
 import static org.onosproject.openstacknetworking.api.Constants.ROUTING_TABLE;
 import static org.onosproject.openstacknetworking.impl.OsgiPropertyConstants.USE_STATEFUL_SNAT;
-import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.getExternalIp;
+import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.externalGatewayIp;
 import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.getPropertyValueAsBoolean;
 import static org.onosproject.openstacknetworking.util.RulePopulatorUtil.NXM_NX_IP_TTL;
 import static org.onosproject.openstacknetworking.util.RulePopulatorUtil.NXM_OF_ICMP_TYPE;
@@ -193,7 +193,7 @@ public class OpenstackSwitchingIcmpHandler {
                                              Router osRouter,
                                              boolean install) {
 
-        IpAddress natAddress = getExternalIp(osRouter, osNetworkService);
+        IpAddress natAddress = externalGatewayIp(osRouter, osNetworkService);
         if (natAddress == null) {
             return;
         }
@@ -361,7 +361,6 @@ public class OpenstackSwitchingIcmpHandler {
             OpenstackNode osNode = event.subject();
             switch (event.type()) {
                 case OPENSTACK_NODE_COMPLETE:
-                case OPENSTACK_NODE_INCOMPLETE:
                 case OPENSTACK_NODE_UPDATED:
                 case OPENSTACK_NODE_REMOVED:
                     eventExecutor.execute(() -> {
@@ -371,6 +370,7 @@ public class OpenstackSwitchingIcmpHandler {
                         reconfigureRouters(osNode);
                     });
                     break;
+                case OPENSTACK_NODE_INCOMPLETE:
                 default:
                     break;
             }
@@ -383,7 +383,7 @@ public class OpenstackSwitchingIcmpHandler {
                 });
                 processRouteGatewayEvent(osRouter, true);
             });
-            log.info("Reconfigure routers for {}", osNode.hostname());
+            log.debug("Reconfigure routers for {}", osNode.hostname());
         }
     }
 }

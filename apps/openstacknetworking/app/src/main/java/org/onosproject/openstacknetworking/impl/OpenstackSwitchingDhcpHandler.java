@@ -91,6 +91,7 @@ import static org.onosproject.openstacknetworking.api.Constants.DHCP_TABLE;
 import static org.onosproject.openstacknetworking.api.Constants.PRIORITY_DHCP_RULE;
 import static org.onosproject.openstacknetworking.impl.OsgiPropertyConstants.DHCP_SERVER_MAC;
 import static org.onosproject.openstacknetworking.impl.OsgiPropertyConstants.DHCP_SERVER_MAC_DEFAULT;
+import static org.onosproject.openstacknetworking.util.OpenstackNetworkingUtil.getBroadcastAddr;
 import static org.onosproject.openstacknode.api.OpenstackNode.NodeType.COMPUTE;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -451,11 +452,13 @@ public class OpenstackSwitchingDhcpHandler {
         }
 
         private DhcpOption doBroadcastAddr(Ip4Address yourIp, int subnetPrefixLen) {
-            Ip4Address broadcast = Ip4Address.makeMaskedAddress(yourIp, subnetPrefixLen);
+            String broadcast = getBroadcastAddr(yourIp.toString(), subnetPrefixLen);
+
             DhcpOption option = new DhcpOption();
             option.setCode(OptionCode_BroadcastAddress.getValue());
             option.setLength(DHCP_OPTION_DATA_LENGTH);
-            option.setData(broadcast.toOctets());
+            option.setData(IpAddress.valueOf(broadcast).toOctets());
+
             return option;
         }
 
@@ -617,8 +620,6 @@ public class OpenstackSwitchingDhcpHandler {
                     eventExecutor.execute(() -> processNodeCompletion(osNode));
                     break;
                 case OPENSTACK_NODE_INCOMPLETE:
-                    eventExecutor.execute(() -> processNodeIncompletion(osNode));
-                    break;
                 case OPENSTACK_NODE_CREATED:
                 case OPENSTACK_NODE_UPDATED:
                 case OPENSTACK_NODE_REMOVED:

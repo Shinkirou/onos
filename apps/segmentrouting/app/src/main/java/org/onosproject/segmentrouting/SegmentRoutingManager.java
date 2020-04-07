@@ -99,6 +99,7 @@ import org.onosproject.segmentrouting.config.SegmentRoutingDeviceConfig;
 import org.onosproject.segmentrouting.grouphandler.DefaultGroupHandler;
 import org.onosproject.segmentrouting.grouphandler.DestinationSet;
 import org.onosproject.segmentrouting.grouphandler.NextNeighbors;
+import org.onosproject.segmentrouting.mcast.McastFilteringObjStoreKey;
 import org.onosproject.segmentrouting.mcast.McastHandler;
 import org.onosproject.segmentrouting.mcast.McastRole;
 import org.onosproject.segmentrouting.mcast.McastRoleStoreKey;
@@ -1014,18 +1015,8 @@ public class SegmentRoutingManager implements SegmentRoutingService {
     }
 
     @Override
-    public Map<McastStoreKey, McastRole> getMcastRoles(IpAddress mcastIp) {
-        return mcastHandler.getMcastRoles(mcastIp);
-    }
-
-    @Override
     public Map<McastRoleStoreKey, McastRole> getMcastRoles(IpAddress mcastIp, ConnectPoint sourcecp) {
         return mcastHandler.getMcastRoles(mcastIp, sourcecp);
-    }
-
-    @Override
-    public Map<ConnectPoint, List<ConnectPoint>> getMcastPaths(IpAddress mcastIp) {
-        return mcastHandler.getMcastPaths(mcastIp);
     }
 
     @Override
@@ -1037,6 +1028,11 @@ public class SegmentRoutingManager implements SegmentRoutingService {
     @Override
     public Map<IpAddress, NodeId> getMcastLeaders(IpAddress mcastIp) {
         return mcastHandler.getMcastLeaders(mcastIp);
+    }
+
+    @Override
+    public Map<DeviceId, List<McastFilteringObjStoreKey>> getMcastFilters() {
+        return mcastHandler.getMcastFilters();
     }
 
     @Override
@@ -1422,6 +1418,8 @@ public class SegmentRoutingManager implements SegmentRoutingService {
                              event.type());
                     processPortUpdatedInternal(((Device) event.subject()),
                                        ((DeviceEvent) event).port());
+                    mcastHandler.processPortUpdate(((Device) event.subject()),
+                                                   ((DeviceEvent) event).port());
                 } else if (event.type() == TopologyEvent.Type.TOPOLOGY_CHANGED) {
                     // Process topology event, needed for all modules relying on
                     // topology service for path computation
@@ -2151,6 +2149,11 @@ public class SegmentRoutingManager implements SegmentRoutingService {
         if (getVlanNextObjectiveId(deviceId, vlanId) != -1) {
             // Update L2IG bucket of the port
             grpHandler.updateL2InterfaceGroupBucket(portNum, vlanId, pushVlan);
+            // Update bridging and unicast routing rule for each host
+            hostEventExecutor.execute(() -> hostHandler.processIntfVlanUpdatedEvent(deviceId, portNum,
+                    vlanId, !pushVlan, false));
+            hostEventExecutor.execute(() -> hostHandler.processIntfVlanUpdatedEvent(deviceId, portNum,
+                    vlanId, pushVlan, true));
         } else {
             log.warn("Failed to retrieve next objective for vlan {} in device {}:{}", vlanId, deviceId, portNum);
         }
@@ -2173,9 +2176,6 @@ public class SegmentRoutingManager implements SegmentRoutingService {
         int nextId = getVlanNextObjectiveId(deviceId, vlanId);
 
         if (nextId != -1 && !install) {
-            // Update next objective for a single port as an output port
-            // Remove a single port from L2FG
-            grpHandler.updateGroupFromVlanConfiguration(vlanId, portNum, nextId, install);
             // Remove L2 Bridging rule and L3 Unicast rule to the host
             hostEventExecutor.execute(() -> hostHandler.processIntfVlanUpdatedEvent(deviceId, portNum,
                     vlanId, pushVlan, install));
@@ -2187,10 +2187,17 @@ public class SegmentRoutingManager implements SegmentRoutingService {
                 // Remove L2FG for VLAN
                 grpHandler.removeBcastGroupFromVlan(deviceId, portNum, vlanId, pushVlan);
             } else {
-                // Remove L2IG of the port
-                grpHandler.removePortNextObjective(deviceId, portNum, vlanId, pushVlan);
+                // Remove a single port from L2FG
+                grpHandler.updateGroupFromVlanConfiguration(vlanId, portNum, nextId, install);
             }
+            // Remove L2IG of the port
+            grpHandler.removePortNextObjective(deviceId, portNum, vlanId, pushVlan);
         } else if (install) {
+            // Create L2IG of the port
+            grpHandler.createPortNextObjective(deviceId, portNum, vlanId, pushVlan);
+            // Create L2 Bridging rule and L3 Unicast rule to the host
+            hostEventExecutor.execute(() -> hostHandler.processIntfVlanUpdatedEvent(deviceId, portNum,
+                    vlanId, pushVlan, install));
             if (nextId != -1) {
                 // Add a single port to L2FG
                 grpHandler.updateGroupFromVlanConfiguration(vlanId, portNum, nextId, install);
@@ -2199,8 +2206,6 @@ public class SegmentRoutingManager implements SegmentRoutingService {
                 grpHandler.createBcastGroupFromVlan(vlanId, Collections.singleton(portNum));
                 routingRulePopulator.updateSubnetBroadcastRule(deviceId, vlanId, install);
             }
-            hostEventExecutor.execute(() -> hostHandler.processIntfVlanUpdatedEvent(deviceId, portNum,
-                    vlanId, pushVlan, install));
         } else {
             log.warn("Failed to retrieve next objective for vlan {} in device {}:{}", vlanId, deviceId, portNum);
         }
@@ -2222,10 +2227,37 @@ public class SegmentRoutingManager implements SegmentRoutingService {
                 .map(InterfaceIpAddress::subnetAddress)
                 .collect(Collectors.toSet());
 
-        defaultRoutingHandler.revokeSubnet(
-                ipPrefixSet.stream()
-                        .filter(ipPrefix -> !deviceIpPrefixSet.contains(ipPrefix))
-                        .collect(Collectors.toSet()));
+        Set<IpPrefix> subnetsToBeRevoked = ipPrefixSet.stream()
+                .filter(ipPrefix -> !deviceIpPrefixSet.contains(ipPrefix))
+                .collect(Collectors.toSet());
+
+        // Check if any of the subnets to be revoked is configured in the pairDevice.
+        // If any, repopulate the subnet with pairDevice connectPoint instead of revoking.
+        Optional<DeviceId> pairDevice = getPairDeviceId(cp.deviceId());
+        if (pairDevice.isPresent()) {
+            Set<IpPrefix> pairDeviceIpPrefix = getDeviceSubnetMap().get(pairDevice.get());
+
+            Set<IpPrefix> subnetsExistingInPairDevice = subnetsToBeRevoked.stream()
+                    .filter(ipPrefix -> pairDeviceIpPrefix.contains(ipPrefix))
+                    .collect(Collectors.toSet());
+
+            // Update the subnets existing in pair device with pair device connect point.
+            if (!subnetsExistingInPairDevice.isEmpty()) {
+                // PortNumber of connect point is not relevant in populate subnet and hence providing as ANY.
+                ConnectPoint pairDeviceCp = new ConnectPoint(pairDevice.get(), PortNumber.ANY);
+                log.debug("Updating the subnets: {} with pairDevice connectPoint as it exists in the Pair device: {}",
+                        subnetsExistingInPairDevice, pairDeviceCp);
+                defaultRoutingHandler.populateSubnet(Collections.singleton(pairDeviceCp), subnetsExistingInPairDevice);
+            }
+
+            // Remove only the subnets that are not configured in the pairDevice.
+            subnetsToBeRevoked = Sets.difference(subnetsToBeRevoked, subnetsExistingInPairDevice);
+        }
+
+        if (!subnetsToBeRevoked.isEmpty()) {
+            log.debug("Removing subnets for connectPoint: {}, subnets: {}", cp, subnetsToBeRevoked);
+            defaultRoutingHandler.revokeSubnet(subnetsToBeRevoked);
+        }
 
         // 2. Interface IP punts
         // Remove IP punts for old Intf address
@@ -2259,12 +2291,56 @@ public class SegmentRoutingManager implements SegmentRoutingService {
         Set<IpPrefix> deviceIpPrefixSet = deviceIntfIpAddrs.stream()
                 .map(InterfaceIpAddress::subnetAddress)
                 .collect(Collectors.toSet());
+        Set<IpPrefix> subnetsToBePopulated = ipPrefixSet.stream()
+                .filter(ipPrefix -> !deviceIpPrefixSet.contains(ipPrefix))
+                .collect(Collectors.toSet());
 
-        defaultRoutingHandler.populateSubnet(
-                Collections.singleton(cp),
-                ipPrefixSet.stream()
-                        .filter(ipPrefix -> !deviceIpPrefixSet.contains(ipPrefix))
-                        .collect(Collectors.toSet()));
+        if (!subnetsToBePopulated.isEmpty()) {
+            log.debug("Adding subnets for connectPoint: {}, subnets: {}", cp, subnetsToBePopulated);
+
+            // check if pair-device has the same subnet configured?
+            Optional<DeviceId> pairDevice = getPairDeviceId(cp.deviceId());
+            if (pairDevice.isPresent()) {
+                Set<IpPrefix> pairDeviceIpPrefix = getDeviceSubnetMap().get(pairDevice.get());
+
+                Set<IpPrefix>  subnetsToBePopulatedAsDualHomed = subnetsToBePopulated.stream()
+                        .filter(ipPrefix -> pairDeviceIpPrefix.contains(ipPrefix))
+                        .collect(Collectors.toSet());
+                Set<IpPrefix> subnetsToBePopulatedAsSingleHomed = Sets.difference(subnetsToBePopulated,
+                        subnetsToBePopulatedAsDualHomed);
+
+                if (!subnetsToBePopulatedAsSingleHomed.isEmpty()) {
+                    defaultRoutingHandler.populateSubnet(
+                            Collections.singleton(cp),
+                            subnetsToBePopulatedAsSingleHomed);
+                }
+
+                if (!subnetsToBePopulatedAsDualHomed.isEmpty()) {
+                    Set<ConnectPoint> cpts = new HashSet<>();
+                    cpts.add(cp);
+                    // As Subnets is DualHomed adding the pairDevice also as ConnectPoint.
+                    // PortNumber of connect point is not relevant in populate subnet and hence providing as ANY.
+                    ConnectPoint pairCp = new ConnectPoint(pairDevice.get(), PortNumber.ANY);
+                    cpts.add(pairCp);
+
+                    log.debug("Adding DualHomed subnets for connectPoint: {} and its pair device: {}, subnets: {}",
+                            cp, pairCp, subnetsToBePopulatedAsDualHomed);
+
+                    // populating the subnets as DualHomed
+                    defaultRoutingHandler.populateSubnet(
+                            cpts,
+                            subnetsToBePopulated);
+
+                    // revoking the subnets populated in the device as it is now Dualhomed.
+                    defaultRoutingHandler.revokeSubnet(Collections.singleton(cp.deviceId()),
+                            subnetsToBePopulatedAsDualHomed);
+                }
+            } else {
+                defaultRoutingHandler.populateSubnet(
+                        Collections.singleton(cp),
+                        subnetsToBePopulated);
+            }
+        }
 
         // 2. Interface IP punts
         // Add IP punts for new Intf address

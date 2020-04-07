@@ -1,8 +1,5 @@
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
 /*
- * Copyright ${year}-present Open Networking Foundation
+ * Copyright 2019-present Open Networking Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.onosproject.openstackvtap.api;
+
+import java.nio.charset.StandardCharsets;
 
 /**
- * The ${artifactId} application.
+ * Provides constants used in OpenstackVtap.
  */
-package ${package};
+public final class Constants {
+
+    private Constants() {
+    }
+
+    public static final String REST_UTF8 = StandardCharsets.UTF_8.name();
+}

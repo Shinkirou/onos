@@ -19,15 +19,11 @@ import com.google.common.base.MoreObjects;
 import org.onlab.osgi.DefaultServiceDirectory;
 import org.onlab.packet.IpAddress;
 import org.onlab.packet.MacAddress;
+import org.onosproject.net.Annotations;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.Port;
 import org.onosproject.net.PortNumber;
 import org.onosproject.net.device.DeviceService;
-import org.onosproject.ovsdb.controller.OvsdbClientService;
-import org.onosproject.ovsdb.controller.OvsdbController;
-import org.onosproject.ovsdb.controller.OvsdbNodeId;
-import org.onosproject.ovsdb.rfc.notation.OvsdbMap;
-import org.onosproject.ovsdb.rfc.table.Interface;
 
 import java.util.Objects;
 
@@ -37,6 +33,8 @@ import static org.onosproject.k8snode.api.Constants.GENEVE_TUNNEL;
 import static org.onosproject.k8snode.api.Constants.GRE_TUNNEL;
 import static org.onosproject.k8snode.api.Constants.INTEGRATION_BRIDGE;
 import static org.onosproject.k8snode.api.Constants.INTEGRATION_TO_EXTERNAL_BRIDGE;
+import static org.onosproject.k8snode.api.Constants.INTEGRATION_TO_LOCAL_BRIDGE;
+import static org.onosproject.k8snode.api.Constants.LOCAL_TO_INTEGRATION_BRIDGE;
 import static org.onosproject.k8snode.api.Constants.PHYSICAL_EXTERNAL_BRIDGE;
 import static org.onosproject.k8snode.api.Constants.VXLAN_TUNNEL;
 import static org.onosproject.net.AnnotationKeys.PORT_NAME;
@@ -46,21 +44,21 @@ import static org.onosproject.net.AnnotationKeys.PORT_NAME;
  */
 public class DefaultK8sNode implements K8sNode {
 
-    private static final int DEFAULT_OVSDB_PORT = 6640;
-    private static final String IP_ADDRESS = "ip_address";
-    private static final String MAC_ADDRESS = "mac_address";
-    private static final String EXT_INTF = "ext_interface";
-    private static final String EXT_GW_IP = "ext_gw_ip_address";
-    private static final String EXT_GW_MAC = "ext_gw_mac_address";
+    private static final String PORT_MAC = "portMac";
 
     private final String hostname;
     private final Type type;
     private final DeviceId intgBridge;
     private final DeviceId extBridge;
+    private final DeviceId localBridge;
     private final IpAddress managementIp;
     private final IpAddress dataIp;
     private final K8sNodeState state;
+    private final String extIntf;
+    private final IpAddress extBridgeIp;
+    private final IpAddress extGatewayIp;
     private final MacAddress extGatewayMac;
+    private final String podCidr;
 
     private static final String NOT_NULL_MSG = "Node % cannot be null";
 
@@ -73,23 +71,35 @@ public class DefaultK8sNode implements K8sNode {
      * @param type              node type
      * @param intgBridge        integration bridge
      * @param extBridge         external bridge
+     * @param localBridge       local bridge
+     * @param extIntf           external interface
      * @param managementIp      management IP address
      * @param dataIp            data IP address
      * @param state             node state
+     * @param extBridgeIp       external bridge IP address
+     * @param extGatewayIp      external gateway IP address
      * @param extGatewayMac     external gateway MAC address
+     * @param podCidr           POD CIDR
      */
     protected DefaultK8sNode(String hostname, Type type, DeviceId intgBridge,
-                             DeviceId extBridge, IpAddress managementIp,
+                             DeviceId extBridge, DeviceId localBridge,
+                             String extIntf, IpAddress managementIp,
                              IpAddress dataIp, K8sNodeState state,
-                             MacAddress extGatewayMac) {
+                             IpAddress extBridgeIp, IpAddress extGatewayIp,
+                             MacAddress extGatewayMac, String podCidr) {
         this.hostname = hostname;
         this.type = type;
         this.intgBridge = intgBridge;
         this.extBridge = extBridge;
+        this.localBridge = localBridge;
+        this.extIntf = extIntf;
         this.managementIp = managementIp;
         this.dataIp = dataIp;
         this.state = state;
+        this.extBridgeIp = extBridgeIp;
+        this.extGatewayIp = extGatewayIp;
         this.extGatewayMac = extGatewayMac;
+        this.podCidr = podCidr;
     }
 
     @Override
@@ -118,16 +128,31 @@ public class DefaultK8sNode implements K8sNode {
     }
 
     @Override
+    public DeviceId localBridge() {
+        return localBridge;
+    }
+
+    @Override
+    public String extIntf() {
+        return extIntf;
+    }
+
+    @Override
     public K8sNode updateIntgBridge(DeviceId deviceId) {
         return new Builder()
                 .hostname(hostname)
                 .type(type)
                 .intgBridge(deviceId)
                 .extBridge(extBridge)
+                .localBridge(localBridge)
+                .extIntf(extIntf)
                 .managementIp(managementIp)
                 .dataIp(dataIp)
                 .state(state)
+                .extBridgeIp(extBridgeIp)
+                .extGatewayIp(extGatewayIp)
                 .extGatewayMac(extGatewayMac)
+                .podCidr(podCidr)
                 .build();
     }
 
@@ -138,10 +163,34 @@ public class DefaultK8sNode implements K8sNode {
                 .type(type)
                 .intgBridge(intgBridge)
                 .extBridge(deviceId)
+                .localBridge(localBridge)
+                .extIntf(extIntf)
                 .managementIp(managementIp)
                 .dataIp(dataIp)
                 .state(state)
+                .extBridgeIp(extBridgeIp)
+                .extGatewayIp(extGatewayIp)
                 .extGatewayMac(extGatewayMac)
+                .podCidr(podCidr)
+                .build();
+    }
+
+    @Override
+    public K8sNode updateLocalBridge(DeviceId deviceId) {
+        return new Builder()
+                .hostname(hostname)
+                .type(type)
+                .intgBridge(intgBridge)
+                .extBridge(extBridge)
+                .localBridge(deviceId)
+                .extIntf(extIntf)
+                .managementIp(managementIp)
+                .dataIp(dataIp)
+                .state(state)
+                .extBridgeIp(extBridgeIp)
+                .extGatewayIp(extGatewayIp)
+                .extGatewayMac(extGatewayMac)
+                .podCidr(podCidr)
                 .build();
     }
 
@@ -161,15 +210,26 @@ public class DefaultK8sNode implements K8sNode {
     }
 
     @Override
+    public String podCidr() {
+        return podCidr;
+    }
+
+    @Override
     public K8sNode updateState(K8sNodeState newState) {
         return new Builder()
                 .hostname(hostname)
                 .type(type)
                 .intgBridge(intgBridge)
+                .extBridge(extBridge)
+                .localBridge(localBridge)
+                .extIntf(extIntf)
                 .managementIp(managementIp)
                 .dataIp(dataIp)
                 .state(newState)
+                .extBridgeIp(extBridgeIp)
+                .extGatewayIp(extGatewayIp)
                 .extGatewayMac(extGatewayMac)
+                .podCidr(podCidr)
                 .build();
     }
 
@@ -179,12 +239,17 @@ public class DefaultK8sNode implements K8sNode {
                 .hostname(hostname)
                 .type(type)
                 .intgBridge(intgBridge)
+                .extBridge(extBridge)
+                .localBridge(localBridge)
+                .extIntf(extIntf)
                 .managementIp(managementIp)
                 .dataIp(dataIp)
                 .state(state)
+                .extBridgeIp(extBridgeIp)
+                .extGatewayIp(extGatewayIp)
                 .extGatewayMac(newMac)
+                .podCidr(podCidr)
                 .build();
-
     }
 
     @Override
@@ -204,74 +269,22 @@ public class DefaultK8sNode implements K8sNode {
 
     @Override
     public PortNumber intgBridgePortNum() {
-        DeviceService deviceService = DefaultServiceDirectory.getService(DeviceService.class);
-        Port port = deviceService.getPorts(intgBridge).stream()
-                .filter(p -> p.isEnabled() &&
-                        Objects.equals(p.annotations().value(PORT_NAME), INTEGRATION_BRIDGE))
-                .findAny().orElse(null);
-        return port != null ? port.number() : null;
-    }
-
-    @Override
-    public MacAddress intgBridgeMac() {
-        OvsdbClientService client = getOvsClient();
-
-        if (client == null) {
-            return null;
-        }
-
-        Interface iface = getOvsClient().getInterface(INTEGRATION_BRIDGE);
-        OvsdbMap data = (OvsdbMap) iface.getExternalIdsColumn().data();
-        return MacAddress.valueOf((String) data.map().get(MAC_ADDRESS));
-    }
-
-    @Override
-    public IpAddress extBridgeIp() {
-        OvsdbClientService client = getOvsClient();
-
-        if (client == null) {
-            return null;
-        }
-
-        Interface iface = getOvsClient().getInterface(EXTERNAL_BRIDGE);
-        OvsdbMap data = (OvsdbMap) iface.getExternalIdsColumn().data();
-        return IpAddress.valueOf((String) data.map().get(IP_ADDRESS));
-    }
-
-    @Override
-    public MacAddress extBridgeMac() {
-        OvsdbClientService client = getOvsClient();
-
-        if (client == null) {
-            return null;
-        }
-
-        Interface iface = getOvsClient().getInterface(EXTERNAL_BRIDGE);
-        OvsdbMap data = (OvsdbMap) iface.getExternalIdsColumn().data();
-        return MacAddress.valueOf((String) data.map().get(MAC_ADDRESS));
-    }
-
-    @Override
-    public IpAddress extGatewayIp() {
-        OvsdbClientService client = getOvsClient();
-
-        if (client == null) {
-            return null;
-        }
-
-        Interface iface = getOvsClient().getInterface(EXTERNAL_BRIDGE);
-        OvsdbMap data = (OvsdbMap) iface.getExternalIdsColumn().data();
-        return IpAddress.valueOf((String) data.map().get(EXT_GW_IP));
-    }
-
-    @Override
-    public MacAddress extGatewayMac() {
-        return extGatewayMac;
+        return portNumber(intgBridge, INTEGRATION_BRIDGE);
     }
 
     @Override
     public PortNumber intgToExtPatchPortNum() {
         return portNumber(intgBridge, INTEGRATION_TO_EXTERNAL_BRIDGE);
+    }
+
+    @Override
+    public PortNumber intgToLocalPatchPortNum() {
+        return portNumber(intgBridge, INTEGRATION_TO_LOCAL_BRIDGE);
+    }
+
+    @Override
+    public PortNumber localToIntgPatchPortNumber() {
+        return portNumber(localBridge, LOCAL_TO_INTEGRATION_BRIDGE);
     }
 
     @Override
@@ -281,20 +294,36 @@ public class DefaultK8sNode implements K8sNode {
 
     @Override
     public PortNumber extBridgePortNum() {
-        OvsdbClientService client = getOvsClient();
-
-        if (client == null) {
+        if (this.extIntf == null) {
             return null;
         }
 
-        Interface iface = getOvsClient().getInterface(EXTERNAL_BRIDGE);
-        OvsdbMap data = (OvsdbMap) iface.getExternalIdsColumn().data();
-        String extIface = (String) data.map().get(EXT_INTF);
-        if (extIface == null) {
-            return null;
-        }
+        return portNumber(extBridge, this.extIntf);
+    }
 
-        return portNumber(extBridge, extIface);
+    @Override
+    public MacAddress intgBridgeMac() {
+        return macAddress(intgBridge, INTEGRATION_BRIDGE);
+    }
+
+    @Override
+    public IpAddress extBridgeIp() {
+        return extBridgeIp;
+    }
+
+    @Override
+    public MacAddress extBridgeMac() {
+        return macAddress(extBridge, EXTERNAL_BRIDGE);
+    }
+
+    @Override
+    public IpAddress extGatewayIp() {
+        return extGatewayIp;
+    }
+
+    @Override
+    public MacAddress extGatewayMac() {
+        return extGatewayMac;
     }
 
     @Override
@@ -310,8 +339,13 @@ public class DefaultK8sNode implements K8sNode {
                     type == that.type &&
                     intgBridge.equals(that.intgBridge) &&
                     extBridge.equals(that.extBridge) &&
+                    localBridge.equals(that.localBridge) &&
+                    extIntf.equals(that.extIntf) &&
                     managementIp.equals(that.managementIp) &&
                     dataIp.equals(that.dataIp) &&
+                    extBridgeIp.equals(that.extBridgeIp) &&
+                    extGatewayIp.equals(that.extGatewayIp) &&
+                    podCidr.equals(that.podCidr) &&
                     state == that.state;
         }
 
@@ -320,8 +354,9 @@ public class DefaultK8sNode implements K8sNode {
 
     @Override
     public int hashCode() {
-        return Objects.hash(hostname, type, intgBridge, extBridge,
-                            managementIp, dataIp, state, extGatewayMac);
+        return Objects.hash(hostname, type, intgBridge, extBridge, localBridge,
+                            extIntf, managementIp, dataIp, state, extBridgeIp,
+                            extGatewayIp, extGatewayMac, podCidr);
     }
 
     @Override
@@ -331,10 +366,15 @@ public class DefaultK8sNode implements K8sNode {
                 .add("type", type)
                 .add("intgBridge", intgBridge)
                 .add("extBridge", extBridge)
+                .add("localBridge", localBridge)
+                .add("extIntf", extIntf)
                 .add("managementIp", managementIp)
                 .add("dataIp", dataIp)
                 .add("state", state)
+                .add("extBridgeIp", extBridgeIp)
+                .add("extGatewayIp", extGatewayIp)
                 .add("extGatewayMac", extGatewayMac)
+                .add("podCidr", podCidr)
                 .toString();
     }
 
@@ -346,25 +386,23 @@ public class DefaultK8sNode implements K8sNode {
         return portNumber(intgBridge, tunnelType);
     }
 
+    private MacAddress macAddress(DeviceId deviceId, String portName) {
+        Port port = port(deviceId, portName);
+        Annotations annots = port.annotations();
+        return annots != null ? MacAddress.valueOf(annots.value(PORT_MAC)) : null;
+    }
+
     private PortNumber portNumber(DeviceId deviceId, String portName) {
-        DeviceService deviceService = DefaultServiceDirectory.getService(DeviceService.class);
-        Port port = deviceService.getPorts(deviceId).stream()
-                .filter(p -> p.isEnabled() &&
-                        Objects.equals(p.annotations().value(PORT_NAME), portName))
-                .findAny().orElse(null);
+        Port port = port(deviceId, portName);
         return port != null ? port.number() : null;
     }
 
-    private OvsdbClientService getOvsClient() {
-        OvsdbController ovsdbController =
-                DefaultServiceDirectory.getService(OvsdbController.class);
-        OvsdbNodeId ovsdb = new OvsdbNodeId(this.managementIp, DEFAULT_OVSDB_PORT);
-        OvsdbClientService client = ovsdbController.getOvsdbClient(ovsdb);
-        if (client == null) {
-            return null;
-        }
-
-        return client;
+    private Port port(DeviceId deviceId, String portName) {
+        DeviceService deviceService = DefaultServiceDirectory.getService(DeviceService.class);
+        return deviceService.getPorts(deviceId).stream()
+                .filter(p -> p.isEnabled() &&
+                        Objects.equals(p.annotations().value(PORT_NAME), portName))
+                .findAny().orElse(null);
     }
 
     /**
@@ -388,10 +426,15 @@ public class DefaultK8sNode implements K8sNode {
                 .type(node.type())
                 .intgBridge(node.intgBridge())
                 .extBridge(node.extBridge())
+                .localBridge(node.localBridge())
+                .extIntf(node.extIntf())
                 .managementIp(node.managementIp())
                 .dataIp(node.dataIp())
                 .state(node.state())
-                .extGatewayMac(node.extGatewayMac());
+                .extBridgeIp(node.extBridgeIp())
+                .extGatewayIp(node.extGatewayIp())
+                .extGatewayMac(node.extGatewayMac())
+                .podCidr(node.podCidr());
     }
 
     public static final class Builder implements K8sNode.Builder {
@@ -400,11 +443,16 @@ public class DefaultK8sNode implements K8sNode {
         private Type type;
         private DeviceId intgBridge;
         private DeviceId extBridge;
+        private DeviceId localBridge;
         private IpAddress managementIp;
         private IpAddress dataIp;
         private K8sNodeState state;
         private K8sApiConfig apiConfig;
+        private String extIntf;
+        private IpAddress extBridgeIp;
+        private IpAddress extGatewayIp;
         private MacAddress extGatewayMac;
+        private String podCidr;
 
         // private constructor not intended to use from external
         private Builder() {
@@ -421,10 +469,15 @@ public class DefaultK8sNode implements K8sNode {
                     type,
                     intgBridge,
                     extBridge,
+                    localBridge,
+                    extIntf,
                     managementIp,
                     dataIp,
                     state,
-                    extGatewayMac);
+                    extBridgeIp,
+                    extGatewayIp,
+                    extGatewayMac,
+                    podCidr);
         }
 
         @Override
@@ -452,6 +505,18 @@ public class DefaultK8sNode implements K8sNode {
         }
 
         @Override
+        public Builder localBridge(DeviceId deviceId) {
+            this.localBridge = deviceId;
+            return this;
+        }
+
+        @Override
+        public Builder extIntf(String intf) {
+            this.extIntf = intf;
+            return this;
+        }
+
+        @Override
         public Builder managementIp(IpAddress managementIp) {
             this.managementIp = managementIp;
             return this;
@@ -470,8 +535,26 @@ public class DefaultK8sNode implements K8sNode {
         }
 
         @Override
+        public Builder extBridgeIp(IpAddress extBridgeIp) {
+            this.extBridgeIp = extBridgeIp;
+            return this;
+        }
+
+        @Override
+        public Builder extGatewayIp(IpAddress extGatewayIp) {
+            this.extGatewayIp = extGatewayIp;
+            return this;
+        }
+
+        @Override
         public Builder extGatewayMac(MacAddress extGatewayMac) {
             this.extGatewayMac = extGatewayMac;
+            return this;
+        }
+
+        @Override
+        public Builder podCidr(String podCidr) {
+            this.podCidr = podCidr;
             return this;
         }
     }

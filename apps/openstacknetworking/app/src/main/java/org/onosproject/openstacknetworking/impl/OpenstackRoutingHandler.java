@@ -730,7 +730,6 @@ public class OpenstackRoutingHandler {
             OpenstackNode osNode = event.subject();
             switch (event.type()) {
                 case OPENSTACK_NODE_COMPLETE:
-                case OPENSTACK_NODE_INCOMPLETE:
                 case OPENSTACK_NODE_UPDATED:
                 case OPENSTACK_NODE_REMOVED:
                     eventExecutor.execute(() -> {
@@ -740,6 +739,7 @@ public class OpenstackRoutingHandler {
                         reconfigureRouters(osNode);
                     });
                     break;
+                case OPENSTACK_NODE_INCOMPLETE:
                 case OPENSTACK_NODE_CREATED:
                 default:
                     break;
@@ -753,7 +753,7 @@ public class OpenstackRoutingHandler {
                     routerIfaceAdded(osRouter, iface);
                 });
             });
-            log.info("Reconfigure routers for {}", osNode.hostname());
+            log.debug("Reconfigure routers for {}", osNode.hostname());
         }
     }
 }

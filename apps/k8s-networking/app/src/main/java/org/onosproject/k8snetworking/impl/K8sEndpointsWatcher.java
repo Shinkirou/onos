@@ -159,7 +159,7 @@ public class K8sEndpointsWatcher {
 
         @Override
         public void onClose(KubernetesClientException e) {
-            log.info("Endpoints watcher OnClose: {}" + e);
+            log.warn("Endpoints watcher OnClose", e);
         }
 
         private void processAddition(Endpoints endpoints) {
@@ -170,7 +170,10 @@ public class K8sEndpointsWatcher {
             log.trace("Process endpoints {} creating event from API server.",
                     endpoints.getMetadata().getName());
 
-            k8sEndpointsAdminService.createEndpoints(endpoints);
+            if (k8sEndpointsAdminService.endpoints(
+                    endpoints.getMetadata().getUid()) == null) {
+                k8sEndpointsAdminService.createEndpoints(endpoints);
+            }
         }
 
         private void processModification(Endpoints endpoints) {

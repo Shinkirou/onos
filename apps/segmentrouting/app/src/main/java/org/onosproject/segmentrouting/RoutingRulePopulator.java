@@ -30,6 +30,7 @@ import org.onlab.packet.MplsLabel;
 import org.onlab.packet.VlanId;
 import org.onosproject.net.ConnectPoint;
 import org.onosproject.net.Device;
+import org.onosproject.net.Host;
 import org.onosproject.net.flowobjective.DefaultObjectiveContext;
 import org.onosproject.net.flowobjective.Objective;
 import org.onosproject.net.flowobjective.ObjectiveContext;
@@ -1157,8 +1158,7 @@ public class RoutingRulePopulator {
                                    VlanId innerVlan, boolean install) {
         // We should trigger the removal of double tagged rules only when removing
         // the filtering objective and no other hosts are connected to the same device port.
-        boolean cleanupDoubleTaggedRules = srManager.hostService
-                .getConnectedHosts(new ConnectPoint(deviceId, portNum)).size() == 0 && !install;
+        boolean cleanupDoubleTaggedRules = !anyDoubleTaggedHost(deviceId, portNum) && !install;
         FilteringObjective.Builder fob = buildDoubleTaggedFilteringObj(deviceId, portNum,
                                                                        outerVlan, innerVlan,
                                                                        cleanupDoubleTaggedRules);
@@ -1178,6 +1178,23 @@ public class RoutingRulePopulator {
         } else {
             srManager.flowObjectiveService.filter(deviceId, fob.remove(context));
         }
+    }
+
+    /**
+     * Checks if there is any double tagged host attached to given location.
+     * This method will match on the effective location of a host.
+     * That is, it will match on auxLocations when auxLocations is not null. Otherwise, it will match on locations.
+     *
+     * @param deviceId device ID
+     * @param portNum port number
+     * @return true if there is any host attached to given location.
+     */
+    private boolean anyDoubleTaggedHost(DeviceId deviceId, PortNumber portNum) {
+        ConnectPoint cp = new ConnectPoint(deviceId, portNum);
+        Set<Host> connectedHosts = srManager.hostService.getConnectedHosts(cp, false);
+        Set<Host> auxConnectedHosts = srManager.hostService.getConnectedHosts(cp, true);
+        return !auxConnectedHosts.isEmpty() ||
+                connectedHosts.stream().anyMatch(host -> host.auxLocations() == null);
     }
 
     private FilteringObjective.Builder buildDoubleTaggedFilteringObj(DeviceId deviceId, PortNumber portNum,
@@ -1668,12 +1685,15 @@ public class RoutingRulePopulator {
         srManager.flowObjectiveService.forward(deviceId, install ? fob.add(context) : fob.remove(context));
 
         if (!install) {
-            DefaultGroupHandler grpHandler = srManager.getGroupHandler(deviceId);
-            if (grpHandler == null) {
-                log.warn("updateFwdObj: groupHandler for device {} not found", deviceId);
-            } else {
-                // Remove L3UG for the given port and host
-                grpHandler.removeGroupFromPort(portNumber, tbuilder.build(), mbuilder.build());
+            if (!srManager.getVlanPortMap(deviceId).containsKey(vlanId) ||
+                    !srManager.getVlanPortMap(deviceId).get(vlanId).contains(portNumber)) {
+                DefaultGroupHandler grpHandler = srManager.getGroupHandler(deviceId);
+                if (grpHandler == null) {
+                    log.warn("updateFwdObj: groupHandler for device {} not found", deviceId);
+                } else {
+                    // Remove L3UG for the given port and host
+                    grpHandler.removeGroupFromPort(portNumber, tbuilder.build(), mbuilder.build());
+                }
             }
         }
     }

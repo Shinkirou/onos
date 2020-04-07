@@ -84,6 +84,7 @@ import static org.onosproject.k8snetworking.api.Constants.ACL_TABLE;
 import static org.onosproject.k8snetworking.api.Constants.DEFAULT_METADATA_MASK;
 import static org.onosproject.k8snetworking.api.Constants.DEFAULT_NAMESPACE_HASH;
 import static org.onosproject.k8snetworking.api.Constants.DEFAULT_SEGMENT_ID;
+import static org.onosproject.k8snetworking.api.Constants.DEFAULT_SERVICE_IP_NONE;
 import static org.onosproject.k8snetworking.api.Constants.GROUPING_TABLE;
 import static org.onosproject.k8snetworking.api.Constants.K8S_NETWORKING_APP_ID;
 import static org.onosproject.k8snetworking.api.Constants.NAMESPACE_TABLE;
@@ -259,12 +260,19 @@ public class K8sNetworkPolicyHandler {
                 if (d.equalsIgnoreCase(DIRECTION_INGRESS)) {
                     sBuilder.matchIPDst(IpPrefix.valueOf(IpAddress.valueOf(k), HOST_PREFIX));
                     tBuilder.transition(ACL_INGRESS_WHITE_TABLE);
+                    setPolicyRulesBase(sBuilder, tBuilder, ACL_TABLE, install);
                 } else if (d.equalsIgnoreCase(DIRECTION_EGRESS)) {
+                    // original IP
                     sBuilder.matchIPSrc(IpPrefix.valueOf(IpAddress.valueOf(k), HOST_PREFIX));
                     tBuilder.transition(ACL_EGRESS_WHITE_TABLE);
-                }
+                    setPolicyRulesBase(sBuilder, tBuilder, ACL_TABLE, install);
 
-                setPolicyRulesBase(sBuilder, tBuilder, ACL_TABLE, install);
+
+                    // shifted IP
+                    sBuilder.matchIPSrc(IpPrefix.valueOf(IpAddress.valueOf(
+                            shiftIpDomain(k, SHIFTED_IP_PREFIX)), HOST_PREFIX));
+                    setPolicyRulesBase(sBuilder, tBuilder, ACL_TABLE, install);
+                }
             });
         });
     }
@@ -302,12 +310,9 @@ public class K8sNetworkPolicyHandler {
                 .setTunnelId(DEFAULT_SEGMENT_ID)
                 .transition(ROUTING_TABLE);
 
-        int table = 0;
         if (DIRECTION_INGRESS.equals(direction)) {
-            table = ACL_INGRESS_WHITE_TABLE;
+            setPolicyRulesBase(sBuilder, tBuilder, ACL_INGRESS_WHITE_TABLE, install);
         }
-
-        setPolicyRulesBase(sBuilder, tBuilder, table, install);
     }
 
     private void setAllowRulesByPolicy(NetworkPolicy policy, boolean install) {
@@ -348,32 +353,11 @@ public class K8sNetworkPolicyHandler {
                 }
 
                 // POD selector
-                Set<Pod> pods = Sets.newConcurrentHashSet();
-                if (peer.getPodSelector() != null) {
-                    Map<String, String> podLabels = peer.getPodSelector().getMatchLabels();
-                    List<LabelSelectorRequirement> matchExps = peer.getPodSelector().getMatchExpressions();
+                Set<Pod> pods = podsFromPolicyPeer(peer, policy.getMetadata().getNamespace());
 
-                    if (podLabels == null && matchExps.size() == 0) {
-                        k8sPodService.pods().stream()
-                                .filter(pod -> pod.getMetadata().getNamespace().equals(
-                                        policy.getMetadata().getNamespace()))
-                                .forEach(pods::add);
-                    } else {
-                        k8sPodService.pods().stream()
-                                .filter(pod -> pod.getMetadata().getNamespace().equals(
-                                        policy.getMetadata().getNamespace()))
-                                .forEach(pod -> {
-                                    pod.getMetadata().getLabels().forEach((k, v) -> {
-                                        if (podLabels != null && podLabels.get(k) != null &&
-                                                podLabels.get(k).equals(v)) {
-                                            pods.add(pod);
-                                        }
-                                    });
-                                });
-                    }
-                }
-
-                pods.forEach(pod -> {
+                pods.stream()
+                        .filter(pod -> pod.getStatus().getPodIP() != null)
+                        .forEach(pod -> {
                     white.compute(shiftIpDomain(pod.getStatus().getPodIP(),
                             SHIFTED_IP_PREFIX) + "/" + HOST_PREFIX, (m, n) -> direction);
                     white.compute(pod.getStatus().getPodIP() + "/" + HOST_PREFIX, (m, n) -> direction);
@@ -429,35 +413,12 @@ public class K8sNetworkPolicyHandler {
                     }
                 }
 
-                Set<Pod> pods = Sets.newConcurrentHashSet();
-
                 // POD selector
-                if (peer.getPodSelector() != null) {
-                    Map<String, String> podLabels = peer.getPodSelector().getMatchLabels();
+                Set<Pod> pods = podsFromPolicyPeer(peer, policy.getMetadata().getNamespace());
 
-                    List<LabelSelectorRequirement> matchExps = peer.getPodSelector().getMatchExpressions();
-
-                    if (podLabels == null && matchExps.size() == 0) {
-                        k8sPodService.pods().stream()
-                                .filter(pod -> pod.getMetadata().getNamespace().equals(
-                                        policy.getMetadata().getNamespace()))
-                                .forEach(pods::add);
-                    } else {
-                        k8sPodService.pods().stream()
-                                .filter(pod -> pod.getMetadata().getNamespace().equals(
-                                        policy.getMetadata().getNamespace()))
-                                .forEach(pod -> {
-                                    pod.getMetadata().getLabels().forEach((k, v) -> {
-                                        if (podLabels != null && podLabels.get(k) != null &&
-                                                podLabels.get(k).equals(v)) {
-                                            pods.add(pod);
-                                        }
-                                    });
-                                });
-                    }
-                }
-
-                pods.forEach(pod -> {
+                pods.stream()
+                        .filter(pod -> pod.getStatus().getPodIP() != null)
+                        .forEach(pod -> {
                     white.compute(shiftIpDomain(pod.getStatus().getPodIP(),
                             SHIFTED_IP_PREFIX) + "/" + HOST_PREFIX, (m, n) -> {
                         if (n != null) {
@@ -488,6 +449,34 @@ public class K8sNetworkPolicyHandler {
         setAllowRules(namespaceHashByNamespace(k8sNamespaceService,
                 policy.getMetadata().getNamespace()), white, install);
         setBlackToRouteRules(true);
+    }
+
+    private Set<Pod> podsFromPolicyPeer(NetworkPolicyPeer peer, String namespace) {
+        Set<Pod> pods = Sets.newConcurrentHashSet();
+        if (peer.getPodSelector() != null) {
+            Map<String, String> podLabels = peer.getPodSelector().getMatchLabels();
+            List<LabelSelectorRequirement> matchExps = peer.getPodSelector().getMatchExpressions();
+
+            if (podLabels == null && matchExps.size() == 0) {
+                k8sPodService.pods().stream()
+                        .filter(pod -> pod.getMetadata().getNamespace().equals(
+                                namespace))
+                        .forEach(pods::add);
+            } else {
+                k8sPodService.pods().stream()
+                        .filter(pod -> pod.getMetadata().getNamespace().equals(
+                                namespace))
+                        .forEach(pod -> {
+                            pod.getMetadata().getLabels().forEach((k, v) -> {
+                                if (podLabels != null && podLabels.get(k) != null &&
+                                        podLabels.get(k).equals(v)) {
+                                    pods.add(pod);
+                                }
+                            });
+                        });
+            }
+        }
+        return pods;
     }
 
     private void setAllowRulesByPod(Pod pod, boolean install) {
@@ -647,7 +636,6 @@ public class K8sNetworkPolicyHandler {
         nsSet.forEach(ns -> {
             setAllowNamespaceRulesBase(tunnelId, ns.hashCode(), direction, install);
         });
-
     }
 
     private void setAllowAllRule(int nsHash, String direction, boolean install) {
@@ -810,7 +798,8 @@ public class K8sNetworkPolicyHandler {
 
         Integer nsHash = namespaceHashByPodIp(k8sPodService, k8sNamespaceService, podIp);
 
-        if (nsHash == null) {
+        // in uninstall case, we will have null nsHash value
+        if (install && nsHash == null) {
             return;
         }
 
@@ -821,6 +810,12 @@ public class K8sNetworkPolicyHandler {
         String clusterIp = service.getSpec().getClusterIP();
 
         if (clusterIp == null) {
+            return;
+        }
+
+        // one the creating of new service, the cluster IP will be configured as None
+        // in this case, we will NOT install any namespace related rules
+        if (DEFAULT_SERVICE_IP_NONE.equalsIgnoreCase(clusterIp)) {
             return;
         }
 
@@ -838,9 +833,12 @@ public class K8sNetworkPolicyHandler {
                     .matchEthType(TYPE_IPV4)
                     .matchIPSrc(IpPrefix.valueOf(IpAddress.valueOf(
                             shiftIpDomain(ip, SHIFTED_IP_PREFIX)), HOST_PREFIX));
-            TrafficTreatment.Builder tBuilder = DefaultTrafficTreatment.builder()
-                    .writeMetadata(nsHash, DEFAULT_METADATA_MASK)
-                    .transition(GROUPING_TABLE);
+            TrafficTreatment.Builder tBuilder = DefaultTrafficTreatment.builder();
+
+            if (install) {
+                tBuilder.writeMetadata(nsHash, DEFAULT_METADATA_MASK)
+                        .transition(GROUPING_TABLE);
+            }
 
             k8sFlowRuleService.setRule(
                     appId,
@@ -998,7 +996,6 @@ public class K8sNetworkPolicyHandler {
             Namespace ns = event.subject();
             switch (event.type()) {
                 case K8S_NAMESPACE_CREATED:
-                case K8S_NAMESPACE_UPDATED:
                     eventExecutor.execute(() -> processNamespaceCreation(ns));
                     break;
                 case K8S_NAMESPACE_REMOVED:
@@ -1023,7 +1020,7 @@ public class K8sNetworkPolicyHandler {
                 return;
             }
 
-            // do nothing for now
+            setDefaultAllowNamespaceRules(namespace, false);
         }
     }
 }

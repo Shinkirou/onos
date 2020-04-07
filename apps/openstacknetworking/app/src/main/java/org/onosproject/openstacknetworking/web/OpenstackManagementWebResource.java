@@ -95,12 +95,17 @@ public class OpenstackManagementWebResource extends AbstractWebResource {
 
     private static final String SECURITY_GROUP_FLAG_REQUIRED = "Security Group flag is not specified";
 
+    private static final String AUTH_INFO_NOT_FOUND = "Auth info is not found";
+    private static final String AUTH_INFO_NOT_CORRECT = "Auth info is not correct";
+
     private static final String HTTP_HEADER_ACCEPT = "accept";
     private static final String HTTP_HEADER_VALUE_JSON = "application/json";
 
     private static final String IS_ACTIVE = "isActive";
     private static final String FLAG_TRUE = "true";
     private static final String FLAG_FALSE = "false";
+
+    private static final String ACTIVE_IP = "activeIp";
 
     private final ObjectNode root = mapper().createObjectNode();
     private final ArrayNode floatingipsNode = root.putArray(FLOATINGIPS);
@@ -132,67 +137,99 @@ public class OpenstackManagementWebResource extends AbstractWebResource {
 
         Optional<OpenstackNode> node = osNodeAdminService.nodes(CONTROLLER).stream().findFirst();
         if (!node.isPresent()) {
-            throw new ItemNotFoundException("Auth info is not found");
+            log.error(AUTH_INFO_NOT_FOUND);
+            throw new ItemNotFoundException(AUTH_INFO_NOT_FOUND);
         }
 
         OSClient osClient = OpenstackNetworkingUtil.getConnectedClient(node.get());
 
         if (osClient == null) {
-            throw new ItemNotFoundException("Auth info is not correct");
+            log.error(AUTH_INFO_NOT_CORRECT);
+            throw new ItemNotFoundException(AUTH_INFO_NOT_CORRECT);
         }
 
-        osClient.headers(headerMap).networking().securitygroup().list().forEach(osSg -> {
-            if (osSgAdminService.securityGroup(osSg.getId()) != null) {
-                osSgAdminService.updateSecurityGroup(osSg);
-            } else {
-                osSgAdminService.createSecurityGroup(osSg);
-            }
-        });
+        try {
+            osClient.headers(headerMap).networking().securitygroup().list().forEach(osSg -> {
+                if (osSgAdminService.securityGroup(osSg.getId()) != null) {
+                    osSgAdminService.updateSecurityGroup(osSg);
+                } else {
+                    osSgAdminService.createSecurityGroup(osSg);
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Failed to retrieve security group due to {}", e.getMessage());
+            return Response.serverError().build();
+        }
 
-        osClient.headers(headerMap).networking().network().list().forEach(osNet -> {
-            if (osNetAdminService.network(osNet.getId()) != null) {
-                osNetAdminService.updateNetwork(osNet);
-            } else {
-                osNetAdminService.createNetwork(osNet);
-            }
-        });
+        try {
+            osClient.headers(headerMap).networking().network().list().forEach(osNet -> {
+                if (osNetAdminService.network(osNet.getId()) != null) {
+                    osNetAdminService.updateNetwork(osNet);
+                } else {
+                    osNetAdminService.createNetwork(osNet);
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Failed to retrieve network due to {}", e.getMessage());
+            return Response.serverError().build();
+        }
 
-        osClient.headers(headerMap).networking().subnet().list().forEach(osSubnet -> {
-            if (osNetAdminService.subnet(osSubnet.getId()) != null) {
-                osNetAdminService.updateSubnet(osSubnet);
-            } else {
-                osNetAdminService.createSubnet(osSubnet);
-            }
-        });
+        try {
+            osClient.headers(headerMap).networking().subnet().list().forEach(osSubnet -> {
+                if (osNetAdminService.subnet(osSubnet.getId()) != null) {
+                    osNetAdminService.updateSubnet(osSubnet);
+                } else {
+                    osNetAdminService.createSubnet(osSubnet);
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Failed to retrieve subnet due to {}", e.getMessage());
+            return Response.serverError().build();
+        }
 
-        osClient.headers(headerMap).networking().port().list().forEach(osPort -> {
-            if (osNetAdminService.port(osPort.getId()) != null) {
-                osNetAdminService.updatePort(osPort);
-            } else {
-                osNetAdminService.createPort(osPort);
-            }
-        });
+        try {
+            osClient.headers(headerMap).networking().port().list().forEach(osPort -> {
+                if (osNetAdminService.port(osPort.getId()) != null) {
+                    osNetAdminService.updatePort(osPort);
+                } else {
+                    osNetAdminService.createPort(osPort);
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Failed to retrieve port due to {}", e.getMessage());
+            return Response.serverError().build();
+        }
 
-        osClient.headers(headerMap).networking().router().list().forEach(osRouter -> {
-            if (osRouterAdminService.router(osRouter.getId()) != null) {
-                osRouterAdminService.updateRouter(osRouter);
-            } else {
-                osRouterAdminService.createRouter(osRouter);
-            }
+        try {
+            osClient.headers(headerMap).networking().router().list().forEach(osRouter -> {
+                if (osRouterAdminService.router(osRouter.getId()) != null) {
+                    osRouterAdminService.updateRouter(osRouter);
+                } else {
+                    osRouterAdminService.createRouter(osRouter);
+                }
 
-            osNetAdminService.ports().stream()
-                    .filter(osPort -> Objects.equals(osPort.getDeviceId(), osRouter.getId()) &&
-                            Objects.equals(osPort.getDeviceOwner(), DEVICE_OWNER_IFACE))
-                    .forEach(osPort -> addRouterIface(osPort, osRouterAdminService));
-        });
+                osNetAdminService.ports().stream()
+                        .filter(osPort -> Objects.equals(osPort.getDeviceId(), osRouter.getId()) &&
+                                Objects.equals(osPort.getDeviceOwner(), DEVICE_OWNER_IFACE))
+                        .forEach(osPort -> addRouterIface(osPort, osRouterAdminService));
+            });
+        } catch (Exception e) {
+            log.warn("Failed to retrieve router due to {}", e.getMessage());
+            return Response.serverError().build();
+        }
 
-        osClient.headers(headerMap).networking().floatingip().list().forEach(osFloating -> {
-            if (osRouterAdminService.floatingIp(osFloating.getId()) != null) {
-                osRouterAdminService.updateFloatingIp(osFloating);
-            } else {
-                osRouterAdminService.createFloatingIp(osFloating);
-            }
-        });
+        try {
+            osClient.headers(headerMap).networking().floatingip().list().forEach(osFloating -> {
+                if (osRouterAdminService.floatingIp(osFloating.getId()) != null) {
+                    osRouterAdminService.updateFloatingIp(osFloating);
+                } else {
+                    osRouterAdminService.createFloatingIp(osFloating);
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Failed to retrieve floating IP due to {}", e.getMessage());
+            return Response.serverError().build();
+        }
 
         return ok(mapper().createObjectNode()).build();
     }
@@ -377,6 +414,8 @@ public class OpenstackManagementWebResource extends AbstractWebResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateActiveStatus(@PathParam("flag") String flag) {
 
+        log.info("Update active status to {}", flag);
+
         if (FLAG_TRUE.equalsIgnoreCase(flag)) {
             osHaService.setActive(true);
         }
@@ -402,6 +441,19 @@ public class OpenstackManagementWebResource extends AbstractWebResource {
     }
 
     /**
+     * Obtains the active node's IP address.
+     *
+     * @return 200 OK with active node's IP address.
+     */
+    @GET
+    @Path("active/ip")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getActiveIp() {
+        return ok(mapper().createObjectNode()
+                .put(ACTIVE_IP, osHaService.getActiveIp().toString())).build();
+    }
+
+    /**
      * Configures the HA active IP address.
      *
      * @param ip IP address of active node
@@ -412,6 +464,8 @@ public class OpenstackManagementWebResource extends AbstractWebResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateActiveIp(@PathParam("ip") String ip) {
+
+        log.info("Update active IP address to {}", ip);
 
         osHaService.setActiveIp(IpAddress.valueOf(ip));
 

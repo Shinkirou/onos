@@ -151,27 +151,52 @@ public class Ofdpa2Pipeline extends AbstractHandlerBehaviour implements Pipeline
     private ScheduledExecutorService accumulatorExecutorService
         = newSingleThreadScheduledExecutor(groupedThreads("OfdpaPipeliner", "acc-%d", log));
 
+    protected AtomicBoolean ready = new AtomicBoolean(false);
+
     @Override
     public void init(DeviceId deviceId, PipelinerContext context) {
-        this.deviceId = deviceId;
+        synchronized (this) {
+            if (isReady()) {
+                return;
+            }
 
-        serviceDirectory = context.directory();
-        coreService = serviceDirectory.get(CoreService.class);
-        flowRuleService = serviceDirectory.get(FlowRuleService.class);
-        groupService = serviceDirectory.get(GroupService.class);
-        flowObjectiveStore = context.store();
-        deviceService = serviceDirectory.get(DeviceService.class);
-        // Init the accumulator, if enabled
-        if (isAccumulatorEnabled(this)) {
-            accumulator = new ForwardingObjectiveAccumulator(context.accumulatorMaxObjectives(),
-                                                             context.accumulatorMaxBatchMillis(),
-                                                             context.accumulatorMaxIdleMillis());
+            this.deviceId = deviceId;
+
+            serviceDirectory = context.directory();
+            coreService = serviceDirectory.get(CoreService.class);
+            flowRuleService = serviceDirectory.get(FlowRuleService.class);
+            groupService = serviceDirectory.get(GroupService.class);
+            flowObjectiveStore = context.store();
+            deviceService = serviceDirectory.get(DeviceService.class);
+            // Init the accumulator, if enabled
+            if (isAccumulatorEnabled(this)) {
+                accumulator = new ForwardingObjectiveAccumulator(context.accumulatorMaxObjectives(),
+                        context.accumulatorMaxBatchMillis(),
+                        context.accumulatorMaxIdleMillis());
+            }
+
+            initDriverId();
+            initGroupHander(context);
+
+            initializePipeline();
+            ready.set(true);
         }
+    }
 
-        initDriverId();
-        initGroupHander(context);
+    @Override
+    public boolean isReady() {
+        return ready.get();
+    }
 
-        initializePipeline();
+    @Override
+    public void cleanUp() {
+        synchronized (this) {
+            if (!isReady()) {
+                return;
+            }
+            ready.set(false);
+        }
+        log.info("Cleaning up...");
     }
 
     void setupAccumulatorForTests(int maxFwd, int maxBatchMS, int maxIdleMS) {
@@ -188,6 +213,13 @@ public class Ofdpa2Pipeline extends AbstractHandlerBehaviour implements Pipeline
     }
 
     protected void initGroupHander(PipelinerContext context) {
+        // Terminate internal references
+        // We are terminating the references here
+        // because when the device is offline the apps
+        // are still sending flowobjectives
+        if (groupHandler != null) {
+            groupHandler.terminate();
+        }
         groupHandler = new Ofdpa2GroupHandler();
         groupHandler.init(deviceId, context);
     }

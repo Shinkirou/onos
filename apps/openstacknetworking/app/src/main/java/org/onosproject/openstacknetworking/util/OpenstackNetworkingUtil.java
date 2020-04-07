@@ -26,6 +26,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.net.util.SubnetUtils;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -56,6 +57,8 @@ import org.onosproject.net.PortNumber;
 import org.onosproject.net.device.DeviceService;
 import org.onosproject.net.flow.DefaultTrafficTreatment;
 import org.onosproject.net.flow.TrafficTreatment;
+import org.onosproject.net.group.DefaultGroupKey;
+import org.onosproject.net.group.GroupKey;
 import org.onosproject.net.packet.DefaultOutboundPacket;
 import org.onosproject.net.packet.PacketService;
 import org.onosproject.openstacknetworking.api.Constants.VnicType;
@@ -83,11 +86,13 @@ import org.openstack4j.core.transport.ObjectMapperSingleton;
 import org.openstack4j.model.ModelEntity;
 import org.openstack4j.model.common.Identifier;
 import org.openstack4j.model.network.ExternalGateway;
+import org.openstack4j.model.network.IP;
 import org.openstack4j.model.network.NetFloatingIP;
 import org.openstack4j.model.network.Network;
 import org.openstack4j.model.network.Port;
 import org.openstack4j.model.network.Router;
 import org.openstack4j.model.network.RouterInterface;
+import org.openstack4j.model.network.SecurityGroup;
 import org.openstack4j.model.network.Subnet;
 import org.openstack4j.openstack.OSFactory;
 import org.openstack4j.openstack.networking.domain.NeutronRouterInterface;
@@ -116,12 +121,14 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -131,15 +138,23 @@ import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.onlab.packet.Ip4Address.valueOf;
 import static org.onosproject.net.AnnotationKeys.PORT_NAME;
 import static org.onosproject.openstacknetworking.api.Constants.DEFAULT_GATEWAY_MAC_STR;
+import static org.onosproject.openstacknetworking.api.Constants.DIRECT;
+import static org.onosproject.openstacknetworking.api.Constants.FLOATING_IP_FORMAT;
+import static org.onosproject.openstacknetworking.api.Constants.NETWORK_FORMAT;
 import static org.onosproject.openstacknetworking.api.Constants.OPENSTACK_NETWORKING_REST_PATH;
 import static org.onosproject.openstacknetworking.api.Constants.PCISLOT;
 import static org.onosproject.openstacknetworking.api.Constants.PCI_VENDOR_INFO;
+import static org.onosproject.openstacknetworking.api.Constants.PORT_FORMAT;
 import static org.onosproject.openstacknetworking.api.Constants.PORT_NAME_PREFIX_VM;
 import static org.onosproject.openstacknetworking.api.Constants.PORT_NAME_VHOST_USER_PREFIX_VM;
 import static org.onosproject.openstacknetworking.api.Constants.REST_PASSWORD;
 import static org.onosproject.openstacknetworking.api.Constants.REST_PORT;
 import static org.onosproject.openstacknetworking.api.Constants.REST_USER;
 import static org.onosproject.openstacknetworking.api.Constants.REST_UTF8;
+import static org.onosproject.openstacknetworking.api.Constants.ROUTER_FORMAT;
+import static org.onosproject.openstacknetworking.api.Constants.ROUTER_INTF_FORMAT;
+import static org.onosproject.openstacknetworking.api.Constants.SECURITY_GROUP_FORMAT;
+import static org.onosproject.openstacknetworking.api.Constants.SUBNET_FORMAT;
 import static org.onosproject.openstacknetworking.api.Constants.UNSUPPORTED_VENDOR;
 import static org.onosproject.openstacknetworking.api.Constants.portNamePrefixMap;
 import static org.openstack4j.core.transport.ObjectMapperSingleton.getContext;
@@ -182,11 +197,17 @@ public final class OpenstackNetworkingUtil {
     private static final String COMMA = ",";
     private static final String TUN_ID = "tun_id=";
 
+    private static final String DEVICE_OWNER_GW = "network:router_gateway";
+    private static final String DEVICE_OWNER_IFACE = "network:router_interface";
+
+    private static final String NOT_AVAILABLE = "N/A";
+
     private static final long TIMEOUT_MS = 5000;
     private static final long WAIT_OUTPUT_STREAM_SECOND = 2;
     private static final int SSH_PORT = 22;
 
     private static final int TAP_PORT_LENGTH = 11;
+    private static final int PORT_NAME_MAX_LENGTH = 15;
 
     /**
      * Prevents object instantiation from external.
@@ -380,6 +401,24 @@ public final class OpenstackNetworkingUtil {
     }
 
     /**
+     * Checks whether the given openstack port is smart NIC capable.
+     *
+     * @param port openstack port
+     * @return true if the given port is smart NIC capable, false otherwise
+     */
+    public static boolean isSmartNicCapable(Port port) {
+        if (port.getProfile() != null && port.getvNicType().equals(DIRECT)) {
+            String vendorInfo = String.valueOf(port.getProfile().get(PCI_VENDOR_INFO));
+            if (portNamePrefixMap().containsKey(vendorInfo)) {
+                log.debug("Port {} is a Smart NIC capable port.", port.getId());
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    /**
      * Extract the interface name with the supplied port.
      *
      * @param port port
@@ -477,6 +516,124 @@ public final class OpenstackNetworkingUtil {
                 log.error("IOException occurred because of {}", e);
             }
         });
+    }
+
+    /**
+     * Prints openstack security group.
+     *
+     * @param osSg  openstack security group
+     */
+    public static void printSecurityGroup(SecurityGroup osSg) {
+        print(SECURITY_GROUP_FORMAT, osSg.getId(), osSg.getName());
+    }
+
+    /**
+     * Prints openstack network.
+     *
+     * @param osNet openstack network
+     */
+    public static void printNetwork(Network osNet) {
+        final String strNet = String.format(NETWORK_FORMAT,
+                osNet.getId(),
+                osNet.getName(),
+                osNet.getProviderSegID(),
+                osNet.getSubnets());
+        print(strNet);
+    }
+
+    /**
+     * Prints openstack subnet.
+     *
+     * @param osSubnet      openstack subnet
+     * @param osNetService  openstack network service
+     */
+    public static void printSubnet(Subnet osSubnet,
+                                   OpenstackNetworkService osNetService) {
+        final Network network = osNetService.network(osSubnet.getNetworkId());
+        final String netName = network == null ? NOT_AVAILABLE : network.getName();
+        final String strSubnet = String.format(SUBNET_FORMAT,
+                osSubnet.getId(),
+                netName,
+                osSubnet.getCidr());
+        print(strSubnet);
+    }
+
+    /**
+     * Prints openstack port.
+     *
+     * @param osPort        openstack port
+     * @param osNetService  openstack network service
+     */
+    public static void printPort(Port osPort,
+                                 OpenstackNetworkService osNetService) {
+        List<String> fixedIps = osPort.getFixedIps().stream()
+                .map(IP::getIpAddress)
+                .collect(Collectors.toList());
+        final Network network = osNetService.network(osPort.getNetworkId());
+        final String netName = network == null ? NOT_AVAILABLE : network.getName();
+        final String strPort = String.format(PORT_FORMAT,
+                osPort.getId(),
+                netName,
+                osPort.getMacAddress(),
+                fixedIps.isEmpty() ? "" : fixedIps);
+        print(strPort);
+    }
+
+    /**
+     * Prints openstack router.
+     *
+     * @param osRouter      openstack router
+     * @param osNetService  openstack network service
+     */
+    public static void printRouter(Router osRouter,
+                                   OpenstackNetworkService osNetService) {
+        List<String> externals = osNetService.ports().stream()
+                .filter(osPort -> Objects.equals(osPort.getDeviceId(), osRouter.getId()) &&
+                        Objects.equals(osPort.getDeviceOwner(), DEVICE_OWNER_GW))
+                .flatMap(osPort -> osPort.getFixedIps().stream())
+                .map(IP::getIpAddress)
+                .collect(Collectors.toList());
+
+        List<String> internals = osNetService.ports().stream()
+                .filter(osPort -> Objects.equals(osPort.getDeviceId(), osRouter.getId()) &&
+                        Objects.equals(osPort.getDeviceOwner(), DEVICE_OWNER_IFACE))
+                .flatMap(osPort -> osPort.getFixedIps().stream())
+                .map(IP::getIpAddress)
+                .collect(Collectors.toList());
+
+        final String strRouter = String.format(ROUTER_FORMAT,
+                osRouter.getId(),
+                osRouter.getName(),
+                externals.isEmpty() ? "" : externals,
+                internals.isEmpty() ? "" : internals);
+        print(strRouter);
+    }
+
+    /**
+     * Prints openstack router interface.
+     *
+     * @param osRouterIntf  openstack router interface
+     */
+    public static void printRouterIntf(RouterInterface osRouterIntf) {
+        final String strRouterIntf = String.format(ROUTER_INTF_FORMAT,
+                osRouterIntf.getId(),
+                osRouterIntf.getTenantId(),
+                osRouterIntf.getSubnetId());
+        print(strRouterIntf);
+    }
+
+    /**
+     * Prints openstack floating IP.
+     *
+     * @param floatingIp    floating IP
+     */
+    public static void printFloatingIp(NetFloatingIP floatingIp) {
+        final String strFloating = String.format(FLOATING_IP_FORMAT,
+                floatingIp.getId(),
+                floatingIp.getFloatingIpAddress(),
+                Strings.isNullOrEmpty(floatingIp.getFixedIpAddress()) ?
+                        "" : floatingIp.getFixedIpAddress());
+        print(strFloating);
     }
 
     /**
@@ -1010,64 +1167,27 @@ public final class OpenstackNetworkingUtil {
     }
 
     /**
-     * Returns the external ip address with specified router information.
-     *
-     * @param srcSubnet source subnet
-     * @param osRouterService openstack router service
-     * @param osNetworkService openstack network service
-     * @return external ip address
-     */
-    public static IpAddress externalIpFromSubnet(Subnet srcSubnet,
-                                                 OpenstackRouterService
-                                                         osRouterService,
-                                                 OpenstackNetworkService
-                                                         osNetworkService) {
-
-        Router osRouter = getRouterFromSubnet(srcSubnet, osRouterService);
-
-        if (osRouter.getExternalGatewayInfo() == null) {
-            // this router does not have external connectivity
-            log.trace("router({}) has no external gateway",
-                    osRouter.getName());
-            return null;
-        }
-
-        return getExternalIp(osRouter, osNetworkService);
-    }
-
-    /**
-     * Returns the external ip address with specified router information.
+     * Returns the external gateway IP address with specified router information.
      *
      * @param router openstack router
      * @param osNetworkService openstack network service
-     * @return external ip address
+     * @return external IP address
      */
-    public static IpAddress getExternalIp(Router router,
-                                          OpenstackNetworkService osNetworkService) {
-        if (router == null) {
-            return null;
-        }
+    public static IpAddress externalGatewayIp(Router router,
+                                              OpenstackNetworkService osNetworkService) {
+        return externalGatewayIpBase(router, false, osNetworkService);
+    }
 
-        ExternalGateway externalGateway = router.getExternalGatewayInfo();
-        if (externalGateway == null || !externalGateway.isEnableSnat()) {
-            log.trace("Failed to get externalIp for router {} because " +
-                            "externalGateway is null or SNAT is disabled",
-                    router.getId());
-            return null;
-        }
-
-        // TODO fix openstack4j for ExternalGateway provides external fixed IP list
-        Port exGatewayPort = osNetworkService.ports(externalGateway.getNetworkId())
-                .stream()
-                .filter(port -> Objects.equals(port.getDeviceId(), router.getId()))
-                .findAny().orElse(null);
-
-        if (exGatewayPort == null) {
-            return null;
-        }
-
-        return IpAddress.valueOf(exGatewayPort.getFixedIps().stream()
-                .findAny().get().getIpAddress());
+    /**
+     * Returns the external gateway IP address (SNAT enabled) with specified router information.
+     *
+     * @param router openstack router
+     * @param osNetworkService openstack network service
+     * @return external IP address
+     */
+    public static IpAddress externalGatewayIpSnatEnabled(Router router,
+                                                         OpenstackNetworkService osNetworkService) {
+        return externalGatewayIpBase(router, true, osNetworkService);
     }
 
     /**
@@ -1250,8 +1370,15 @@ public final class OpenstackNetworkingUtil {
         return null;
     }
 
-    private static Router getRouterFromSubnet(Subnet subnet,
-                                              OpenstackRouterService osRouterService) {
+    /**
+     * Return the router associated with the given subnet.
+     *
+     * @param subnet openstack subnet
+     * @param osRouterService openstack router service
+     * @return router
+     */
+    public static Router getRouterFromSubnet(Subnet subnet,
+                                             OpenstackRouterService osRouterService) {
         RouterInterface osRouterIface = osRouterService.routerInterfaces().stream()
                 .filter(i -> Objects.equals(i.getSubnetId(), subnet.getId()))
                 .findAny().orElse(null);
@@ -1300,6 +1427,46 @@ public final class OpenstackNetworkingUtil {
         ethernet.setPayload(arp);
 
         return ethernet;
+    }
+
+    /**
+     * Re-structures the OVS port name.
+     * The length of OVS port name should be not large than 15.
+     *
+     * @param portName  original port name
+     * @return re-structured OVS port name
+     */
+    public static String structurePortName(String portName) {
+
+        // The size of OVS port name should not be larger than 15
+        if (portName.length() > PORT_NAME_MAX_LENGTH) {
+            return StringUtils.substring(portName, 0, PORT_NAME_MAX_LENGTH);
+        }
+
+        return portName;
+    }
+
+    /**
+     * Obtains flow group key from the given id.
+     *
+     * @param groupId flow group identifier
+     * @return flow group key
+     */
+    public static GroupKey getGroupKey(int groupId) {
+        return new DefaultGroupKey((Integer.toString(groupId)).getBytes());
+    }
+
+    /**
+     * Calculate the broadcast address from given IP address and subnet prefix length.
+     *
+     * @param ipAddr        IP address
+     * @param prefixLength  subnet prefix length
+     * @return broadcast address
+     */
+    public static String getBroadcastAddr(String ipAddr, int prefixLength) {
+        String subnet = ipAddr + "/" + prefixLength;
+        SubnetUtils utils = new SubnetUtils(subnet);
+        return utils.getInfo().getBroadcastAddress();
     }
 
     /**
@@ -1412,5 +1579,52 @@ public final class OpenstackNetworkingUtil {
             intIndex++;
         }
         return gw;
+    }
+
+    /**
+     * Returns the external gateway IP address with specified router information.
+     *
+     * @param router openstack router
+     * @param snatOnly true for only query SNAT enabled case, false otherwise
+     * @param osNetworkService openstack network service
+     * @return external IP address
+     */
+    private static IpAddress externalGatewayIpBase(Router router, boolean snatOnly,
+                                                   OpenstackNetworkService osNetworkService) {
+        if (router == null) {
+            return null;
+        }
+
+        ExternalGateway externalGateway = router.getExternalGatewayInfo();
+        if (externalGateway == null) {
+            log.info("Failed to get external IP for router {} because no " +
+                            "external gateway is associated with the router",
+                    router.getId());
+            return null;
+        }
+
+        if (snatOnly) {
+            if (!externalGateway.isEnableSnat()) {
+                log.warn("The given router {} SNAT is configured as false", router.getId());
+                return null;
+            }
+        }
+
+        // TODO fix openstack4j for ExternalGateway provides external fixed IP list
+        Port exGatewayPort = osNetworkService.ports(externalGateway.getNetworkId())
+                .stream()
+                .filter(port -> Objects.equals(port.getDeviceId(), router.getId()))
+                .findAny().orElse(null);
+
+        if (exGatewayPort == null) {
+            return null;
+        }
+
+        return IpAddress.valueOf(exGatewayPort.getFixedIps().stream()
+                .findAny().get().getIpAddress());
+    }
+
+    private static void print(String format, Object... args) {
+        System.out.println(String.format(format, args));
     }
 }

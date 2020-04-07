@@ -31,12 +31,15 @@ import org.onosproject.openstacknode.api.OpenstackNodeService;
 import org.openstack4j.api.OSClient;
 
 import static org.onosproject.net.AnnotationKeys.PORT_NAME;
+import static org.onosproject.openstacknode.api.Constants.GENEVE_TUNNEL;
 import static org.onosproject.openstacknode.api.Constants.GRE_TUNNEL;
-import static org.onosproject.openstacknode.api.Constants.VXLAN_TUNNEL;
 import static org.onosproject.openstacknode.api.Constants.INTEGRATION_BRIDGE;
+import static org.onosproject.openstacknode.api.Constants.INTEGRATION_TO_PHYSICAL_PREFIX;
+import static org.onosproject.openstacknode.api.Constants.VXLAN_TUNNEL;
 import static org.onosproject.openstacknode.api.OpenstackNode.NodeType.CONTROLLER;
 import static org.onosproject.openstacknode.api.OpenstackNode.NodeType.GATEWAY;
 import static org.onosproject.openstacknode.util.OpenstackNodeUtil.getConnectedClient;
+import static org.onosproject.openstacknode.util.OpenstackNodeUtil.structurePortName;
 
 /**
  * Checks detailed node init state.
@@ -101,12 +104,14 @@ public class OpenstackNodeCheckCommand extends AbstractShellCommand {
                 if (osNode.dataIp() != null) {
                     printPortState(deviceService, osNode.intgBridge(), VXLAN_TUNNEL);
                     printPortState(deviceService, osNode.intgBridge(), GRE_TUNNEL);
+                    printPortState(deviceService, osNode.intgBridge(), GENEVE_TUNNEL);
                 }
                 if (osNode.vlanIntf() != null) {
                     printPortState(deviceService, osNode.intgBridge(), osNode.vlanIntf());
                 }
                 osNode.phyIntfs().forEach(intf -> {
-                    printPortState(deviceService, osNode.intgBridge(), intf.intf());
+                    printPortState(deviceService, osNode.intgBridge(),
+                            structurePortName(INTEGRATION_TO_PHYSICAL_PREFIX + intf.network()));
                 });
                 if (osNode.type() == GATEWAY) {
                     printPortState(deviceService, osNode.intgBridge(), osNode.uplinkPort());

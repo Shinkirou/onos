@@ -45,12 +45,16 @@ public final class Constants {
 
     public static final String SHIFTED_IP_CIDR = "172.10.0.0/16";
     public static final String SHIFTED_IP_PREFIX = "172.10";
+    public static final String SHIFTED_LOCAL_IP_PREFIX = "172.11";
     public static final String NODE_IP_PREFIX = "182";
 
     public static final String SRC = "src";
     public static final String DST = "dst";
     public static final String A_CLASS = "a";
     public static final String B_CLASS = "b";
+
+    public static final String DEFAULT_SERVICE_IP_CIDR = "10.96.0.0/12";
+    public static final String DEFAULT_SERVICE_IP_NONE = "none";
 
     public static final String PORT_NAME_PREFIX_CONTAINER = "veth";
 
@@ -64,6 +68,8 @@ public final class Constants {
 
     public static final int DEFAULT_SEGMENT_ID = 100;
 
+    public static final int HOST_PREFIX = 32;
+
     // flow priority
     public static final int PRIORITY_SNAT_RULE = 26000;
     public static final int PRIORITY_TUNNEL_TAG_RULE = 30000;
@@ -73,15 +79,13 @@ public final class Constants {
     public static final int PRIORITY_CT_RULE = 32000;
     public static final int PRIORITY_CT_DROP_RULE = 32500;
     public static final int PRIORITY_NAT_RULE = 30000;
-    public static final int PRIORITY_SERVICE_CIDR_RULE = 32000;
-    public static final int PRIORITY_GATEWAY_RULE = 30000;
+    public static final int PRIORITY_GATEWAY_RULE = 31000;
+    public static final int PRIORITY_LOCAL_BRIDGE_RULE = 32000;
     public static final int PRIORITY_SWITCHING_RULE = 30000;
     public static final int PRIORITY_CIDR_RULE = 30000;
     public static final int PRIORITY_NAMESPACE_RULE = 31000;
     public static final int PRIORITY_STATEFUL_SNAT_RULE = 41000;
     public static final int PRIORITY_EXTERNAL_ROUTING_RULE = 25000;
-    public static final int PRIORITY_ARP_GATEWAY_RULE = 41000;
-    public static final int PRIORITY_ARP_SUBNET_RULE = 40000;
     public static final int PRIORITY_ARP_CONTROL_RULE = 40000;
     public static final int PRIORITY_ARP_REPLY_RULE = 40000;
     public static final int PRIORITY_ARP_POD_RULE = 39000;
@@ -118,4 +122,23 @@ public final class Constants {
 
     public static final int EXT_ENTRY_TABLE = 0;
     public static final int POD_RESOLUTION_TABLE = 11;
+
+    public static final int LOCAL_ENTRY_TABLE = 0;
+
+    // CLI item length
+    public static final int CLI_ID_LENGTH = 30;
+    public static final int CLI_NAME_LENGTH = 30;
+    public static final int CLI_IP_ADDRESSES_LENGTH = 50;
+    public static final int CLI_IP_ADDRESS_LENGTH = 25;
+    public static final int CLI_MAC_ADDRESS_LENGTH = 25;
+    public static final int CLI_PORTS_LENGTH = 20;
+    public static final int CLI_NAMESPACE_LENGTH = 15;
+    public static final int CLI_PHASE_LENGTH = 15;
+    public static final int CLI_TYPE_LENGTH = 15;
+    public static final int CLI_TYPES_LENGTH = 30;
+    public static final int CLI_SEG_ID_LENGTH = 10;
+    public static final int CLI_LABELS_LENGTH = 30;
+    public static final int CLI_CONTAINERS_LENGTH = 30;
+
+    public static final int CLI_MARGIN_LENGTH = 2;
 }
