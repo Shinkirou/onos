@@ -94,7 +94,7 @@ function do_requirements {
         wget \
         unzip
 
-    sudo -H pip2.7 install setuptools cffi ipaddr ipaddress pypcap \
+    sudo -H pip install setuptools cffi ipaddr ipaddress pypcap \
         git+https://github.com/p4lang/scapy-vxlan \
         git+https://github.com/p4lang/ptf.git
 }
@@ -151,7 +151,7 @@ function do_protobuf {
     # https://github.com/protocolbuffers/protobuf/blob/v3.6.1/python/setup.py#L208
     export KOKORO_BUILD_NUMBER="hack"
     sudo -E python2.7 setup.py build --cpp_implementation
-    sudo -E pip2.7 install .
+    sudo -E pip install .
     unset KOKORO_BUILD_NUMBER
 }
 
@@ -180,8 +180,8 @@ function do_grpc {
     sudo ldconfig
     unset LDFLAGS
 
-    sudo pip2.7 install -r requirements.txt
-    sudo pip2.7 install .
+    sudo pip install -r requirements.txt
+    sudo pip install .
 }
 
 function checkout_bmv2 {

@@ -45,7 +45,7 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
         traffic_global_flow_register.read(meta.threshold.flow_global_traffic, (bit<32>)meta.threshold.hash_flow);
     }
 
-        action send_to_cpu_threshold() {
+    action send_to_cpu_threshold() {
 
         // Packets sent to the controller needs to be prepended with the packet-in header.
         // By setting it valid we make sure it will be deparsed on the wire (see c_deparser).
@@ -66,6 +66,7 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
         hdr.packet_in.bm_src        = meta.bm.sketch_1;
         hdr.packet_in.bm_dst        = meta.bm.sketch_2;
         hdr.packet_in.ams           = meta.ams.sketch_final;
+        hdr.packet_in.mv            = meta.mv.temp_key;
     }
 
 	apply {

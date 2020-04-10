@@ -344,6 +344,13 @@ actions {
 }
 actions {
   preamble {
+    id: 16797354
+    name: "c_ingress.mv.hash_0"
+    alias: "mv.hash_0"
+  }
+}
+actions {
+  preamble {
     id: 16822540
     name: "c_ingress.send_to_cpu"
     alias: "send_to_cpu"
@@ -482,6 +489,11 @@ controller_packet_metadata {
     id: 15
     name: "ams"
     bitwidth: 32
+  }
+  metadata {
+    id: 16
+    name: "mv"
+    bitwidth: 64
   }
 }
 controller_packet_metadata {
@@ -731,7 +743,7 @@ registers {
   preamble {
     id: 369103739
     name: "c_ingress.ams.register_sum"
-    alias: "register_sum"
+    alias: "ams.register_sum"
   }
   type_spec {
     bitstring {
@@ -812,6 +824,51 @@ registers {
     bitstring {
       bit {
         bitwidth: 48
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369152048
+    name: "c_ingress.mv.register_key"
+    alias: "register_key"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 64
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369104985
+    name: "c_ingress.mv.register_sum"
+    alias: "mv.register_sum"
+  }
+  type_spec {
+    bitstring {
+      int {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 262144
+}
+registers {
+  preamble {
+    id: 369131727
+    name: "c_ingress.mv.register_count"
+    alias: "register_count"
+  }
+  type_spec {
+    bitstring {
+      int {
+        bitwidth: 32
       }
     }
   }

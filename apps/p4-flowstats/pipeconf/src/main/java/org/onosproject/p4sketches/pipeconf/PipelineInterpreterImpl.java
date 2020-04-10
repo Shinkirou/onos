@@ -77,6 +77,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import java.lang.StringIndexOutOfBoundsException;
+import java.math.BigInteger;
+import java.nio.BufferUnderflowException;
+
 /**
  * Implementation of a pipeline interpreter for the flowstats.p4 program.
  */
@@ -105,6 +109,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     private static final String BM_SRC              = "bm_src";
     private static final String BM_DST              = "bm_dst";
     private static final String AMS                 = "ams";
+    private static final String MV                  = "mv";
     private static final int PORT_FIELD_BITWIDTH    = 9;
 
     private static final String TCP     = "tcp";
@@ -269,89 +274,79 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                 .filter(metadata -> metadata.id().toString().equals(INGRESS_PORT))
                 .findFirst();
 
-        // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadataTs = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(TIMESTAMP))
                 .findFirst();
 
-        // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadataIpSrc = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(IP_SRC))
                 .findFirst();  
                 
-        // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadataIpDst = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(IP_DST))
                 .findFirst();
 
-        // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadataIpProto = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(IP_PROTO))
                 .findFirst();                
 
-        // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadataPortSrc = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(PORT_SRC))
                 .findFirst();
 
-        // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadataPortDst = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(PORT_DST))
                 .findFirst(); 
 
-        // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadataTcpFlags = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(TCP_FLAGS))
                 .findFirst();                
 
-        // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadataIcmpType = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(ICMP_TYPE))
                 .findFirst(); 
 
-        // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadataIcmpCode = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(ICMP_CODE))
                 .findFirst();                 
 
-        // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadataCmIp = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(CM_IP))
                 .findFirst(); 
 
-        // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadataCm5t = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(CM_5T))
                 .findFirst(); 
 
-        // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadataBmSrc = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(BM_SRC))
                 .findFirst(); 
 
-        // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadataBmDst = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(BM_DST))
                 .findFirst();   
 
-        // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadataAms = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(AMS))
-                .findFirst();                                                                                                                               
+                .findFirst();
 
-        try {
+        Optional<PiPacketMetadata> packetMetadataMv = packetIn.metadatas().stream()
+                .filter(metadata -> metadata.id().toString().equals(MV))
+                .findFirst();                                                                                                                                               
+
+        try {          
 
             String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS").format(new Date());
             String currentUsersHomeDir = System.getProperty("user.home");
             String otherFolder = currentUsersHomeDir + File.separator + "Documents" + File.separator + "flow-stats" + File.separator;
-            java.nio.file.Path txtPath = Paths.get(otherFolder + "threshold" + ".csv");             
+            java.nio.file.Path txtPath = Paths.get(otherFolder + "threshold" + ".csv");          
 
             if (packetMetadataIpDst.isPresent() && packetMetadataIpSrc.isPresent()) {
 
                 ByteBuffer tsBB = packetMetadataTs.get().value().asReadOnlyBuffer();
                 long ts = tsBB.getLong();
                 String tsString = Long.toString(ts);
-                
+
                 ByteBuffer ipSrcBB = packetMetadataIpSrc.get().value().asReadOnlyBuffer();
                 int ipSrc = ipSrcBB.getInt();
                 String ipSrcHex = decToHex(ipSrc);
@@ -360,7 +355,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                 ByteBuffer ipDstBB = packetMetadataIpDst.get().value().asReadOnlyBuffer();
                 int ipDst = ipDstBB.getInt();
                 String ipDstHex = decToHex(ipDst);
-                String ipDstString = InetAddress.getByAddress(hexStringToByteArray(ipDstHex)).toString().split("/")[1];
+                String ipDstString = InetAddress.getByAddress(hexStringToByteArray(ipDstHex)).toString().split("/")[1];                
 
                 ByteBuffer ipProtoBB = packetMetadataIpProto.get().value().asReadOnlyBuffer();
                 short ipProto = ipProtoBB.getShort();
@@ -446,7 +441,32 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
                 ByteBuffer amsBB = packetMetadataAms.get().value().asReadOnlyBuffer();
                 int ams = amsBB.getInt();
-                String amsString = Integer.toString(ams);                                                                                                
+                String amsString = Integer.toString(ams);
+
+                ByteBuffer mvBB = packetMetadataMv.get().value().asReadOnlyBuffer();
+                long mv = mvBB.getLong();
+                String mvBinaryString = Long.toBinaryString(mv);
+
+                String mvSrcString = "";
+                String mvDstString = "";
+
+                try {
+                    
+                    String mvBinarySrcString = mvBinaryString.substring(0, 32);
+                    String mvBinaryDstString = mvBinaryString.substring(32);
+
+                    long mv1 = new BigInteger(mvBinarySrcString, 2).longValue();
+                    long mv2 = new BigInteger(mvBinaryDstString, 2).longValue();
+
+                    String mvSrcHex = Long.toHexString(mv1);
+                    String mvDstHex = Long.toHexString(mv2);                     
+
+                    mvSrcString = InetAddress.getByAddress(hexStringToByteArray(mvSrcHex)).toString().split("/")[1];
+                    mvDstString = InetAddress.getByAddress(hexStringToByteArray(mvDstHex)).toString().split("/")[1];         
+
+                } catch (StringIndexOutOfBoundsException e) {
+                    e.printStackTrace();
+                }
 
                 if ((ipSrc != 0) && (ipDst != 0)) {
 
@@ -463,8 +483,9 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                                         "\"cm5t\": \"" + cm5tString + "\" , " +
                                         "\"bmSrc\": \"" + bmSrcString + "\" , " +
                                         "\"bmDst\": \"" + bmDstString + "\" , " +
-                                        "\"ams\": \"" + amsString + "\"}";
-
+                                        "\"ams\": \"" + amsString + "\" , " +
+                                        "\"mv\": \"" + mvSrcString + " " + mvDstString + "\"}";
+                                        
                     flowstatsPost(flowStats);
 
                     // Files.write(txtPath, Arrays.asList(flowStats), StandardCharsets.UTF_8,
@@ -473,7 +494,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }                          
+        }
 
         if (packetMetadataIngress.isPresent()) {
             short s = packetMetadataIngress.get().value().asReadOnlyBuffer().getShort();
@@ -483,7 +504,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
             throw new PiInterpreterException(format(
                     "Missing metadata '%s' in packet-in received from '%s': %s",
                     INGRESS_PORT, deviceId, packetIn));
-        }        
+        }                 
     }
 
     private PiPacketOperation createPiPacketOp(ByteBuffer data, long portNumber)

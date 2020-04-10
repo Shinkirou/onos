@@ -10,6 +10,7 @@
 #include "includes/bmSketch.p4"
 #include "includes/amsSketch.p4"
 #include "includes/threshold.p4"
+#include "includes/mvSketch.p4"
 
 //------------------------------------------------------------------------------
 // INGRESS PIPELINE
@@ -27,7 +28,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
     c_bmSketch()    bm;
     c_amsSketch()   ams;
     c_threshold()   threshold;
-    // c_karySketch()  kary;
+    c_mvSketch()    mv;
 
     action send_to_cpu() {
         // Packets sent to the controller needs to be prepended with the packet-in header.
@@ -96,6 +97,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 				cm.apply(hdr, meta, standard_metadata);                 
                 bm.apply(hdr, meta, standard_metadata); 
                 ams.apply(hdr, meta, standard_metadata);
+                mv.apply(hdr, meta, standard_metadata);
 
                 threshold.apply(hdr, meta, standard_metadata);           
 
