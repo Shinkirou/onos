@@ -59,27 +59,18 @@ import static org.onosproject.net.PortNumber.FLOOD;
 import static org.onosproject.net.flow.instructions.Instruction.Type.OUTPUT;
 import static org.onosproject.net.pi.model.PiPacketOperationType.PACKET_OUT;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.io.IOException;
-import java.nio.LongBuffer;
 
 import java.net.InetAddress;
-
-import java.io.*;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import java.lang.StringIndexOutOfBoundsException;
 import java.math.BigInteger;
-import java.nio.BufferUnderflowException;
 
 /**
  * Implementation of a pipeline interpreter for the flowstats.p4 program.
@@ -257,10 +248,9 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     }
 
     @Override
-    public InboundPacket mapInboundPacket(PiPacketOperation packetIn, DeviceId deviceId)
-            throws PiInterpreterException {
-        // We assume that the packet is ethernet, which is fine since mytunnel.p4
-        // can deparse only ethernet packets.
+    public InboundPacket mapInboundPacket(PiPacketOperation packetIn, DeviceId deviceId) throws PiInterpreterException {
+        
+        // We assume that the packet is ethernet, which is fine since mytunnel.p4 can deparse only ethernet packets.
         Ethernet ethPkt;       
 
         try {
@@ -334,12 +324,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                 .filter(metadata -> metadata.id().toString().equals(MV))
                 .findFirst();                                                                                                                                               
 
-        try {          
-
-            String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS").format(new Date());
-            String currentUsersHomeDir = System.getProperty("user.home");
-            String otherFolder = currentUsersHomeDir + File.separator + "Documents" + File.separator + "flow-stats" + File.separator;
-            java.nio.file.Path txtPath = Paths.get(otherFolder + "threshold" + ".csv");          
+        try {                   
 
             if (packetMetadataIpDst.isPresent() && packetMetadataIpSrc.isPresent()) {
 
@@ -444,29 +429,39 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                 String amsString = Integer.toString(ams);
 
                 ByteBuffer mvBB = packetMetadataMv.get().value().asReadOnlyBuffer();
-                long mv = mvBB.getLong();
-                String mvBinaryString = Long.toBinaryString(mv);
-
-                String mvSrcString = "";
-                String mvDstString = "";
-
-                try {
-                    
-                    String mvBinarySrcString = mvBinaryString.substring(0, 32);
-                    String mvBinaryDstString = mvBinaryString.substring(32);
-
-                    long mv1 = new BigInteger(mvBinarySrcString, 2).longValue();
-                    long mv2 = new BigInteger(mvBinaryDstString, 2).longValue();
-
-                    String mvSrcHex = Long.toHexString(mv1);
-                    String mvDstHex = Long.toHexString(mv2);                     
-
-                    mvSrcString = InetAddress.getByAddress(hexStringToByteArray(mvSrcHex)).toString().split("/")[1];
-                    mvDstString = InetAddress.getByAddress(hexStringToByteArray(mvDstHex)).toString().split("/")[1];         
-
-                } catch (StringIndexOutOfBoundsException e) {
-                    e.printStackTrace();
+                short mv = mvBB.getShort();
+                String mvString = "";
+                if (mv > 0) {
+                    mvString = Short.toString(mv);
+                } else {
+                    String mvHex = decToHex(mv & 0xffff);
+                    int mvParsed = (int) Long.parseLong(mvHex, 16);
+                    mvString = Integer.toString(mvParsed);
                 }
+
+                // long mv = mvBB.getLong();
+                // String mvBinaryString = Long.toBinaryString(mv);
+
+                // String mvSrcString = "";
+                // String mvDstString = "";
+
+                // try {
+                    
+                //     String mvBinarySrcString = mvBinaryString.substring(0, 32);
+                //     String mvBinaryDstString = mvBinaryString.substring(32);
+
+                //     long mv1 = new BigInteger(mvBinarySrcString, 2).longValue();
+                //     long mv2 = new BigInteger(mvBinaryDstString, 2).longValue();
+
+                //     String mvSrcHex = Long.toHexString(mv1);
+                //     String mvDstHex = Long.toHexString(mv2);                     
+
+                //     mvSrcString = InetAddress.getByAddress(hexStringToByteArray(mvSrcHex)).toString().split("/")[1];
+                //     mvDstString = InetAddress.getByAddress(hexStringToByteArray(mvDstHex)).toString().split("/")[1];         
+
+                // } catch (StringIndexOutOfBoundsException e) {
+                //     e.printStackTrace();
+                // }
 
                 if ((ipSrc != 0) && (ipDst != 0)) {
 
@@ -484,12 +479,9 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                                         "\"bmSrc\": \"" + bmSrcString + "\" , " +
                                         "\"bmDst\": \"" + bmDstString + "\" , " +
                                         "\"ams\": \"" + amsString + "\" , " +
-                                        "\"mv\": \"" + mvSrcString + " " + mvDstString + "\"}";
+                                        "\"mv\": \"" + mvString + "\"}";
                                         
-                    flowstatsPost(flowStats);
-
-                    // Files.write(txtPath, Arrays.asList(flowStats), StandardCharsets.UTF_8,
-                    // Files.exists(txtPath) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);                    
+                    flowstatsPost(flowStats);                   
                 }
             }
         } catch (IOException e) {

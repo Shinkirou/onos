@@ -66,7 +66,13 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
         hdr.packet_in.bm_src        = meta.bm.sketch_1;
         hdr.packet_in.bm_dst        = meta.bm.sketch_2;
         hdr.packet_in.ams           = meta.ams.sketch_final;
-        hdr.packet_in.mv            = meta.mv.temp_key;
+
+        // Check if the current MV sketch key (strongest candidate) matches the current flow key.
+        if (hdr.ipv4.src_addr ++ hdr.ipv4.dst_addr == meta.mv.temp_key) {
+            hdr.packet_in.mv        = (bit<9>)0;
+        } else {
+            hdr.packet_in.mv        = (bit<9>)1;
+        }
     }
 
 	apply {

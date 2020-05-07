@@ -493,7 +493,12 @@ controller_packet_metadata {
   metadata {
     id: 16
     name: "mv"
-    bitwidth: 64
+    bitwidth: 9
+  }
+  metadata {
+    id: 17
+    name: "_padding"
+    bitwidth: 7
   }
 }
 controller_packet_metadata {

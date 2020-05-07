@@ -69,8 +69,8 @@ header packet_in_header_t {
 	bit<32> bm_src;
 	bit<32> bm_dst;
 	bit<32> ams;
-	bit<64> mv;
-	// bit<4>  _padding;
+	bit<9> mv;
+	bit<7>  _padding;
 }
 
 // Packet-out header. Prepended to packets received by the controller and used

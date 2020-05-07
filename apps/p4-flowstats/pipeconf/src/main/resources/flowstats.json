@@ -147,7 +147,8 @@
         ["bm_src", 32, false],
         ["bm_dst", 32, false],
         ["ams", 32, false],
-        ["mv", 64, false]
+        ["mv", 9, false],
+        ["_padding", 7, false]
       ]
     },
     {
@@ -9838,15 +9839,215 @@
               "value" : ["packet_in", "mv"]
             },
             {
-              "type" : "field",
-              "value" : ["userMetadata.mv", "temp_key"]
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "?",
+                  "left" : {
+                    "type" : "hexstr",
+                    "value" : "0x0000"
+                  },
+                  "right" : {
+                    "type" : "field",
+                    "value" : ["packet_in", "mv"]
+                  },
+                  "cond" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "==",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "|",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "<<",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "field",
+                                        "value" : ["ipv4", "src_addr"]
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffffffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x20"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xffffffffffffffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "field",
+                                    "value" : ["ipv4", "dst_addr"]
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0xffffffffffffffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x00000001ffffffff"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "field",
+                        "value" : ["userMetadata.mv", "temp_key"]
+                      }
+                    }
+                  }
+                }
+              }
             }
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 69,
-            "column" : 8,
-            "source_fragment" : "hdr.packet_in.mv = meta.mv.temp_key"
+            "line" : 72,
+            "column" : 12,
+            "source_fragment" : "hdr.packet_in.mv ="
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["packet_in", "mv"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "?",
+                  "left" : {
+                    "type" : "hexstr",
+                    "value" : "0x0001"
+                  },
+                  "right" : {
+                    "type" : "field",
+                    "value" : ["packet_in", "mv"]
+                  },
+                  "cond" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "not",
+                      "left" : null,
+                      "right" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "==",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "|",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "<<",
+                                      "left" : {
+                                        "type" : "expression",
+                                        "value" : {
+                                          "op" : "&",
+                                          "left" : {
+                                            "type" : "field",
+                                            "value" : ["ipv4", "src_addr"]
+                                          },
+                                          "right" : {
+                                            "type" : "hexstr",
+                                            "value" : "0xffffffffffffffff"
+                                          }
+                                        }
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0x20"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0xffffffffffffffff"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : "&",
+                                  "left" : {
+                                    "type" : "expression",
+                                    "value" : {
+                                      "op" : "&",
+                                      "left" : {
+                                        "type" : "field",
+                                        "value" : ["ipv4", "dst_addr"]
+                                      },
+                                      "right" : {
+                                        "type" : "hexstr",
+                                        "value" : "0xffffffffffffffff"
+                                      }
+                                    }
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x00000001ffffffff"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "field",
+                            "value" : ["userMetadata.mv", "temp_key"]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "includes/threshold.p4",
+            "line" : 74,
+            "column" : 12,
+            "source_fragment" : "hdr.packet_in.mv ="
           }
         }
       ]
@@ -10730,7 +10931,7 @@
           ],
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 75,
+            "line" : 81,
             "column" : 8,
             "source_fragment" : "meta.threshold.hash_flow = meta.cm.hash_5t_0"
           }
@@ -12148,7 +12349,7 @@
           "id" : 39,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 75,
+            "line" : 81,
             "column" : 33,
             "source_fragment" : "="
           },
@@ -12177,7 +12378,7 @@
           "id" : 40,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 77,
+            "line" : 83,
             "column" : 8,
             "source_fragment" : "global_traffic_counter_incr()"
           },
@@ -12206,7 +12407,7 @@
           "id" : 41,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 78,
+            "line" : 84,
             "column" : 8,
             "source_fragment" : "flow_traffic_counter_incr()"
           },
@@ -12235,7 +12436,7 @@
           "id" : 42,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 81,
+            "line" : 87,
             "column" : 8,
             "source_fragment" : "check_flow_time()"
           },
@@ -12264,7 +12465,7 @@
           "id" : 43,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 86,
+            "line" : 92,
             "column" : 12,
             "source_fragment" : "time_flow_update()"
           },
@@ -12293,7 +12494,7 @@
           "id" : 44,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 93,
+            "line" : 99,
             "column" : 12,
             "source_fragment" : "check_flow_global_traffic()"
           },
@@ -12322,7 +12523,7 @@
           "id" : 45,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 100,
+            "line" : 106,
             "column" : 16,
             "source_fragment" : "send_to_cpu_threshold()"
           },
@@ -12351,7 +12552,7 @@
           "id" : 46,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 104,
+            "line" : 110,
             "column" : 16,
             "source_fragment" : "time_flow_update()"
           },
@@ -12380,7 +12581,7 @@
           "id" : 47,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 105,
+            "line" : 111,
             "column" : 16,
             "source_fragment" : "flow_traffic_counter_reset()"
           },
@@ -12864,7 +13065,7 @@
           "id" : 9,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 85,
+            "line" : 91,
             "column" : 12,
             "source_fragment" : "meta.threshold.flow_time == (bit<48>)0"
           },
@@ -12890,7 +13091,7 @@
           "id" : 10,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 90,
+            "line" : 96,
             "column" : 12,
             "source_fragment" : "(standard_metadata.ingress_global_timestamp - meta.threshold.flow_time) > (bit<48>)5000000"
           },
@@ -12936,7 +13137,7 @@
           "id" : 11,
           "source_info" : {
             "filename" : "includes/threshold.p4",
-            "line" : 97,
+            "line" : 103,
             "column" : 16,
             "source_fragment" : "(meta.threshold.flow_traffic * 10) > (meta.threshold.global_traffic - meta.threshold.flow_global_traffic)"
           },
