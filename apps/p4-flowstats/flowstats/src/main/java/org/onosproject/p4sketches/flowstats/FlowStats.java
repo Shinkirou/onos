@@ -49,43 +49,20 @@ import org.onosproject.net.topology.Topology;
 import org.onosproject.net.topology.TopologyService;
 import org.slf4j.Logger;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import static org.slf4j.LoggerFactory.getLogger;
 
 import static org.onosproject.net.flow.FlowRuleEvent.Type.RULE_UPDATED;
 import static org.onosproject.net.flow.FlowRuleEvent.Type.RULE_ADDED;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
-import java.io.IOException;
 import org.onosproject.net.flow.FlowRuleListener;
 import org.onosproject.net.flow.FlowRuleEvent;
 import org.onosproject.net.flow.FlowEntry;
-import java.sql.Timestamp;
 import java.util.Map;
 import org.onosproject.net.flow.criteria.Criterion.Type;
 import org.onosproject.net.flow.criteria.IPCriterion;
 import org.onosproject.net.flow.criteria.Criterion;
-import org.onlab.packet.Ip4Address;
 import org.onosproject.net.flow.criteria.EthCriterion;
-import org.onosproject.net.flow.criteria.IPProtocolCriterion;
-import org.onosproject.net.flow.criteria.TcpFlagsCriterion;
-import org.onosproject.net.flow.criteria.UdpPortCriterion;
-import org.onosproject.net.flow.criteria.TcpPortCriterion;
-import org.onosproject.net.flow.criteria.IcmpTypeCriterion;
-import org.onosproject.net.flow.criteria.IcmpCodeCriterion;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
 import java.util.concurrent.ConcurrentHashMap;
-import java.io.File;
 
 @Component(immediate = true)
 public class FlowStats {
@@ -151,10 +128,10 @@ public class FlowStats {
 
     private void writeUpdatedFlow(FlowRule flowRule) {
 
-        String ethSrcString     = "";
-        String ethDstString     = "";
-        String ipSrcString      = "";
-        String ipDstString      = "";
+        String ethSrcString = "";
+        String ethDstString = "";
+        String ipSrcString  = "";
+        String ipDstString  = "";
 
         try {
             ethSrcString = ((EthCriterion) flowRule.selector().getCriterion(Type.ETH_SRC)).mac().toString();     
@@ -170,8 +147,6 @@ public class FlowStats {
         }
 
         if ((ipSrcString.equals("10.0.0.1")) && (ipDstString.equals("10.0.0.2"))) {
-            // Thread threadWriteToFile = new Thread(runnable);
-            // threadWriteToFile.start();
             flowRuleService.removeFlowRules(flowRule);
             return;
         }
@@ -183,9 +158,7 @@ public class FlowStats {
 
         FlowEntry flowEntry = getFlowEntry(flowRule);
 
-        Long flowPackets       = flowEntry.packets() + 1;
-        String flowPacketsString = Long.toString(flowPackets); 
-        String flowBytesString   = Long.toString(flowEntry.bytes());
+        Long flowPackets = flowEntry.packets() + 1;
 
         Long flowId = flowRule.id().value();
 
@@ -200,8 +173,8 @@ public class FlowStats {
             // Perform flow removal, if the limit is exceeded.
             flowCountUpdate(flowPackets, newFlowPackets, flowId, flowRule);
 
-            flowPacketsMap.put(flowId, flowPacketsString);
-            flowBytesMap.put(flowId, flowBytesString);
+            flowPacketsMap.put(flowId, Long.toString(flowPackets));
+            flowBytesMap.put(flowId, Long.toString(flowEntry.bytes()));
 
         } else {
             return;
@@ -243,16 +216,19 @@ public class FlowStats {
         Long flowPacketsIncr = flowPackets + 1L;
 
         if (flowCount > 0L) {
+            
             while ((flowCount.compareTo(flowPacketsIncr)) < 0) {
                 flowCount++;
             }
+            
             flowCountMap.put(flowId, flowCount);
+        
         } else {
+           
             if (flowCountMap.size() < FLOW_TABLE_SIZE) {
                 flowCountMap.put(flowId, newFlowPackets);
                 flowRuleMap.putIfAbsent(flowId, flowRule);
             } else {
-
                 Long minFlowCountKey = getMinFlowCount();
                 FlowRule minFlowRule = flowRuleMap.get(minFlowCountKey);
                 flowRuleService.removeFlowRules(minFlowRule);
@@ -263,61 +239,6 @@ public class FlowStats {
             }
         }
     }
-
-    /*
-    Runnable runnable = () -> {
-        
-        try {
-
-            String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS").format(new Date());
-            String homeDir = System.getProperty("user.home");
-            String destFolder = homeDir + File.separator + "Documents" + File.separator + "flow-stats" + File.separator;
-            java.nio.file.Path txtPath = Paths.get(destFolder + timeStamp + ".txt");
-
-            for (Long key : flowCountMap.keySet()) {
-
-                String flowPackets = flowPacketsMap.get(key);
-                String flowBytes = flowBytesMap.get(key);
-                String flowIpSrc = flowIpSrcMap.get(key);
-                String flowIpDst = flowIpDstMap.get(key);
-                String flowIpProto = flowIpProtoMap.get(key);
-                
-                String flowSrcPort  = "";
-                String flowDstPort  = "";
-                String flowIcmpType = "";
-                String flowIcmpCode = "";
-
-                if (flowIpProto.equals("17")) {
-                    flowSrcPort = flowUdpSrcMap.get(key);
-                    flowDstPort = flowUdpDstMap.get(key);
-                } else if (flowIpProto.equals("6")) {
-                    flowSrcPort = flowTcpSrcMap.get(key);
-                    flowDstPort = flowTcpDstMap.get(key);
-                } else if (flowIpProto.equals("1")) {
-                    flowIcmpType = flowIcmpTypeMap.get(key);
-                    flowIcmpCode = flowIcmpCodeMap.get(key);
-                }
-
-                // Write to file
-
-                String flowStats =  flowPackets + "," +
-                                    flowBytes + "," + 
-                                    flowIpSrc + "," +
-                                    flowIpDst + "," + 
-                                    flowIpProto + "," +
-                                    flowSrcPort + "," +
-                                    flowDstPort + "," + 
-                                    flowIcmpType + "," + 
-                                    flowIcmpCode;
-
-                Files.write(txtPath, Arrays.asList(flowStats), StandardCharsets.UTF_8,
-                Files.exists(txtPath) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    };
-    */
 
     private FlowEntry getFlowEntry(FlowRule flowRule) {
         
