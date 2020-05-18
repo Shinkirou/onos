@@ -208,10 +208,10 @@ public class LinkDiscovery implements TimerTask {
                         Type.DIRECT : Type.INDIRECT;
 
                 /* Verify MAC in LLDP packets */
-                if (!ONOSLLDP.verify(onoslldp, context.lldpSecret(), context.maxDiscoveryDelay())) {
-                    log.warn("LLDP Packet failed to validate!");
-                    return true;
-                }
+                // if (!ONOSLLDP.verify(onoslldp, context.lldpSecret(), context.maxDiscoveryDelay())) {
+                //     log.warn("LLDP Packet failed to validate!");
+                //     return true;
+                // }
             }
 
             PortNumber srcPort = portNumber(onoslldp.getPort());
