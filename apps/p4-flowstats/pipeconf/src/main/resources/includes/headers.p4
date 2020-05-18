@@ -69,7 +69,7 @@ header packet_in_header_t {
 	bit<32> bm_src;
 	bit<32> bm_dst;
 	bit<32> ams;
-	bit<9> mv;
+	bit<9>  mv;
 	bit<7>  _padding;
 }
 

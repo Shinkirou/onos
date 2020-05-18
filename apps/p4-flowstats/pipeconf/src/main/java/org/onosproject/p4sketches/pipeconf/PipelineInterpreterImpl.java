@@ -80,7 +80,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     private static final String DOT                 = ".";
     private static final String HDR                 = "hdr";
     private static final String C_INGRESS           = "c_ingress";
-    private static final String T_L2_FWD            = "t_l2_fwd";
+    private static final String T_FWD            = "t_fwd";
     private static final String EGRESS_PORT         = "egress_port";
     private static final String INGRESS_PORT        = "ingress_port";
     private static final String ETHERNET            = "ethernet";
@@ -122,7 +122,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     private static final PiMatchFieldId ICMP_CODE_ID    = PiMatchFieldId.of(HDR + DOT + ICMP + DOT + "code");
     private static final PiMatchFieldId ETH_TYPE_ID     = PiMatchFieldId.of(HDR + DOT + ETHERNET + DOT + "ether_type");
 
-    private static final PiTableId TABLE_L2_FWD_ID = PiTableId.of(C_INGRESS + DOT + T_L2_FWD);
+    private static final PiTableId TABLE_FWD_ID = PiTableId.of(C_INGRESS + DOT + T_FWD);
 
     private static final PiActionId ACT_ID_NOP              = PiActionId.of("NoAction");
     private static final PiActionId ACT_ID_SEND_TO_CPU      = PiActionId.of(C_INGRESS + DOT + "send_to_cpu");
@@ -131,7 +131,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     private static final PiActionParamId ACT_PARAM_ID_PORT = PiActionParamId.of("port");
 
     private static final Map<Integer, PiTableId> TABLE_MAP = new ImmutableMap.Builder<Integer, PiTableId>()
-                                                                    .put(0, TABLE_L2_FWD_ID)
+                                                                    .put(0, TABLE_FWD_ID)
                                                                     .build();
 
     private static final Map<Criterion.Type, PiMatchFieldId> CRITERION_MAP =
@@ -173,9 +173,9 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     @Override
     public PiAction mapTreatment(TrafficTreatment treatment, PiTableId piTableId) throws PiInterpreterException {
 
-        if (piTableId != TABLE_L2_FWD_ID) {
+        if (piTableId != TABLE_FWD_ID) {
             throw new PiInterpreterException(
-                    "Can map treatments only for 't_l2_fwd' table");
+                    "Can map treatments only for 't_fwd' table");
         }
 
         if (treatment.allInstructions().size() == 0) {

@@ -23,7 +23,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
     counter(MAX_PORTS, CounterType.packets_and_bytes) tx_port_counter;
     counter(MAX_PORTS, CounterType.packets_and_bytes) rx_port_counter;
 
-	// control blocks instantiations
+	// Control blocks instantiations.
 	c_cmSketch()    cm;
     c_bmSketch()    bm;
     c_amsSketch()   ams;
@@ -36,7 +36,6 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         standard_metadata.egress_spec = CPU_PORT;
         hdr.packet_in.setValid();
         hdr.packet_in.ingress_port = standard_metadata.ingress_port;
-        // hdr.packet_in.threshold_hash = standard_metadata.ingress_port;
     }
 
     action set_out_port(port_t port) {
@@ -46,10 +45,10 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 
     action _drop() {}
 
-    // Table counter used to count packets and bytes matched by each entry of t_l2_fwd table.
-    direct_counter(CounterType.packets_and_bytes) l2_fwd_counter;
+    // Table counter used to count packets and bytes matched by each entry of t_fwd table.
+    direct_counter(CounterType.packets_and_bytes) fwd_counter;
 
-    table t_l2_fwd {
+    table t_fwd {
         key = {
             standard_metadata.ingress_port  : ternary;
             hdr.ethernet.dst_addr           : ternary;
@@ -76,8 +75,44 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         }
         default_action = NoAction();
         size = 524288;
-        counters = l2_fwd_counter;
-    }          
+        counters = fwd_counter;
+    }
+
+    table t_cm {
+        key = {
+            hdr.ethernet.ether_type: exact;  
+        }
+        actions = {
+            _drop;
+        }
+    }
+
+    table t_bm {
+        key = {
+            hdr.ethernet.ether_type: exact;  
+        }
+        actions = {
+            _drop;
+        }
+    }
+
+    table t_ams {
+        key = {
+            hdr.ethernet.ether_type: exact;  
+        }
+        actions = {
+            _drop;
+        }
+    }
+
+    table t_mv {
+        key = {
+            hdr.ethernet.ether_type: exact;  
+        }
+        actions = {
+            _drop;
+        }
+    }                
 
     // Defines the processing applied by this control block. 
     // You can see this as the main function applied to every packet received by the switch.
@@ -91,17 +126,28 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         } else {
             
             // Packet received from data plane port.
-            // Applies table t_l2_fwd to the packet.   
-            if (t_l2_fwd.apply().hit) {
-  
-				cm.apply(hdr, meta, standard_metadata);                 
-                bm.apply(hdr, meta, standard_metadata); 
-                ams.apply(hdr, meta, standard_metadata);
-                mv.apply(hdr, meta, standard_metadata);
+            // Applies table t_fwd to the packet.   
+            if (t_fwd.apply().hit) {
 
-                threshold.apply(hdr, meta, standard_metadata);           
+                if (t_cm.apply().hit) {
+                    cm.apply(hdr, meta, standard_metadata);
+                }
 
-                // Packet hit an entry in t_l2_fwd table. A forwarding action has already been taken.
+                if (t_bm.apply().hit) {
+                    bm.apply(hdr, meta, standard_metadata);
+                }
+
+                if (t_ams.apply().hit) {
+                    ams.apply(hdr, meta, standard_metadata);
+                }
+
+                if (t_mv.apply().hit) {
+                    mv.apply(hdr, meta, standard_metadata);
+                }                                
+
+                threshold.apply(hdr, meta, standard_metadata);
+
+                // Packet hit an entry in t_fwd table. A forwarding action has already been taken.
                 // No need to apply other tables, exit this control block.                
                 return;
             }

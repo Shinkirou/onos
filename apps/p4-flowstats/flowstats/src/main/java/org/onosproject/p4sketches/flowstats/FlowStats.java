@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.onlab.packet.IpAddress;
@@ -64,7 +65,30 @@ import org.onosproject.net.flow.criteria.EthCriterion;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component(immediate = true)
+import org.onosproject.cfg.ComponentConfigService;
+import org.osgi.service.component.ComponentContext;
+import java.util.Dictionary;
+import org.onlab.util.Tools;
+
+import static org.onosproject.p4flowstats.flowstats.OsgiPropertyConstants.FLOW_RULE_CM_SKETCH;
+import static org.onosproject.p4flowstats.flowstats.OsgiPropertyConstants.FLOW_RULE_CM_SKETCH_DEFAULT;
+import static org.onosproject.p4flowstats.flowstats.OsgiPropertyConstants.FLOW_RULE_BM_SKETCH;
+import static org.onosproject.p4flowstats.flowstats.OsgiPropertyConstants.FLOW_RULE_BM_SKETCH_DEFAULT;
+import static org.onosproject.p4flowstats.flowstats.OsgiPropertyConstants.FLOW_RULE_AMS_SKETCH;
+import static org.onosproject.p4flowstats.flowstats.OsgiPropertyConstants.FLOW_RULE_AMS_SKETCH_DEFAULT;
+import static org.onosproject.p4flowstats.flowstats.OsgiPropertyConstants.FLOW_RULE_MV_SKETCH;
+import static org.onosproject.p4flowstats.flowstats.OsgiPropertyConstants.FLOW_RULE_MV_SKETCH_DEFAULT;
+
+@Component(    
+    immediate = true,
+    service = FlowStats.class,
+    property = {
+        FLOW_RULE_CM_SKETCH  + ":Boolean=" + FLOW_RULE_CM_SKETCH_DEFAULT,
+        FLOW_RULE_BM_SKETCH  + ":Boolean=" + FLOW_RULE_BM_SKETCH_DEFAULT,
+        FLOW_RULE_AMS_SKETCH + ":Boolean=" + FLOW_RULE_AMS_SKETCH_DEFAULT,
+        FLOW_RULE_MV_SKETCH  + ":Boolean=" + FLOW_RULE_MV_SKETCH_DEFAULT,
+    }
+)
 public class FlowStats {
 
     private static final String APP_NAME = "org.onosproject.p4flowstats.flowstats";
@@ -105,15 +129,26 @@ public class FlowStats {
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     private HostService hostService;
 
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    protected ComponentConfigService cfgService;    
+
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
+
+    // Sketch flow rule variables.
+    private boolean flowRuleCmSketch  = FLOW_RULE_CM_SKETCH_DEFAULT;
+    private boolean flowRuleBmSketch  = FLOW_RULE_BM_SKETCH_DEFAULT;
+    private boolean flowRuleAmsSketch = FLOW_RULE_AMS_SKETCH_DEFAULT;
+    private boolean flowRuleMvSketch  = FLOW_RULE_MV_SKETCH_DEFAULT;
 
     @Activate
     public void activate() {
         // Register app and event listeners.
         log.info("Starting...");
         appId = coreService.registerApplication(APP_NAME);
+        cfgService.registerProperties(getClass());
         flowRuleService.addListener(flowListener);
+        readComponentConfiguration(context);
         log.info("STARTED", appId.id());
     }
 
@@ -121,9 +156,108 @@ public class FlowStats {
     public void deactivate() {
         // Remove listeners and clean-up flow rules.
         log.info("Stopping...");
+        cfgService.unregisterProperties(getClass(), false);
         flowRuleService.removeListener(flowListener);
         flowRuleService.removeFlowRulesById(appId);
         log.info("STOPPED");
+    }
+
+    @Modified
+    public void modified(ComponentContext context) {
+        readComponentConfiguration(context);
+    }    
+
+    /**
+     * Extracts properties from the component configuration context.
+     *
+     * @param context the component context
+     */
+    private void readComponentConfiguration(ComponentContext context) {
+        Dictionary<?, ?> properties = context.getProperties();
+
+        Boolean flowRuleCmSketchEnabled = Tools.isPropertyEnabled(properties, FLOW_RULE_CM_SKETCH);
+        if (flowRuleCmSketchEnabled == null) {
+            log.info("Flow Rule: CM Sketch is not configured, " + "using current value of {}", flowRuleCmSketch);
+        } else {
+            flowRuleCmSketch = flowRuleCmSketchEnabled;
+            if (flowRuleCmSketch == true) {
+                // Hardcoded for now.
+                insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_cm");
+            }
+            log.info("Configured. Flow Rule: CM Sketch is {}", flowRuleCmSketch ? "enabled" : "disabled");
+        }
+
+        Boolean flowRuleBmSketchEnabled = Tools.isPropertyEnabled(properties, FLOW_RULE_BM_SKETCH);
+        if (flowRuleBmSketchEnabled == null) {
+            log.info("Flow Rule: BM Sketch is not configured, " + "using current value of {}", flowRuleBmSketch);
+        } else {
+            flowRuleBmSketch = flowRuleBmSketchEnabled;
+            if (flowRuleBmSketch == true) {
+                // Hardcoded for now.
+                insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_bm");
+            }
+            log.info("Configured. Flow Rule: BM Sketch is {}", flowRuleBmSketch ? "enabled" : "disabled");
+        }
+
+        Boolean flowRuleAmsSketchEnabled = Tools.isPropertyEnabled(properties, FLOW_RULE_AMS_SKETCH);
+        if (flowRuleAmsSketchEnabled == null) {
+            log.info("Flow Rule: AMS Sketch is not configured, " + "using current value of {}", flowRuleAmsSketch);
+        } else {
+            flowRuleAmsSketch = flowRuleAmsSketchEnabled;
+            if (flowRuleAmsSketch == true) {
+                // Hardcoded for now.
+                insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_ams");
+            }
+            log.info("Configured. Flow Rule: AMS Sketch is {}", flowRuleAmsSketch ? "enabled" : "disabled");
+        }
+
+        Boolean flowRuleMvSketchEnabled = Tools.isPropertyEnabled(properties, FLOW_RULE_MV_SKETCH);
+        if (flowRuleMvSketchEnabled == null) {
+            log.info("Flow Rule: MV Sketch is not configured, " + "using current value of {}", flowRuleMvSketch);
+        } else {
+            flowRuleMvSketch = flowRuleMvSketchEnabled;
+            if (flowRuleMvSketch == true) {
+                // Hardcoded for now.
+                insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_mv");
+            }
+            log.info("Configured. Flow Rule: MV Sketch is {}", flowRuleMvSketch ? "enabled" : "disabled");
+        }                        
+    }
+
+    private void insertSketchFlowRule(DeviceId switchId, String tableId) {
+
+        PiMatchFieldId etherTypeMatchFieldId = PiMatchFieldId.of("hdr.ethernet.ether_type");
+        PiTableId forwardingTableId = PiTableId.of(tableId);
+
+        byte[] matchExactBytes1 = {0x08, 0x00};
+
+        PiCriterion match = PiCriterion.builder().matchExact(etherTypeMatchFieldId, matchExactBytes1).build();
+
+        PiActionId actionId = PiActionId.of("c_ingress._drop");
+        
+        PiAction action = PiAction.builder()
+                .withId(actionId)
+                .build();
+
+        log.info("Inserting INGRESS rule on switch {}: table={}, match={}, action={}",
+                 switchId, forwardingTableId, match, action);
+
+        insertPiFlowRule(switchId, forwardingTableId, match, action);
+    }
+
+    private void insertPiFlowRule(DeviceId switchId, PiTableId tableId, PiCriterion piCriterion, PiAction piAction) {
+        
+        FlowRule rule = DefaultFlowRule.builder()
+                .forDevice(switchId)
+                .forTable(tableId)
+                .fromApp(appId)
+                .withPriority(FLOW_RULE_PRIORITY)
+                .makePermanent()
+                .withSelector(DefaultTrafficSelector.builder().matchPi(piCriterion).build())
+                .withTreatment(DefaultTrafficTreatment.builder().piTableAction(piAction).build())
+                .build();
+        
+        flowRuleService.applyFlowRules(rule);
     }
 
     private void writeUpdatedFlow(FlowRule flowRule) {
@@ -275,7 +409,7 @@ public class FlowStats {
             globalMinFlowCount = minFlowCount;
         }
         return minFlowKey;
-    }    
+    }        
 
     private class InternalFlowListener implements FlowRuleListener {
         @Override

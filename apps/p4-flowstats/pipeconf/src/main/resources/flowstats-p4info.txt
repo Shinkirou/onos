@@ -3,9 +3,9 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33606914
-    name: "c_ingress.t_l2_fwd"
-    alias: "t_l2_fwd"
+    id: 33606554
+    name: "c_ingress.t_fwd"
+    alias: "t_fwd"
   }
   match_fields {
     id: 1
@@ -115,8 +115,96 @@ tables {
   action_refs {
     id: 16800567
   }
-  direct_resource_ids: 318778805
+  direct_resource_ids: 318771578
   size: 524288
+}
+tables {
+  preamble {
+    id: 33561598
+    name: "c_ingress.t_cm"
+    alias: "t_cm"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.ether_type"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16808599
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33615236
+    name: "c_ingress.t_bm"
+    alias: "t_bm"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.ether_type"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16808599
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33614226
+    name: "c_ingress.t_ams"
+    alias: "t_ams"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.ether_type"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16808599
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33575601
+    name: "c_ingress.t_mv"
+    alias: "t_mv"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.ether_type"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16808599
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
 }
 actions {
   preamble {
@@ -399,14 +487,14 @@ counters {
 }
 direct_counters {
   preamble {
-    id: 318778805
-    name: "c_ingress.l2_fwd_counter"
-    alias: "l2_fwd_counter"
+    id: 318771578
+    name: "c_ingress.fwd_counter"
+    alias: "fwd_counter"
   }
   spec {
     unit: BOTH
   }
-  direct_table_id: 33606914
+  direct_table_id: 33606554
 }
 controller_packet_metadata {
   preamble {
