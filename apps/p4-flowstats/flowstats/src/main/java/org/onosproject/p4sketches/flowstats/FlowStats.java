@@ -142,7 +142,7 @@ public class FlowStats {
     private boolean flowRuleMvSketch  = FLOW_RULE_MV_SKETCH_DEFAULT;
 
     @Activate
-    public void activate() {
+    public void activate(ComponentContext context) {
         // Register app and event listeners.
         log.info("Starting...");
         appId = coreService.registerApplication(APP_NAME);
@@ -229,6 +229,7 @@ public class FlowStats {
         PiMatchFieldId etherTypeMatchFieldId = PiMatchFieldId.of("hdr.ethernet.ether_type");
         PiTableId forwardingTableId = PiTableId.of(tableId);
 
+        // IPv4.
         byte[] matchExactBytes1 = {0x08, 0x00};
 
         PiCriterion match = PiCriterion.builder().matchExact(etherTypeMatchFieldId, matchExactBytes1).build();
