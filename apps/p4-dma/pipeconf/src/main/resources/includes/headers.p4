@@ -1,0 +1,119 @@
+header ethernet_t {
+	bit<48> dst_addr;
+	bit<48> src_addr;
+	bit<16> ether_type;
+}
+
+header ipv4_t {
+	bit<4>  version;
+	bit<4>  ihl;
+	bit<8>  diffserv;
+	bit<16> len;
+	bit<16> identification;
+	bit<3>  flags;
+	bit<13> frag_offset;
+	bit<8>  ttl;
+	bit<8>  protocol;
+	bit<16> hdr_checksum;
+	bit<32> src_addr;
+	bit<32> dst_addr;
+}
+
+header tcp_t {
+	bit<16> src_port;
+	bit<16> dst_port;
+	bit<32> seq_no;
+	bit<32> ack_no;
+	bit<4>  data_offset;
+	bit<3>  res;
+	bit<3>  ecn;
+	bit<6>  ctrl;
+	bit<16> window;
+	bit<16> checksum;
+	bit<16> urgent_ptr;
+}
+
+header udp_t {
+	bit<16> src_port;
+	bit<16> dst_port;
+	bit<16> length_;
+	bit<16> checksum;
+}
+
+header meta_t {
+	bit<16> l4_src_port;
+	bit<16> l4_dst_port;
+}
+
+header reg_meta_t {
+	// Number of active virtual registers, related to the current active sketches and their required registers.
+	bit<32> virtual_register_num;
+	bit<32> hash_size;
+	bit<32> current_register;
+	bit<32> current_index;
+	bit<32> current_sketch_hash;
+	bit<32> index_remaining;
+	bit<32> cm_5t;
+	bit<32> cm_ip;
+	bit<32>	bm_src;
+	bit<32> bm_dst;
+	// bit <4> padding;
+}
+
+header epoch_meta_t {
+	bit<1>	current_epoch;
+	bit<1>	index_epoch;
+	bit<32> sketch_temp;
+	bit<6>	padding;
+}
+
+header cm_5t_meta_t {
+	bit<32> hash_0;
+	bit<32> hash_1;
+	bit<32> hash_2;
+	bit<32> sketch_0;
+	bit<32> sketch_1;
+	bit<32> sketch_2;
+	bit<32> sketch_final;
+	bit<32> sketch_temp;
+}
+
+header cm_ip_meta_t {
+	bit<32> hash_0;
+	bit<32> hash_1;
+	bit<32> hash_2;
+	bit<32> sketch_0;
+	bit<32> sketch_1;
+	bit<32> sketch_2;
+	bit<32> sketch_final;
+	bit<32> sketch_temp;
+}
+
+header bm_src_meta_t {
+	bit<32> hash_0;
+	bit<32> hash_1;
+	bit<32> sketch;
+}
+
+header bm_dst_meta_t {
+	bit<32> hash_0;
+	bit<32> hash_1;
+	bit<32> sketch;
+}
+
+struct metadata_t {
+	meta_t 			meta;
+	reg_meta_t		reg;
+	epoch_meta_t	epoch;
+	cm_5t_meta_t	cm_5t;
+	cm_ip_meta_t	cm_ip;
+	bm_src_meta_t	bm_src;
+	bm_dst_meta_t	bm_dst;
+}
+
+struct headers_t {
+	ethernet_t	ethernet;
+	ipv4_t		ipv4;
+	tcp_t		tcp;
+	udp_t		udp;
+}
