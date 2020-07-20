@@ -35,7 +35,7 @@
             create a cell for the name and another for the value -->
                 <tr *ngFor="let p of showDetails?.propOrder">
                     <td *ngIf="showDetails?.propLabels[p] !== '-'"
-                        class="label">{{showDetails?.propLabels[p]}} :</td>
+                        class="label">{{showDetails?.propLabels[p]}}</td>
                     <td *ngIf="showDetails?.propLabels[p] !== '-'"
                         class="value">{{ showDetails?.propValues[p]}}</td>
                     <!-- If the label is '-' then insert a horiz line -->
@@ -57,7 +57,7 @@
                            (click)="navto(buttonAttribs(btn).path)"
                         [iconSize]="25"
                         [iconId]="buttonAttribs(btn).gid"
-                        [toolTip]="lionFnTopo(buttonAttribs(btn).tt)"
+                        [toolTip]="lionFnFlow(buttonAttribs(btn).tt)"
                         classes="button icon selected">
                 </onos-icon>
             </div>
@@ -66,6 +66,7 @@
                            (click)="navto('pipeconf')"
                            [iconSize]="25"
                            [iconId]="'pipeconfTable'"
+                           [toolTip]="'Show Pipeconf table for this device'"
                            classes="button icon selected">
                 </onos-icon>
             </div>
