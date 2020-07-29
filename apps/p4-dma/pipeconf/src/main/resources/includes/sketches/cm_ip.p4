@@ -225,25 +225,20 @@ control c_cm_ip(inout headers_t hdr, inout metadata_t meta, inout standard_metad
 
 		// CM ip Final Value.
 
-		meta.reg.current_sketch_hash = meta.cm_ip.hash_2;
-
 		cm_ip_set_reg_final.apply(hdr, meta, standard_metadata);
 		
 		// No need to apply an epoch check here, since all the cm values are already in the correct epoch
 		// and one of them will be the final value.
 
-		meta.cm_ip.sketch_final = meta.cm_ip.sketch_0;
+		meta.epoch.sketch_temp = meta.cm_ip.sketch_0;
 
-		if (meta.cm_ip.sketch_final > meta.cm_ip.sketch_1) {
-			meta.cm_ip.sketch_final = meta.cm_ip.sketch_1;
+		if (meta.epoch.sketch_temp > meta.cm_ip.sketch_1) {
+			meta.epoch.sketch_temp = meta.cm_ip.sketch_1;
 		}
 		
-		if (meta.cm_ip.sketch_final > meta.cm_ip.sketch_2) {
-			meta.cm_ip.sketch_final = meta.cm_ip.sketch_2;
+		if (meta.epoch.sketch_temp > meta.cm_ip.sketch_2) {
+			meta.epoch.sketch_temp = meta.cm_ip.sketch_2;
 		}
-
-		// We reuse this metadata just to write the cm value in the register.
-		meta.epoch.sketch_temp = meta.cm_ip.sketch_final;
 
 		current_register();
 

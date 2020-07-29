@@ -327,13 +327,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16833966
-    name: "c_ingress.ams.hash_3"
-    alias: "hash_3"
-  }
-}
-actions {
-  preamble {
     id: 16822077
     name: "c_ingress.ams.hash_g_0"
     alias: "hash_g_0"
@@ -355,13 +348,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16777501
-    name: "c_ingress.ams.hash_g_3"
-    alias: "hash_g_3"
-  }
-}
-actions {
-  preamble {
     id: 16831766
     name: "c_ingress.ams.ams_update"
     alias: "ams_update"
@@ -372,13 +358,6 @@ actions {
     id: 16787395
     name: "c_ingress.ams.ams_register_write"
     alias: "ams_register_write"
-  }
-}
-actions {
-  preamble {
-    id: 16826202
-    name: "c_ingress.ams.ams_median"
-    alias: "ams_median"
   }
 }
 actions {
@@ -807,21 +786,6 @@ registers {
     id: 369143530
     name: "c_ingress.ams.register_2"
     alias: "ams.register_2"
-  }
-  type_spec {
-    bitstring {
-      bit {
-        bitwidth: 32
-      }
-    }
-  }
-  size: 262144
-}
-registers {
-  preamble {
-    id: 369132448
-    name: "c_ingress.ams.register_3"
-    alias: "register_3"
   }
   type_spec {
     bitstring {
