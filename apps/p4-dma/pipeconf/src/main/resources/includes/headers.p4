@@ -57,6 +57,7 @@ header reg_meta_t {
 	bit<32> cm_ip;
 	bit<32>	bm_src;
 	bit<32> bm_dst;
+	bit<32> ams;
 	// bit <4> padding;
 }
 
@@ -101,6 +102,18 @@ header bm_dst_meta_t {
 	bit<32> sketch;
 }
 
+header ams_meta_t {
+	bit<32> hash_0;
+	bit<32> hash_1;
+	bit<32> hash_2;
+	bit<32> hash_g_0;
+	bit<32> hash_g_1;
+	bit<32> hash_g_2;
+	bit<32> sum_0;
+	bit<32> sum_1;
+	bit<32> sum_2;
+}
+
 struct metadata_t {
 	meta_t 			meta;
 	reg_meta_t		reg;
@@ -109,6 +122,7 @@ struct metadata_t {
 	cm_ip_meta_t	cm_ip;
 	bm_src_meta_t	bm_src;
 	bm_dst_meta_t	bm_dst;
+	ams_meta_t		ams;
 }
 
 struct headers_t {

@@ -1339,6 +1339,419 @@ tables {
 }
 tables {
   preamble {
+    id: 33570583
+    name: "c_ingress.ams.ams_set_reg_0.t_set_reg"
+    alias: "ams_set_reg_0.t_set_reg"
+  }
+  action_refs {
+    id: 16824091
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33578412
+    name: "c_ingress.ams.ams_set_reg_1.t_set_reg"
+    alias: "ams_set_reg_1.t_set_reg"
+  }
+  action_refs {
+    id: 16832779
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33557858
+    name: "c_ingress.ams.ams_set_reg_2.t_set_reg"
+    alias: "ams_set_reg_2.t_set_reg"
+  }
+  action_refs {
+    id: 16838528
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33587991
+    name: "c_ingress.ams.ams_set_reg_final.t_set_reg"
+    alias: "ams_set_reg_final.t_set_reg"
+  }
+  action_refs {
+    id: 16791107
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33583476
+    name: "c_ingress.ams.ams_epoch_0.t_epoch_check"
+    alias: "ams_epoch_0.t_epoch_check"
+  }
+  match_fields {
+    id: 1
+    name: "current_register_temp"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16826897
+  }
+  action_refs {
+    id: 16803885
+  }
+  action_refs {
+    id: 16780326
+  }
+  action_refs {
+    id: 16823112
+  }
+  action_refs {
+    id: 16799663
+  }
+  action_refs {
+    id: 16841219
+  }
+  action_refs {
+    id: 16817840
+  }
+  action_refs {
+    id: 16782136
+  }
+  action_refs {
+    id: 16824215
+  }
+  action_refs {
+    id: 16800467
+  }
+  action_refs {
+    id: 16824124
+  }
+  action_refs {
+    id: 16778131
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33560538
+    name: "c_ingress.ams.ams_epoch_1.t_epoch_check"
+    alias: "ams_epoch_1.t_epoch_check"
+  }
+  match_fields {
+    id: 1
+    name: "current_register_temp"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16792257
+  }
+  action_refs {
+    id: 16795201
+  }
+  action_refs {
+    id: 16835580
+  }
+  action_refs {
+    id: 16780426
+  }
+  action_refs {
+    id: 16820951
+  }
+  action_refs {
+    id: 16840539
+  }
+  action_refs {
+    id: 16799318
+  }
+  action_refs {
+    id: 16809448
+  }
+  action_refs {
+    id: 16785341
+  }
+  action_refs {
+    id: 16825126
+  }
+  action_refs {
+    id: 16792413
+  }
+  action_refs {
+    id: 16832009
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33606588
+    name: "c_ingress.ams.ams_epoch_2.t_epoch_check"
+    alias: "ams_epoch_2.t_epoch_check"
+  }
+  match_fields {
+    id: 1
+    name: "current_register_temp"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16836901
+  }
+  action_refs {
+    id: 16835837
+  }
+  action_refs {
+    id: 16793714
+  }
+  action_refs {
+    id: 16785943
+  }
+  action_refs {
+    id: 16809875
+  }
+  action_refs {
+    id: 16791762
+  }
+  action_refs {
+    id: 16783196
+  }
+  action_refs {
+    id: 16839049
+  }
+  action_refs {
+    id: 16829449
+  }
+  action_refs {
+    id: 16797600
+  }
+  action_refs {
+    id: 16798216
+  }
+  action_refs {
+    id: 16809862
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33581961
+    name: "c_ingress.ams.t_ams_0"
+    alias: "t_ams_0"
+  }
+  match_fields {
+    id: 1
+    name: "current_register_temp"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16836577
+  }
+  action_refs {
+    id: 16810082
+  }
+  action_refs {
+    id: 16789054
+  }
+  action_refs {
+    id: 16829065
+  }
+  action_refs {
+    id: 16790559
+  }
+  action_refs {
+    id: 16830500
+  }
+  action_refs {
+    id: 16809384
+  }
+  action_refs {
+    id: 16784095
+  }
+  action_refs {
+    id: 16819825
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33589260
+    name: "c_ingress.ams.t_ams_1"
+    alias: "t_ams_1"
+  }
+  match_fields {
+    id: 1
+    name: "current_register_temp"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16810082
+  }
+  action_refs {
+    id: 16789054
+  }
+  action_refs {
+    id: 16829065
+  }
+  action_refs {
+    id: 16790559
+  }
+  action_refs {
+    id: 16830500
+  }
+  action_refs {
+    id: 16809384
+  }
+  action_refs {
+    id: 16784095
+  }
+  action_refs {
+    id: 16819825
+  }
+  action_refs {
+    id: 16794514
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33592048
+    name: "c_ingress.ams.t_ams_2"
+    alias: "t_ams_2"
+  }
+  match_fields {
+    id: 1
+    name: "current_register_temp"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16789054
+  }
+  action_refs {
+    id: 16829065
+  }
+  action_refs {
+    id: 16790559
+  }
+  action_refs {
+    id: 16830500
+  }
+  action_refs {
+    id: 16809384
+  }
+  action_refs {
+    id: 16784095
+  }
+  action_refs {
+    id: 16819825
+  }
+  action_refs {
+    id: 16794514
+  }
+  action_refs {
+    id: 16831059
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33565988
+    name: "c_ingress.ams.t_ams_final"
+    alias: "t_ams_final"
+  }
+  match_fields {
+    id: 1
+    name: "current_register_temp"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16829065
+  }
+  action_refs {
+    id: 16790559
+  }
+  action_refs {
+    id: 16830500
+  }
+  action_refs {
+    id: 16809384
+  }
+  action_refs {
+    id: 16784095
+  }
+  action_refs {
+    id: 16819825
+  }
+  action_refs {
+    id: 16794514
+  }
+  action_refs {
+    id: 16831059
+  }
+  action_refs {
+    id: 16789760
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
     id: 33606554
     name: "c_ingress.t_fwd"
     alias: "t_fwd"
@@ -3245,6 +3658,564 @@ actions {
 }
 actions {
   preamble {
+    id: 16813319
+    name: "c_ingress.ams.ams_set_reg_0.register_setup"
+    alias: "ams_set_reg_0.register_setup"
+  }
+}
+actions {
+  preamble {
+    id: 16837255
+    name: "c_ingress.ams.ams_set_reg_0.calculate_register_index"
+    alias: "ams_set_reg_0.calculate_register_index"
+  }
+}
+actions {
+  preamble {
+    id: 16824091
+    name: "c_ingress.ams.ams_set_reg_0.set_reg"
+    alias: "ams_set_reg_0.set_reg"
+  }
+  params {
+    id: 1
+    name: "current_register"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "current_index"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 16803234
+    name: "c_ingress.ams.ams_set_reg_1.register_setup"
+    alias: "ams_set_reg_1.register_setup"
+  }
+}
+actions {
+  preamble {
+    id: 16833241
+    name: "c_ingress.ams.ams_set_reg_1.calculate_register_index"
+    alias: "ams_set_reg_1.calculate_register_index"
+  }
+}
+actions {
+  preamble {
+    id: 16832779
+    name: "c_ingress.ams.ams_set_reg_1.set_reg"
+    alias: "ams_set_reg_1.set_reg"
+  }
+  params {
+    id: 1
+    name: "current_register"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "current_index"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 16802695
+    name: "c_ingress.ams.ams_set_reg_2.register_setup"
+    alias: "ams_set_reg_2.register_setup"
+  }
+}
+actions {
+  preamble {
+    id: 16839779
+    name: "c_ingress.ams.ams_set_reg_2.calculate_register_index"
+    alias: "ams_set_reg_2.calculate_register_index"
+  }
+}
+actions {
+  preamble {
+    id: 16838528
+    name: "c_ingress.ams.ams_set_reg_2.set_reg"
+    alias: "ams_set_reg_2.set_reg"
+  }
+  params {
+    id: 1
+    name: "current_register"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "current_index"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 16799026
+    name: "c_ingress.ams.ams_set_reg_final.register_setup"
+    alias: "ams_set_reg_final.register_setup"
+  }
+}
+actions {
+  preamble {
+    id: 16842116
+    name: "c_ingress.ams.ams_set_reg_final.calculate_register_index"
+    alias: "ams_set_reg_final.calculate_register_index"
+  }
+}
+actions {
+  preamble {
+    id: 16791107
+    name: "c_ingress.ams.ams_set_reg_final.set_reg"
+    alias: "ams_set_reg_final.set_reg"
+  }
+  params {
+    id: 1
+    name: "current_register"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "current_index"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 16826897
+    name: "c_ingress.ams.ams_epoch_0.epoch_check_0"
+    alias: "ams_epoch_0.epoch_check_0"
+  }
+}
+actions {
+  preamble {
+    id: 16803885
+    name: "c_ingress.ams.ams_epoch_0.epoch_check_1"
+    alias: "ams_epoch_0.epoch_check_1"
+  }
+}
+actions {
+  preamble {
+    id: 16780326
+    name: "c_ingress.ams.ams_epoch_0.epoch_check_2"
+    alias: "ams_epoch_0.epoch_check_2"
+  }
+}
+actions {
+  preamble {
+    id: 16823112
+    name: "c_ingress.ams.ams_epoch_0.epoch_check_3"
+    alias: "ams_epoch_0.epoch_check_3"
+  }
+}
+actions {
+  preamble {
+    id: 16799663
+    name: "c_ingress.ams.ams_epoch_0.epoch_check_4"
+    alias: "ams_epoch_0.epoch_check_4"
+  }
+}
+actions {
+  preamble {
+    id: 16841219
+    name: "c_ingress.ams.ams_epoch_0.epoch_check_5"
+    alias: "ams_epoch_0.epoch_check_5"
+  }
+}
+actions {
+  preamble {
+    id: 16817840
+    name: "c_ingress.ams.ams_epoch_0.epoch_check_6"
+    alias: "ams_epoch_0.epoch_check_6"
+  }
+}
+actions {
+  preamble {
+    id: 16782136
+    name: "c_ingress.ams.ams_epoch_0.epoch_check_7"
+    alias: "ams_epoch_0.epoch_check_7"
+  }
+}
+actions {
+  preamble {
+    id: 16824215
+    name: "c_ingress.ams.ams_epoch_0.epoch_check_8"
+    alias: "ams_epoch_0.epoch_check_8"
+  }
+}
+actions {
+  preamble {
+    id: 16800467
+    name: "c_ingress.ams.ams_epoch_0.epoch_check_9"
+    alias: "ams_epoch_0.epoch_check_9"
+  }
+}
+actions {
+  preamble {
+    id: 16824124
+    name: "c_ingress.ams.ams_epoch_0.epoch_check_10"
+    alias: "ams_epoch_0.epoch_check_10"
+  }
+}
+actions {
+  preamble {
+    id: 16778131
+    name: "c_ingress.ams.ams_epoch_0.epoch_check_11"
+    alias: "ams_epoch_0.epoch_check_11"
+  }
+}
+actions {
+  preamble {
+    id: 16804414
+    name: "c_ingress.ams.ams_epoch_0.change_index_epoch"
+    alias: "ams_epoch_0.change_index_epoch"
+  }
+}
+actions {
+  preamble {
+    id: 16804007
+    name: "c_ingress.ams.ams_epoch_0.current_register"
+    alias: "ams_epoch_0.current_register"
+  }
+}
+actions {
+  preamble {
+    id: 16792257
+    name: "c_ingress.ams.ams_epoch_1.epoch_check_0"
+    alias: "ams_epoch_1.epoch_check_0"
+  }
+}
+actions {
+  preamble {
+    id: 16795201
+    name: "c_ingress.ams.ams_epoch_1.epoch_check_1"
+    alias: "ams_epoch_1.epoch_check_1"
+  }
+}
+actions {
+  preamble {
+    id: 16835580
+    name: "c_ingress.ams.ams_epoch_1.epoch_check_2"
+    alias: "ams_epoch_1.epoch_check_2"
+  }
+}
+actions {
+  preamble {
+    id: 16780426
+    name: "c_ingress.ams.ams_epoch_1.epoch_check_3"
+    alias: "ams_epoch_1.epoch_check_3"
+  }
+}
+actions {
+  preamble {
+    id: 16820951
+    name: "c_ingress.ams.ams_epoch_1.epoch_check_4"
+    alias: "ams_epoch_1.epoch_check_4"
+  }
+}
+actions {
+  preamble {
+    id: 16840539
+    name: "c_ingress.ams.ams_epoch_1.epoch_check_5"
+    alias: "ams_epoch_1.epoch_check_5"
+  }
+}
+actions {
+  preamble {
+    id: 16799318
+    name: "c_ingress.ams.ams_epoch_1.epoch_check_6"
+    alias: "ams_epoch_1.epoch_check_6"
+  }
+}
+actions {
+  preamble {
+    id: 16809448
+    name: "c_ingress.ams.ams_epoch_1.epoch_check_7"
+    alias: "ams_epoch_1.epoch_check_7"
+  }
+}
+actions {
+  preamble {
+    id: 16785341
+    name: "c_ingress.ams.ams_epoch_1.epoch_check_8"
+    alias: "ams_epoch_1.epoch_check_8"
+  }
+}
+actions {
+  preamble {
+    id: 16825126
+    name: "c_ingress.ams.ams_epoch_1.epoch_check_9"
+    alias: "ams_epoch_1.epoch_check_9"
+  }
+}
+actions {
+  preamble {
+    id: 16792413
+    name: "c_ingress.ams.ams_epoch_1.epoch_check_10"
+    alias: "ams_epoch_1.epoch_check_10"
+  }
+}
+actions {
+  preamble {
+    id: 16832009
+    name: "c_ingress.ams.ams_epoch_1.epoch_check_11"
+    alias: "ams_epoch_1.epoch_check_11"
+  }
+}
+actions {
+  preamble {
+    id: 16808406
+    name: "c_ingress.ams.ams_epoch_1.change_index_epoch"
+    alias: "ams_epoch_1.change_index_epoch"
+  }
+}
+actions {
+  preamble {
+    id: 16788705
+    name: "c_ingress.ams.ams_epoch_1.current_register"
+    alias: "ams_epoch_1.current_register"
+  }
+}
+actions {
+  preamble {
+    id: 16836901
+    name: "c_ingress.ams.ams_epoch_2.epoch_check_0"
+    alias: "ams_epoch_2.epoch_check_0"
+  }
+}
+actions {
+  preamble {
+    id: 16835837
+    name: "c_ingress.ams.ams_epoch_2.epoch_check_1"
+    alias: "ams_epoch_2.epoch_check_1"
+  }
+}
+actions {
+  preamble {
+    id: 16793714
+    name: "c_ingress.ams.ams_epoch_2.epoch_check_2"
+    alias: "ams_epoch_2.epoch_check_2"
+  }
+}
+actions {
+  preamble {
+    id: 16785943
+    name: "c_ingress.ams.ams_epoch_2.epoch_check_3"
+    alias: "ams_epoch_2.epoch_check_3"
+  }
+}
+actions {
+  preamble {
+    id: 16809875
+    name: "c_ingress.ams.ams_epoch_2.epoch_check_4"
+    alias: "ams_epoch_2.epoch_check_4"
+  }
+}
+actions {
+  preamble {
+    id: 16791762
+    name: "c_ingress.ams.ams_epoch_2.epoch_check_5"
+    alias: "ams_epoch_2.epoch_check_5"
+  }
+}
+actions {
+  preamble {
+    id: 16783196
+    name: "c_ingress.ams.ams_epoch_2.epoch_check_6"
+    alias: "ams_epoch_2.epoch_check_6"
+  }
+}
+actions {
+  preamble {
+    id: 16839049
+    name: "c_ingress.ams.ams_epoch_2.epoch_check_7"
+    alias: "ams_epoch_2.epoch_check_7"
+  }
+}
+actions {
+  preamble {
+    id: 16829449
+    name: "c_ingress.ams.ams_epoch_2.epoch_check_8"
+    alias: "ams_epoch_2.epoch_check_8"
+  }
+}
+actions {
+  preamble {
+    id: 16797600
+    name: "c_ingress.ams.ams_epoch_2.epoch_check_9"
+    alias: "ams_epoch_2.epoch_check_9"
+  }
+}
+actions {
+  preamble {
+    id: 16798216
+    name: "c_ingress.ams.ams_epoch_2.epoch_check_10"
+    alias: "ams_epoch_2.epoch_check_10"
+  }
+}
+actions {
+  preamble {
+    id: 16809862
+    name: "c_ingress.ams.ams_epoch_2.epoch_check_11"
+    alias: "ams_epoch_2.epoch_check_11"
+  }
+}
+actions {
+  preamble {
+    id: 16814273
+    name: "c_ingress.ams.ams_epoch_2.change_index_epoch"
+    alias: "ams_epoch_2.change_index_epoch"
+  }
+}
+actions {
+  preamble {
+    id: 16812551
+    name: "c_ingress.ams.ams_epoch_2.current_register"
+    alias: "ams_epoch_2.current_register"
+  }
+}
+actions {
+  preamble {
+    id: 16817572
+    name: "c_ingress.ams.hash_ams_0"
+    alias: "hash_ams_0"
+  }
+}
+actions {
+  preamble {
+    id: 16822602
+    name: "c_ingress.ams.hash_ams_1"
+    alias: "hash_ams_1"
+  }
+}
+actions {
+  preamble {
+    id: 16837272
+    name: "c_ingress.ams.hash_ams_2"
+    alias: "hash_ams_2"
+  }
+}
+actions {
+  preamble {
+    id: 16785724
+    name: "c_ingress.ams.hash_ams_g_0"
+    alias: "hash_ams_g_0"
+  }
+}
+actions {
+  preamble {
+    id: 16796794
+    name: "c_ingress.ams.hash_ams_g_1"
+    alias: "hash_ams_g_1"
+  }
+}
+actions {
+  preamble {
+    id: 16818462
+    name: "c_ingress.ams.hash_ams_g_2"
+    alias: "hash_ams_g_2"
+  }
+}
+actions {
+  preamble {
+    id: 16841047
+    name: "c_ingress.ams.current_register"
+    alias: "ams.current_register"
+  }
+}
+actions {
+  preamble {
+    id: 16831766
+    name: "c_ingress.ams.ams_update"
+    alias: "ams_update"
+  }
+}
+actions {
+  preamble {
+    id: 16836577
+    name: "c_ingress.ams.ams_write_0"
+    alias: "ams_write_0"
+  }
+}
+actions {
+  preamble {
+    id: 16810082
+    name: "c_ingress.ams.ams_write_1"
+    alias: "ams_write_1"
+  }
+}
+actions {
+  preamble {
+    id: 16789054
+    name: "c_ingress.ams.ams_write_2"
+    alias: "ams_write_2"
+  }
+}
+actions {
+  preamble {
+    id: 16829065
+    name: "c_ingress.ams.ams_write_3"
+    alias: "ams_write_3"
+  }
+}
+actions {
+  preamble {
+    id: 16790559
+    name: "c_ingress.ams.ams_write_4"
+    alias: "ams_write_4"
+  }
+}
+actions {
+  preamble {
+    id: 16830500
+    name: "c_ingress.ams.ams_write_5"
+    alias: "ams_write_5"
+  }
+}
+actions {
+  preamble {
+    id: 16809384
+    name: "c_ingress.ams.ams_write_6"
+    alias: "ams_write_6"
+  }
+}
+actions {
+  preamble {
+    id: 16784095
+    name: "c_ingress.ams.ams_write_7"
+    alias: "ams_write_7"
+  }
+}
+actions {
+  preamble {
+    id: 16819825
+    name: "c_ingress.ams.ams_write_8"
+    alias: "ams_write_8"
+  }
+}
+actions {
+  preamble {
+    id: 16794514
+    name: "c_ingress.ams.ams_write_9"
+    alias: "ams_write_9"
+  }
+}
+actions {
+  preamble {
+    id: 16831059
+    name: "c_ingress.ams.ams_write_10"
+    alias: "ams_write_10"
+  }
+}
+actions {
+  preamble {
+    id: 16789760
+    name: "c_ingress.ams.ams_write_11"
+    alias: "ams_write_11"
+  }
+}
+actions {
+  preamble {
     id: 16835992
     name: "c_ingress.drop"
     alias: "drop"
@@ -3295,11 +4266,16 @@ actions {
   }
   params {
     id: 5
-    name: "virtual_register_num"
+    name: "ams_flag"
     bitwidth: 32
   }
   params {
     id: 6
+    name: "virtual_register_num"
+    bitwidth: 32
+  }
+  params {
+    id: 7
     name: "hash_size"
     bitwidth: 32
   }
@@ -3501,6 +4477,51 @@ registers {
     bitstring {
       bit {
         bitwidth: 1
+      }
+    }
+  }
+  size: 1
+}
+registers {
+  preamble {
+    id: 369136646
+    name: "c_ingress.ams.register_sum_0"
+    alias: "register_sum_0"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 1
+}
+registers {
+  preamble {
+    id: 369162772
+    name: "c_ingress.ams.register_sum_1"
+    alias: "register_sum_1"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 1
+}
+registers {
+  preamble {
+    id: 369105265
+    name: "c_ingress.ams.register_sum_2"
+    alias: "register_sum_2"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
       }
     }
   }
