@@ -17,7 +17,9 @@ package org.onosproject.k8snode.codec;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.lang.StringUtils;
 import org.onlab.packet.IpAddress;
+import org.onlab.packet.MacAddress;
 import org.onosproject.codec.CodecContext;
 import org.onosproject.codec.JsonCodec;
 import org.onosproject.k8snode.api.DefaultK8sNode;
@@ -28,6 +30,8 @@ import org.slf4j.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.onlab.util.Tools.nullIsIllegal;
+import static org.onosproject.k8snode.api.Constants.DEFAULT_CLUSTER_NAME;
+import static org.onosproject.k8snode.api.Constants.DEFAULT_SEGMENT_ID;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -37,17 +41,22 @@ public final class K8sNodeCodec extends JsonCodec<K8sNode> {
 
     private final Logger log = getLogger(getClass());
 
+    private static final String CLUSTER_NAME = "clusterName";
     private static final String HOSTNAME = "hostname";
     private static final String TYPE = "type";
+    private static final String MODE = "mode";
+    private static final String SEGMENT_ID = "segmentId";
     private static final String MANAGEMENT_IP = "managementIp";
     private static final String DATA_IP = "dataIp";
     private static final String INTEGRATION_BRIDGE = "integrationBridge";
     private static final String EXTERNAL_BRIDGE = "externalBridge";
     private static final String LOCAL_BRIDGE = "localBridge";
+    private static final String TUNNEL_BRIDGE = "tunnelBridge";
     private static final String STATE = "state";
     private static final String EXTERNAL_INTF = "externalInterface";
     private static final String EXTERNAL_BRIDGE_IP = "externalBridgeIp";
     private static final String EXTERNAL_GATEWAY_IP = "externalGatewayIp";
+    private static final String EXTERNAL_GATEWAY_MAC = "externalGatewayMac";
 
     private static final String MISSING_MESSAGE = " is required in K8sNode";
 
@@ -56,8 +65,11 @@ public final class K8sNodeCodec extends JsonCodec<K8sNode> {
         checkNotNull(node, "Kubernetes node cannot be null");
 
         ObjectNode result = context.mapper().createObjectNode()
+                .put(CLUSTER_NAME, node.clusterName())
                 .put(HOSTNAME, node.hostname())
                 .put(TYPE, node.type().name())
+                .put(MODE, node.mode().name())
+                .put(SEGMENT_ID, node.segmentId())
                 .put(STATE, node.state().name())
                 .put(MANAGEMENT_IP, node.managementIp().toString());
 
@@ -71,6 +83,10 @@ public final class K8sNodeCodec extends JsonCodec<K8sNode> {
 
         if (node.localBridge() != null) {
             result.put(LOCAL_BRIDGE, node.localBridge().toString());
+        }
+
+        if (node.tunBridge() != null) {
+            result.put(TUNNEL_BRIDGE, node.tunBridge().toString());
         }
 
         if (node.dataIp() != null) {
@@ -89,6 +105,10 @@ public final class K8sNodeCodec extends JsonCodec<K8sNode> {
             result.put(EXTERNAL_GATEWAY_IP, node.extGatewayIp().toString());
         }
 
+        if (node.extGatewayMac() != null) {
+            result.put(EXTERNAL_GATEWAY_MAC, node.extGatewayMac().toString());
+        }
+
         return result;
     }
 
@@ -96,6 +116,12 @@ public final class K8sNodeCodec extends JsonCodec<K8sNode> {
     public K8sNode decode(ObjectNode json, CodecContext context) {
         if (json == null || !json.isObject()) {
             return null;
+        }
+
+        String clusterName = json.get(CLUSTER_NAME).asText();
+
+        if (StringUtils.isEmpty(clusterName)) {
+            clusterName = DEFAULT_CLUSTER_NAME;
         }
 
         String hostname = nullIsIllegal(json.get(HOSTNAME).asText(),
@@ -106,6 +132,7 @@ public final class K8sNodeCodec extends JsonCodec<K8sNode> {
                 MANAGEMENT_IP + MISSING_MESSAGE);
 
         DefaultK8sNode.Builder nodeBuilder = DefaultK8sNode.builder()
+                .clusterName(clusterName)
                 .hostname(hostname)
                 .type(K8sNode.Type.valueOf(type))
                 .state(K8sNodeState.INIT)
@@ -114,6 +141,13 @@ public final class K8sNodeCodec extends JsonCodec<K8sNode> {
         if (json.get(DATA_IP) != null) {
             nodeBuilder.dataIp(IpAddress.valueOf(json.get(DATA_IP).asText()));
         }
+
+        JsonNode segmentIdJson = json.get(SEGMENT_ID);
+        int segmentId = DEFAULT_SEGMENT_ID;
+        if (segmentIdJson != null) {
+            segmentId = segmentIdJson.asInt();
+        }
+        nodeBuilder.segmentId(segmentId);
 
         JsonNode intBridgeJson = json.get(INTEGRATION_BRIDGE);
         if (intBridgeJson != null) {
@@ -130,6 +164,11 @@ public final class K8sNodeCodec extends JsonCodec<K8sNode> {
             nodeBuilder.localBridge(DeviceId.deviceId(localBridgeJson.asText()));
         }
 
+        JsonNode tunBridgeJson = json.get(TUNNEL_BRIDGE);
+        if (tunBridgeJson != null) {
+            nodeBuilder.tunBridge(DeviceId.deviceId(tunBridgeJson.asText()));
+        }
+
         JsonNode extIntfJson = json.get(EXTERNAL_INTF);
         if (extIntfJson != null) {
             nodeBuilder.extIntf(extIntfJson.asText());
@@ -143,6 +182,11 @@ public final class K8sNodeCodec extends JsonCodec<K8sNode> {
         JsonNode extGatewayIpJson = json.get(EXTERNAL_GATEWAY_IP);
         if (extGatewayIpJson != null) {
             nodeBuilder.extGatewayIp(IpAddress.valueOf(extGatewayIpJson.asText()));
+        }
+
+        JsonNode extGatewayMacJson = json.get(EXTERNAL_GATEWAY_MAC);
+        if (extGatewayMacJson != null) {
+            nodeBuilder.extGatewayMac(MacAddress.valueOf(extGatewayMacJson.asText()));
         }
 
         log.trace("node is {}", nodeBuilder.build().toString());

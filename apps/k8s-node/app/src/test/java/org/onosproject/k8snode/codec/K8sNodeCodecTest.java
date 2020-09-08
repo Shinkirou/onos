@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Before;
 import org.junit.Test;
 import org.onlab.packet.IpAddress;
+import org.onlab.packet.MacAddress;
 import org.onosproject.codec.CodecContext;
 import org.onosproject.codec.JsonCodec;
 import org.onosproject.codec.impl.CodecManager;
@@ -78,8 +79,10 @@ public class K8sNodeCodecTest {
     @Test
     public void testK8sMinionNodeEncode() {
         K8sNode node = DefaultK8sNode.builder()
+                .clusterName("kubernetes")
                 .hostname("minion")
                 .type(K8sNode.Type.MINION)
+                .segmentId(100)
                 .state(K8sNodeState.INIT)
                 .managementIp(IpAddress.valueOf("10.10.10.1"))
                 .dataIp(IpAddress.valueOf("20.20.20.2"))
@@ -87,6 +90,7 @@ public class K8sNodeCodecTest {
                 .extIntf("eth1")
                 .extBridgeIp(IpAddress.valueOf("10.10.10.5"))
                 .extGatewayIp(IpAddress.valueOf("10.10.10.1"))
+                .extGatewayMac(MacAddress.valueOf("FF:FF:FF:FF:FF:FF"))
                 .build();
 
         ObjectNode nodeJson = k8sNodeCodec.encode(node, context);
@@ -102,14 +106,17 @@ public class K8sNodeCodecTest {
     public void testK8sMinionNodeDecode() throws IOException {
         K8sNode node = getK8sNode("K8sMinionNode.json");
 
+        assertEquals("kubernetes", node.clusterName());
         assertEquals("minion", node.hostname());
         assertEquals("MINION", node.type().name());
+        assertEquals(100, node.segmentId());
         assertEquals("172.16.130.4", node.managementIp().toString());
         assertEquals("172.16.130.4", node.dataIp().toString());
         assertEquals("of:00000000000000a1", node.intgBridge().toString());
         assertEquals("eth1", node.extIntf());
         assertEquals("172.16.130.5", node.extBridgeIp().toString());
         assertEquals("172.16.130.1", node.extGatewayIp().toString());
+        assertEquals("FF:FF:FF:FF:FF:FF", node.extGatewayMac().toString());
     }
 
     private K8sNode getK8sNode(String resourceName) throws IOException {

@@ -111,6 +111,7 @@ import static org.onosproject.k8snetworking.api.Constants.SHIFTED_IP_CIDR;
 import static org.onosproject.k8snetworking.api.Constants.SHIFTED_IP_PREFIX;
 import static org.onosproject.k8snetworking.api.Constants.SRC;
 import static org.onosproject.k8snetworking.api.Constants.STAT_EGRESS_TABLE;
+import static org.onosproject.k8snetworking.api.Constants.TUN_ENTRY_TABLE;
 import static org.onosproject.k8snetworking.impl.OsgiPropertyConstants.SERVICE_CIDR;
 import static org.onosproject.k8snetworking.impl.OsgiPropertyConstants.SERVICE_IP_CIDR_DEFAULT;
 import static org.onosproject.k8snetworking.impl.OsgiPropertyConstants.SERVICE_IP_NAT_MODE;
@@ -315,9 +316,7 @@ public class K8sServiceHandler {
         });
 
         // setup load balancing rules using group table
-        k8sServiceService.services().stream()
-                .filter(s -> CLUSTER_IP.equals(s.getSpec().getType()))
-                .forEach(s -> setStatelessGroupFlowRules(deviceId, s, install));
+        k8sServiceService.services().forEach(s -> setStatelessGroupFlowRules(deviceId, s, install));
     }
 
     private void setSrcDstCidrRules(DeviceId deviceId, String srcCidr,
@@ -645,16 +644,33 @@ public class K8sServiceHandler {
                 }
                 tBuilder.transition(STAT_EGRESS_TABLE);
             } else {
-                PortNumber portNum = tunnelPortNumByNetId(network.networkId(),
-                        k8sNetworkService, n);
                 K8sNode localNode = k8sNodeService.node(network.name());
 
-                tBuilder.extension(buildExtension(
-                        deviceService,
-                        n.intgBridge(),
-                        localNode.dataIp().getIp4Address()),
-                        n.intgBridge())
-                        .setOutput(portNum);
+                tBuilder.setOutput(n.intgToTunPortNum());
+
+                PortNumber portNum = tunnelPortNumByNetId(network.networkId(),
+                        k8sNetworkService, n);
+
+                // install rules into tunnel bridge
+                TrafficTreatment treatmentToRemote = DefaultTrafficTreatment.builder()
+                        .extension(buildExtension(
+                                deviceService,
+                                n.tunBridge(),
+                                localNode.dataIp().getIp4Address()),
+                                n.tunBridge())
+                        .setTunnelId(Long.valueOf(network.segmentId()))
+                        .setOutput(portNum)
+                        .build();
+
+                k8sFlowRuleService.setRule(
+                        appId,
+                        n.tunBridge(),
+                        sBuilder.build(),
+                        treatmentToRemote,
+                        PRIORITY_CIDR_RULE,
+                        TUN_ENTRY_TABLE,
+                        install
+                );
             }
 
             k8sFlowRuleService.setRule(

@@ -19,10 +19,14 @@ import com.google.common.testing.EqualsTester;
 import org.junit.Before;
 import org.junit.Test;
 import org.onlab.packet.IpAddress;
+import org.onlab.packet.IpPrefix;
 import org.onosproject.k8snode.api.K8sApiConfig.Scheme;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.onlab.junit.ImmutableClassChecker.assertThatClassIsImmutable;
+import static org.onosproject.k8snode.api.K8sApiConfig.Mode;
+import static org.onosproject.k8snode.api.K8sApiConfig.Mode.NORMAL;
+import static org.onosproject.k8snode.api.K8sApiConfig.Mode.PASSTHROUGH;
 import static org.onosproject.k8snode.api.K8sApiConfig.Scheme.HTTP;
 import static org.onosproject.k8snode.api.K8sApiConfig.Scheme.HTTPS;
 import static org.onosproject.k8snode.api.K8sApiConfig.State.CONNECTED;
@@ -33,8 +37,18 @@ import static org.onosproject.k8snode.api.K8sApiConfig.State.DISCONNECTED;
  */
 public final class DefaultK8sApiConfigTest {
 
+    private static final String CLUSTER_NAME = "kubernetes";
+
+    private static final int SEGMENT_ID_1 = 1;
+    private static final int SEGMENT_ID_2 = 2;
+
+    private static final IpPrefix EXT_NETWORK_CIDR = IpPrefix.valueOf("192.168.200.0/0");
+
     private static final Scheme SCHEME_1 = HTTP;
     private static final Scheme SCHEME_2 = HTTPS;
+
+    private static final Mode MODE_1 = NORMAL;
+    private static final Mode MODE_2 = PASSTHROUGH;
 
     private static final IpAddress IP_ADDRESS_1 = IpAddress.valueOf("192.168.0.200");
     private static final IpAddress IP_ADDRESS_2 = IpAddress.valueOf("192.168.0.201");
@@ -54,6 +68,9 @@ public final class DefaultK8sApiConfigTest {
     private static final String CLIENT_KEY_DATA_1 = "clientKeyData1";
     private static final String CLIENT_KEY_DATA_2 = "clientKeyData2";
 
+    private static final boolean DVR_1 = true;
+    private static final boolean DVR_2 = false;
+
     private K8sApiConfig config1;
     private K8sApiConfig sameAsConfig1;
     private K8sApiConfig config2;
@@ -72,6 +89,10 @@ public final class DefaultK8sApiConfigTest {
     @Before
     public void setUp() {
         config1 = DefaultK8sApiConfig.builder()
+                .clusterName(CLUSTER_NAME)
+                .segmentId(SEGMENT_ID_1)
+                .extNetworkCidr(EXT_NETWORK_CIDR)
+                .mode(NORMAL)
                 .scheme(SCHEME_1)
                 .ipAddress(IP_ADDRESS_1)
                 .port(PORT_1)
@@ -80,9 +101,14 @@ public final class DefaultK8sApiConfigTest {
                 .caCertData(CA_CERT_DATA_1)
                 .clientCertData(CLIENT_CERT_DATA_1)
                 .clientKeyData(CLIENT_KEY_DATA_1)
+                .dvr(DVR_1)
                 .build();
 
         sameAsConfig1 = DefaultK8sApiConfig.builder()
+                .clusterName(CLUSTER_NAME)
+                .segmentId(SEGMENT_ID_1)
+                .extNetworkCidr(EXT_NETWORK_CIDR)
+                .mode(NORMAL)
                 .scheme(SCHEME_1)
                 .ipAddress(IP_ADDRESS_1)
                 .port(PORT_1)
@@ -91,9 +117,14 @@ public final class DefaultK8sApiConfigTest {
                 .caCertData(CA_CERT_DATA_1)
                 .clientCertData(CLIENT_CERT_DATA_1)
                 .clientKeyData(CLIENT_KEY_DATA_1)
+                .dvr(DVR_1)
                 .build();
 
         config2 = DefaultK8sApiConfig.builder()
+                .clusterName(CLUSTER_NAME)
+                .segmentId(SEGMENT_ID_2)
+                .extNetworkCidr(EXT_NETWORK_CIDR)
+                .mode(PASSTHROUGH)
                 .scheme(SCHEME_2)
                 .ipAddress(IP_ADDRESS_2)
                 .port(PORT_2)
@@ -102,6 +133,7 @@ public final class DefaultK8sApiConfigTest {
                 .caCertData(CA_CERT_DATA_2)
                 .clientCertData(CLIENT_CERT_DATA_2)
                 .clientKeyData(CLIENT_KEY_DATA_2)
+                .dvr(DVR_2)
                 .build();
     }
 
@@ -122,7 +154,11 @@ public final class DefaultK8sApiConfigTest {
     public void testConstruction() {
         K8sApiConfig config = config1;
 
+        assertEquals(CLUSTER_NAME, config.clusterName());
+        assertEquals(SEGMENT_ID_1, config.segmentId());
+        assertEquals(EXT_NETWORK_CIDR, config.extNetworkCidr());
         assertEquals(SCHEME_1, config.scheme());
+        assertEquals(MODE_1, config.mode());
         assertEquals(IP_ADDRESS_1, config.ipAddress());
         assertEquals(PORT_1, config.port());
         assertEquals(CONNECTED, config.state());
@@ -130,5 +166,6 @@ public final class DefaultK8sApiConfigTest {
         assertEquals(CA_CERT_DATA_1, config.caCertData());
         assertEquals(CLIENT_CERT_DATA_1, config.clientCertData());
         assertEquals(CLIENT_KEY_DATA_1, config.clientKeyData());
+        assertEquals(DVR_1, config.dvr());
     }
 }
