@@ -84,7 +84,6 @@ function do_requirements {
         libjudy-dev \
         libpcap-dev \
         libpcre3-dev \
-        libssl-dev \
         libtool \
         make \
         pkg-config \
