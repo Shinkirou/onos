@@ -5,24 +5,36 @@
 // The following registers are divided by sketch, assuming their original configuration with all active sketches.
 
 // Count-min sketch (5-tuple)
-register<bit<32>>(256) 	register_0;
-register<bit<32>>(256) 	register_1;
-register<bit<32>>(256) 	register_2;
-register<bit<32>>(256) 	register_3;
+register<bit<32>>(256) register_0;
+register<bit<32>>(256) register_1;
+register<bit<32>>(256) register_2;
+register<bit<32>>(256) register_3;
 
 // Count-min sketch (IP addresses)
-register<bit<32>>(256) 	register_4;
-register<bit<32>>(256) 	register_5;
-register<bit<32>>(256) 	register_6;
-register<bit<32>>(256) 	register_7;
+register<bit<32>>(256) register_4;
+register<bit<32>>(256) register_5;
+register<bit<32>>(256) register_6;
+register<bit<32>>(256) register_7;
 
 // Bitmap sketch (Source IP)
-register<bit<32>>(256) 	register_8;
-register<bit<32>>(256) 	register_9;
+register<bit<32>>(256) register_8;
+register<bit<32>>(256) register_9;
 
 // Bitmap sketch (Destination IP)
-register<bit<32>>(256) 	register_10;
-register<bit<32>>(256) 	register_11;
+register<bit<32>>(256) register_10;
+register<bit<32>>(256) register_11;
+
+// AMS sketch
+register<bit<32>>(256) register_12;
+register<bit<32>>(256) register_13;
+register<bit<32>>(256) register_14;
+register<bit<32>>(256) register_15;
+
+// MV sketch
+register<bit<32>>(256) register_16;
+register<bit<32>>(256) register_17;
+register<bit<32>>(256) register_18;
+register<bit<32>>(256) register_19;
 
 //------------------------------------------------------------------------------
 // EPOCH REGISTER

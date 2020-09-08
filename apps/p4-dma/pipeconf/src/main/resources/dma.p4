@@ -13,6 +13,7 @@
 #include "includes/sketches/bm_src.p4"
 #include "includes/sketches/bm_dst.p4"
 #include "includes/sketches/ams.p4"
+#include "includes/sketches/mv.p4"
 
 //------------------------------------------------------------------------------
 // INGRESS PIPELINE
@@ -25,6 +26,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 	c_bm_src()	bm_src; 
 	c_bm_dst()	bm_dst;
 	c_ams() 	ams;
+	c_mv() 		mv;
 	
 	action drop() {
 		mark_to_drop(standard_metadata);
@@ -37,13 +39,14 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 		hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
 	}
 
-	action sketch_config(bit<32> cm_5t_flag, bit<32> cm_ip_flag, bit<32> bm_src_flag, bit<32> bm_dst_flag, bit<32> ams_flag, bit<32> virtual_register_num, bit<32> hash_size) {
+	action sketch_config(bit<32> cm_5t_flag, bit<32> cm_ip_flag, bit<32> bm_src_flag, bit<32> bm_dst_flag, bit<32> ams_flag, bit<32> mv_flag, bit<32> virtual_register_num, bit<32> hash_size) {
 		
 		meta.reg.cm_5t = cm_5t_flag;
 		meta.reg.cm_ip = cm_ip_flag;
 		meta.reg.bm_src = bm_src_flag;
 		meta.reg.bm_dst = bm_dst_flag;
 		meta.reg.ams = ams_flag;
+		meta.reg.mv = mv_flag;
 
 		meta.reg.virtual_register_num = virtual_register_num;
 		meta.reg.hash_size = hash_size;
@@ -118,7 +121,11 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 
 				if (meta.reg.ams == 0) {
 					ams.apply(hdr, meta, standard_metadata);
-				}							
+				}
+
+				if (meta.reg.mv == 0) {
+					mv.apply(hdr, meta, standard_metadata);
+				}	
 			}
 			
 			return;

@@ -90,10 +90,42 @@ control c_cm_ip(inout headers_t hdr, inout metadata_t meta, inout standard_metad
 		register_11.write(meta.reg.current_index, meta.epoch.sketch_temp);
 	}
 
+	action cm_write_12() {
+		register_12.write(meta.reg.current_index, meta.epoch.sketch_temp);
+	}
+
+	action cm_write_13() {
+		register_13.write(meta.reg.current_index, meta.epoch.sketch_temp);
+	}
+
+	action cm_write_14() {
+		register_14.write(meta.reg.current_index, meta.epoch.sketch_temp);
+	}
+
+	action cm_write_15() {
+		register_15.write(meta.reg.current_index, meta.epoch.sketch_temp);
+	}
+
+	action cm_write_16() {
+		register_16.write(meta.reg.current_index, meta.epoch.sketch_temp);
+	}
+
+	action cm_write_17() {
+		register_17.write(meta.reg.current_index, meta.epoch.sketch_temp);
+	}
+
+	action cm_write_18() {
+		register_18.write(meta.reg.current_index, meta.epoch.sketch_temp);
+	}
+
+	action cm_write_19() {
+		register_19.write(meta.reg.current_index, meta.epoch.sketch_temp);
+	}					
+
 	table t_cm_ip_0 {
 		key = {
 			current_register_temp: exact;
-		}		
+		}
 		actions = {
 			cm_write_0;
 			cm_write_1;
@@ -107,6 +139,11 @@ control c_cm_ip(inout headers_t hdr, inout metadata_t meta, inout standard_metad
 			cm_write_9;
 			cm_write_10;
 			cm_write_11;
+			cm_write_12;
+			cm_write_13;
+			cm_write_14;
+			cm_write_15;
+			cm_write_16;
 		}
 	}
 
@@ -126,6 +163,12 @@ control c_cm_ip(inout headers_t hdr, inout metadata_t meta, inout standard_metad
 			cm_write_9;
 			cm_write_10;
 			cm_write_11;
+			cm_write_12;
+			cm_write_13;
+			cm_write_14;
+			cm_write_15;
+			cm_write_16;
+			cm_write_17;
 		}
 	}
 
@@ -144,6 +187,13 @@ control c_cm_ip(inout headers_t hdr, inout metadata_t meta, inout standard_metad
 			cm_write_9;
 			cm_write_10;
 			cm_write_11;
+			cm_write_12;
+			cm_write_13;
+			cm_write_14;
+			cm_write_15;
+			cm_write_16;
+			cm_write_17;
+			cm_write_18;
 		}
 	}
 
@@ -161,6 +211,14 @@ control c_cm_ip(inout headers_t hdr, inout metadata_t meta, inout standard_metad
 			cm_write_9;
 			cm_write_10;
 			cm_write_11;
+			cm_write_12;
+			cm_write_13;
+			cm_write_14;
+			cm_write_15;
+			cm_write_16;
+			cm_write_17;
+			cm_write_18;
+			cm_write_19;
 		}
 	}	
 

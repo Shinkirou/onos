@@ -52,6 +52,38 @@ control c_epoch(inout headers_t hdr, inout metadata_t meta, inout standard_metad
 
 	action epoch_check_11() {
 		register_11.read(meta.epoch.sketch_temp, meta.reg.current_index);
+	}
+
+	action epoch_check_12() {
+		register_12.read(meta.epoch.sketch_temp, meta.reg.current_index);
+	}
+
+	action epoch_check_13() {
+		register_13.read(meta.epoch.sketch_temp, meta.reg.current_index);
+	}
+
+	action epoch_check_14() {
+		register_14.read(meta.epoch.sketch_temp, meta.reg.current_index);
+	}
+
+	action epoch_check_15() {
+		register_15.read(meta.epoch.sketch_temp, meta.reg.current_index);
+	}
+
+	action epoch_check_16() {
+		register_16.read(meta.epoch.sketch_temp, meta.reg.current_index);
+	}
+
+	action epoch_check_17() {
+		register_17.read(meta.epoch.sketch_temp, meta.reg.current_index);
+	}
+
+	action epoch_check_18() {
+		register_18.read(meta.epoch.sketch_temp, meta.reg.current_index);
+	}
+
+	action epoch_check_19() {
+		register_19.read(meta.epoch.sketch_temp, meta.reg.current_index);
 	}											
 
 	action change_index_epoch() {

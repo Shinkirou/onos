@@ -58,6 +58,7 @@ header reg_meta_t {
 	bit<32>	bm_src;
 	bit<32> bm_dst;
 	bit<32> ams;
+	bit<32> mv;
 	// bit <4> padding;
 }
 
@@ -114,6 +115,14 @@ header ams_meta_t {
 	bit<32> sum_2;
 }
 
+header mv_meta_t {
+    bit<32> hash_mv_0;
+    bit<64> key_temp;
+    bit<32> count_temp;
+    bit<32> sum_temp;
+    bit<32> sketch_temp;
+}
+
 struct metadata_t {
 	meta_t 			meta;
 	reg_meta_t		reg;
@@ -123,6 +132,7 @@ struct metadata_t {
 	bm_src_meta_t	bm_src;
 	bm_dst_meta_t	bm_dst;
 	ams_meta_t		ams;
+	mv_meta_t 		mv;
 }
 
 struct headers_t {

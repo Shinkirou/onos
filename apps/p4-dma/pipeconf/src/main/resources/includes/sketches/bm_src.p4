@@ -75,6 +75,38 @@ control c_bm_src(inout headers_t hdr, inout metadata_t meta, inout standard_meta
 		register_11.write(meta.reg.current_index, meta.bm_src.sketch);
 	}
 
+	action bm_write_bitmap_12() {
+		register_12.write(meta.reg.current_index, meta.bm_src.sketch);
+	}
+
+	action bm_write_bitmap_13() {
+		register_13.write(meta.reg.current_index, meta.bm_src.sketch);
+	}
+
+	action bm_write_bitmap_14() {
+		register_14.write(meta.reg.current_index, meta.bm_src.sketch);
+	}
+
+	action bm_write_bitmap_15() {
+		register_15.write(meta.reg.current_index, meta.bm_src.sketch);
+	}
+
+	action bm_write_bitmap_16() {
+		register_16.write(meta.reg.current_index, meta.bm_src.sketch);
+	}
+
+	action bm_write_bitmap_17() {
+		register_17.write(meta.reg.current_index, meta.bm_src.sketch);
+	}
+
+	action bm_write_bitmap_18() {
+		register_18.write(meta.reg.current_index, meta.bm_src.sketch);
+	}
+
+	action bm_write_bitmap_19() {
+		register_19.write(meta.reg.current_index, meta.bm_src.sketch);
+	}								
+
 	table t_bm_src_0 {
 		key = {
 			current_register_temp: exact;
@@ -91,6 +123,14 @@ control c_bm_src(inout headers_t hdr, inout metadata_t meta, inout standard_meta
 			bm_write_bitmap_8;
 			bm_write_bitmap_9;
 			bm_write_bitmap_10;
+			bm_write_bitmap_11;
+			bm_write_bitmap_12;
+			bm_write_bitmap_13;
+			bm_write_bitmap_14;
+			bm_write_bitmap_15;
+			bm_write_bitmap_16;
+			bm_write_bitmap_17;
+			bm_write_bitmap_18;
 		}
 	}
 
@@ -110,6 +150,14 @@ control c_bm_src(inout headers_t hdr, inout metadata_t meta, inout standard_meta
 			bm_write_bitmap_9;
 			bm_write_bitmap_10;
 			bm_write_bitmap_11;
+			bm_write_bitmap_12;
+			bm_write_bitmap_13;
+			bm_write_bitmap_14;
+			bm_write_bitmap_15;
+			bm_write_bitmap_16;
+			bm_write_bitmap_17;
+			bm_write_bitmap_18;
+			bm_write_bitmap_19;
 		}
 	}	
 

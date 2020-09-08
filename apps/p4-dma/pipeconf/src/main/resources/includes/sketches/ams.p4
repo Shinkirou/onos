@@ -119,6 +119,38 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
 		register_11.write(meta.reg.current_index, meta.epoch.sketch_temp);
 	}
 
+	action ams_write_12() {
+		register_12.write(meta.reg.current_index, meta.epoch.sketch_temp);
+	}
+
+	action ams_write_13() {
+		register_13.write(meta.reg.current_index, meta.epoch.sketch_temp);
+	}
+
+	action ams_write_14() {
+		register_14.write(meta.reg.current_index, meta.epoch.sketch_temp);
+	}
+
+	action ams_write_15() {
+		register_15.write(meta.reg.current_index, meta.epoch.sketch_temp);
+	}
+
+	action ams_write_16() {
+		register_16.write(meta.reg.current_index, meta.epoch.sketch_temp);
+	}
+
+	action ams_write_17() {
+		register_17.write(meta.reg.current_index, meta.epoch.sketch_temp);
+	}
+
+	action ams_write_18() {
+		register_18.write(meta.reg.current_index, meta.epoch.sketch_temp);
+	}
+
+	action ams_write_19() {
+		register_19.write(meta.reg.current_index, meta.epoch.sketch_temp);
+	}							
+
 	table t_ams_0 {
 		key = {
 			current_register_temp: exact;
@@ -133,6 +165,13 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
 			ams_write_6;
 			ams_write_7;
 			ams_write_8;
+			ams_write_9;
+			ams_write_10;
+			ams_write_11;
+			ams_write_12;
+			ams_write_14;
+			ams_write_15;
+			ams_write_16;
 		}
 	}
 
@@ -150,6 +189,14 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
 			ams_write_7;
 			ams_write_8;
 			ams_write_9;
+			ams_write_10;
+			ams_write_11;
+			ams_write_12;
+			ams_write_13;
+			ams_write_14;
+			ams_write_15;
+			ams_write_16;
+			ams_write_17;
 		}
 	}
 
@@ -167,6 +214,14 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
 			ams_write_8;
 			ams_write_9;
 			ams_write_10;
+			ams_write_11;
+			ams_write_12;
+			ams_write_13;
+			ams_write_14;
+			ams_write_15;
+			ams_write_16;
+			ams_write_17;
+			ams_write_18;
 		}
 	}
 
@@ -184,6 +239,14 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
 			ams_write_9;
 			ams_write_10;
 			ams_write_11;
+			ams_write_12;
+			ams_write_13;
+			ams_write_14;
+			ams_write_15;
+			ams_write_16;
+			ams_write_17;
+			ams_write_18;
+			ams_write_19;
 		}
 	}	
 
