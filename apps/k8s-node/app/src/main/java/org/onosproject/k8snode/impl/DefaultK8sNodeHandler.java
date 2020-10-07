@@ -408,6 +408,33 @@ public class DefaultK8sNodeHandler implements K8sNodeHandler {
                             .build();
 
             ifaceConfig.addPatchMode(k8sNode.tunToIntgPatchPortName(), brTunIntPatchDesc);
+        } else {
+            // k8s integration bridge -> openstack integration bridge
+            PatchDescription k8sIntOsIntPatchDesc =
+                    DefaultPatchDescription.builder()
+                            .deviceId(k8sNode.intgBridgeName())
+                            .ifaceName(k8sNode.k8sIntgToOsPatchPortName())
+                            .peer(k8sNode.osToK8sIntgPatchPortName())
+                            .build();
+            ifaceConfig.addPatchMode(k8sNode.k8sIntgToOsPatchPortName(), k8sIntOsIntPatchDesc);
+
+            // k8s external bridge -> openstack integration bridge
+            PatchDescription k8sExtOsIntPatchDesc =
+                    DefaultPatchDescription.builder()
+                            .deviceId(k8sNode.extBridgeName())
+                            .ifaceName(k8sNode.k8sExtToOsPatchPortName())
+                            .peer(k8sNode.osToK8sExtPatchPortName())
+                            .build();
+            ifaceConfig.addPatchMode(k8sNode.k8sExtToOsPatchPortName(), k8sExtOsIntPatchDesc);
+
+            // external bridge -> router bridge
+            PatchDescription extRouterPatchDesc =
+                    DefaultPatchDescription.builder()
+                            .deviceId(k8sNode.extBridgeName())
+                            .ifaceName(k8sNode.extToRouterPatchPortName())
+                            .peer(k8sNode.routerToExtPatchPortName())
+                            .build();
+            ifaceConfig.addPatchMode(k8sNode.extToRouterPatchPortName(), extRouterPatchDesc);
         }
     }
 

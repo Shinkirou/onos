@@ -18,16 +18,14 @@ package org.onosproject.inbandtelemetry.app.ui;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableSet;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.onlab.packet.IPv4;
 import org.onlab.packet.Ip4Address;
 import org.onlab.packet.Ip4Prefix;
-import org.onlab.packet.IpAddress;
-import org.onlab.packet.MacAddress;
 import org.onlab.packet.TpPort;
 import org.onosproject.inbandtelemetry.api.IntIntent;
 import org.onosproject.inbandtelemetry.api.IntIntentId;
 import org.onosproject.net.behaviour.inbandtelemetry.IntMetadataType;
 import org.onosproject.inbandtelemetry.api.IntService;
-import org.onosproject.net.behaviour.inbandtelemetry.IntDeviceConfig;
 import org.onosproject.net.flow.DefaultTrafficSelector;
 import org.onosproject.net.flow.TrafficSelector;
 import org.onosproject.ui.RequestHandler;
@@ -43,8 +41,6 @@ public class IntAppUiMessageHandler extends UiMessageHandler {
 
     private static final String INT_INTENT_ADD_REQUEST = "intIntentAddRequest";
     private static final String INT_INTENT_DEL_REQUEST = "intIntentDelRequest";
-    private static final String INT_CONFIG_ADD_REQUEST = "intConfigAddRequest";
-//    private static final String INT_CONFIG_DEL_REQUEST = "intConfigDelRequest";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -54,44 +50,8 @@ public class IntAppUiMessageHandler extends UiMessageHandler {
     protected Collection<RequestHandler> createRequestHandlers() {
         return ImmutableSet.of(
                 new IntIntentAddRequestHandler(),
-                new IntIntentDelRequestHandler(),
-                new IntConfigAddRequestHandler()
-                //new intConfigDelRequestHandler()
+                new IntIntentDelRequestHandler()
         );
-    }
-
-    private final class IntConfigAddRequestHandler extends RequestHandler {
-        private IntConfigAddRequestHandler() {
-            super(INT_CONFIG_ADD_REQUEST);
-        }
-
-        @Override
-        public void process(ObjectNode payload) {
-            log.info("intConfigAddRequest: {}", payload);
-
-            intService = get(IntService.class);
-            IntDeviceConfig.Builder builder = IntDeviceConfig.builder();
-
-            if (payload.get("collectorIp") != null) {
-                builder.withCollectorIp(IpAddress.valueOf(payload.get("collectorIp").asText()));
-            } else {
-                builder.withCollectorIp(IpAddress.valueOf("127.0.0.1"));
-            }
-
-            if (payload.get("collectorPort") != null) {
-                builder.withCollectorPort(TpPort.tpPort(
-                        payload.get("collectorPort").asInt()));
-            } else {
-                builder.withCollectorPort(TpPort.tpPort(1234));
-            }
-
-            builder.enabled(true)
-                    .withSinkIp(IpAddress.valueOf("10.192.19.180"))
-                    .withSinkMac(MacAddress.NONE)
-                    .withCollectorNextHopMac(MacAddress.BROADCAST);
-
-            intService.setConfig(builder.build());
-        }
     }
 
     private final class IntIntentDelRequestHandler extends RequestHandler {
@@ -101,10 +61,8 @@ public class IntAppUiMessageHandler extends UiMessageHandler {
 
         @Override
         public void process(ObjectNode payload) {
-            log.info("intIntentDelRequest: {}", payload);
-
+            log.debug("intIntentDelRequest: {}", payload);
             intService = get(IntService.class);
-
             if (payload.get("intentId") != null) {
                 intService.removeIntIntent(IntIntentId.valueOf(payload.get("intentId").asLong()));
             }
@@ -118,66 +76,80 @@ public class IntAppUiMessageHandler extends UiMessageHandler {
 
         @Override
         public void process(ObjectNode payload) {
-            log.info("intIntentAddRequest: {}", payload);
+            log.debug("intIntentAddRequest: {}", payload);
 
             intService = get(IntService.class);
 
             TrafficSelector.Builder sBuilder = DefaultTrafficSelector.builder();
             IntIntent.Builder builder = IntIntent.builder();
 
-            if (payload.get("ip4SrcPrefix") != null) {
-                sBuilder.matchIPSrc(parseIp4Prefix(payload.get("ip4SrcPrefix").asText()));
+            JsonNode jsonNodeVal = payload.get("ip4SrcPrefix");
+            if (jsonNodeVal != null && !jsonNodeVal.asText().isEmpty()) {
+                sBuilder.matchIPSrc(parseIp4Prefix(jsonNodeVal.asText()));
             }
 
-            if (payload.get("ip4DstPrefix") != null) {
-                sBuilder.matchIPDst(parseIp4Prefix(payload.get("ip4DstPrefix").asText()));
+            jsonNodeVal = payload.get("ip4DstPrefix");
+            if (jsonNodeVal != null && !jsonNodeVal.asText().isEmpty()) {
+                sBuilder.matchIPDst(parseIp4Prefix(jsonNodeVal.asText()));
             }
 
-            if (payload.get("l4SrcPort") != null) {
-                if (payload.get("protocol") != null && payload.get("protocol").asText().equalsIgnoreCase("TCP")) {
-                    sBuilder.matchTcpSrc(TpPort.tpPort(payload.get("l4SrcPort").asInt()));
-                } else {
-                    sBuilder.matchUdpSrc(TpPort.tpPort(payload.get("l4SrcPort").asInt()));
+            jsonNodeVal = payload.get("protocol");
+            byte ipProtocol = 0;
+            if (jsonNodeVal != null) {
+                if (jsonNodeVal.asText().equalsIgnoreCase("TCP")) {
+                    ipProtocol = IPv4.PROTOCOL_TCP;
+                } else if (jsonNodeVal.asText().equalsIgnoreCase("UDP")) {
+                    ipProtocol = IPv4.PROTOCOL_UDP;
                 }
             }
 
-            if (payload.get("l4DstPort") != null) {
-                if (payload.get("protocol") != null && payload.get("protocol").asText().equalsIgnoreCase("TCP")) {
-                    sBuilder.matchTcpDst(TpPort.tpPort(payload.get("l4DstPort").asInt()));
-                } else {
-                    sBuilder.matchUdpDst(TpPort.tpPort(payload.get("l4DstPort").asInt()));
+            jsonNodeVal = payload.get("l4SrcPort");
+            if (jsonNodeVal != null) {
+                int portNo = jsonNodeVal.asInt(0);
+                if (portNo != 0 && ipProtocol == IPv4.PROTOCOL_TCP) {
+                    sBuilder.matchTcpSrc(TpPort.tpPort(portNo));
+                } else if (portNo != 0 && ipProtocol == IPv4.PROTOCOL_UDP) {
+                    sBuilder.matchUdpSrc(TpPort.tpPort(portNo));
                 }
             }
 
-            if (payload.get("metadata") != null) {
-                JsonNode meta = payload.get("metadata");
-                if (meta.isArray()) {
-                    for (final JsonNode json : meta) {
-                        switch (json.asText()) {
-                            case "SWITCH_ID":
-                                builder.withMetadataType(IntMetadataType.SWITCH_ID);
-                                break;
-                            case "PORT_ID":
-                                builder.withMetadataType(IntMetadataType.L1_PORT_ID);
-                                break;
-                            case "HOP_LATENCY":
-                                builder.withMetadataType(IntMetadataType.HOP_LATENCY);
-                                break;
-                            case "QUEUE_OCCUPANCY":
-                                builder.withMetadataType(IntMetadataType.QUEUE_OCCUPANCY);
-                                break;
-                            case "INGRESS_TIMESTAMP":
-                                builder.withMetadataType(IntMetadataType.INGRESS_TIMESTAMP);
-                                break;
-                            case "EGRESS_TIMESTAMP":
-                                builder.withMetadataType(IntMetadataType.EGRESS_TIMESTAMP);
-                                break;
-                            case "EGRESS_TX_UTIL":
-                                builder.withMetadataType(IntMetadataType.EGRESS_TX_UTIL);
-                                break;
-                            default:
-                                break;
-                        }
+            jsonNodeVal = payload.get("l4DstPort");
+            if (jsonNodeVal != null) {
+                int portNo = jsonNodeVal.asInt(0);
+                if (portNo != 0 && ipProtocol == IPv4.PROTOCOL_TCP) {
+                    sBuilder.matchTcpDst(TpPort.tpPort(portNo));
+                } else if (portNo != 0 && ipProtocol == IPv4.PROTOCOL_UDP) {
+                    sBuilder.matchUdpDst(TpPort.tpPort(portNo));
+                }
+            }
+
+            jsonNodeVal = payload.get("metadata");
+            if (jsonNodeVal != null && jsonNodeVal.isArray()) {
+                for (final JsonNode json : jsonNodeVal) {
+                    switch (json.asText()) {
+                        case "SWITCH_ID":
+                            builder.withMetadataType(IntMetadataType.SWITCH_ID);
+                            break;
+                        case "PORT_ID":
+                            builder.withMetadataType(IntMetadataType.L1_PORT_ID);
+                            break;
+                        case "HOP_LATENCY":
+                            builder.withMetadataType(IntMetadataType.HOP_LATENCY);
+                            break;
+                        case "QUEUE_OCCUPANCY":
+                            builder.withMetadataType(IntMetadataType.QUEUE_OCCUPANCY);
+                            break;
+                        case "INGRESS_TIMESTAMP":
+                            builder.withMetadataType(IntMetadataType.INGRESS_TIMESTAMP);
+                            break;
+                        case "EGRESS_TIMESTAMP":
+                            builder.withMetadataType(IntMetadataType.EGRESS_TIMESTAMP);
+                            break;
+                        case "EGRESS_TX_UTIL":
+                            builder.withMetadataType(IntMetadataType.EGRESS_TX_UTIL);
+                            break;
+                        default:
+                            break;
                     }
                 }
             }

@@ -34,16 +34,24 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static org.onosproject.k8snode.api.Constants.DEFAULT_CLUSTER_NAME;
 import static org.onosproject.k8snode.api.Constants.DEFAULT_EXTERNAL_BRIDGE_MAC;
 import static org.onosproject.k8snode.api.Constants.DEFAULT_EXTERNAL_GATEWAY_MAC;
+import static org.onosproject.k8snode.api.Constants.DEFAULT_INTG_BRIDGE_MAC;
 import static org.onosproject.k8snode.api.Constants.EXTERNAL_BRIDGE;
+import static org.onosproject.k8snode.api.Constants.EXTERNAL_TO_ROUTER;
 import static org.onosproject.k8snode.api.Constants.GENEVE_TUNNEL;
 import static org.onosproject.k8snode.api.Constants.GRE_TUNNEL;
 import static org.onosproject.k8snode.api.Constants.INTEGRATION_BRIDGE;
 import static org.onosproject.k8snode.api.Constants.INTEGRATION_TO_EXTERNAL_BRIDGE;
 import static org.onosproject.k8snode.api.Constants.INTEGRATION_TO_LOCAL_BRIDGE;
 import static org.onosproject.k8snode.api.Constants.INTEGRATION_TO_TUN_BRIDGE;
+import static org.onosproject.k8snode.api.Constants.K8S_EXTERNAL_TO_OS_BRIDGE;
+import static org.onosproject.k8snode.api.Constants.K8S_INTEGRATION_TO_OS_BRIDGE;
 import static org.onosproject.k8snode.api.Constants.LOCAL_BRIDGE;
 import static org.onosproject.k8snode.api.Constants.LOCAL_TO_INTEGRATION_BRIDGE;
+import static org.onosproject.k8snode.api.Constants.OS_TO_K8S_EXTERNAL_BRIDGE;
+import static org.onosproject.k8snode.api.Constants.OS_TO_K8S_INTEGRATION_BRIDGE;
 import static org.onosproject.k8snode.api.Constants.PHYSICAL_EXTERNAL_BRIDGE;
+import static org.onosproject.k8snode.api.Constants.ROUTER;
+import static org.onosproject.k8snode.api.Constants.ROUTER_TO_EXTERNAL;
 import static org.onosproject.k8snode.api.Constants.TUNNEL_BRIDGE;
 import static org.onosproject.k8snode.api.Constants.TUN_TO_INTEGRATION_BRIDGE;
 import static org.onosproject.k8snode.api.Constants.VXLAN_TUNNEL;
@@ -72,8 +80,8 @@ public class DefaultK8sNode implements K8sNode {
     private final DeviceId tunBridge;
     private final IpAddress managementIp;
     private final IpAddress dataIp;
+    private final IpAddress nodeIp;
     private final K8sNodeState state;
-    private final String extIntf;
     private final K8sExternalNetwork extNetwork;
     private final String podCidr;
 
@@ -93,9 +101,9 @@ public class DefaultK8sNode implements K8sNode {
      * @param extBridge         external bridge
      * @param localBridge       local bridge
      * @param tunBridge         tunnel bridge
-     * @param extIntf           external interface
      * @param managementIp      management IP address
      * @param dataIp            data IP address
+     * @param nodeIp            node IP address
      * @param state             node state
      * @param extNetwork        external network
      * @param podCidr           POD CIDR
@@ -103,8 +111,8 @@ public class DefaultK8sNode implements K8sNode {
     protected DefaultK8sNode(String clusterName, String hostname, Type type,
                              int segmentId, Mode mode, DeviceId intgBridge,
                              DeviceId extBridge, DeviceId localBridge,
-                             DeviceId tunBridge, String extIntf, IpAddress managementIp,
-                             IpAddress dataIp, K8sNodeState state,
+                             DeviceId tunBridge, IpAddress managementIp,
+                             IpAddress dataIp, IpAddress nodeIp, K8sNodeState state,
                              K8sExternalNetwork extNetwork, String podCidr) {
         this.clusterName = clusterName;
         this.hostname = hostname;
@@ -115,9 +123,9 @@ public class DefaultK8sNode implements K8sNode {
         this.extBridge = extBridge;
         this.localBridge = localBridge;
         this.tunBridge = tunBridge;
-        this.extIntf = extIntf;
         this.managementIp = managementIp;
         this.dataIp = dataIp;
+        this.nodeIp = nodeIp;
         this.state = state;
         this.extNetwork = extNetwork;
         this.podCidr = podCidr;
@@ -212,7 +220,7 @@ public class DefaultK8sNode implements K8sNode {
 
     @Override
     public String extIntf() {
-        return extIntf;
+        return extNetwork.extIntf();
     }
 
     @Override
@@ -227,13 +235,14 @@ public class DefaultK8sNode implements K8sNode {
                 .extBridge(extBridge)
                 .localBridge(localBridge)
                 .tunBridge(tunBridge)
-                .extIntf(extIntf)
                 .managementIp(managementIp)
                 .dataIp(dataIp)
+                .nodeIp(nodeIp)
                 .state(state)
                 .extBridgeIp(extNetwork.extBridgeIp())
                 .extGatewayIp(extNetwork.extGatewayIp())
                 .extGatewayMac(extNetwork.extGatewayMac())
+                .extIntf(extNetwork.extIntf())
                 .podCidr(podCidr)
                 .build();
     }
@@ -250,13 +259,14 @@ public class DefaultK8sNode implements K8sNode {
                 .extBridge(deviceId)
                 .localBridge(localBridge)
                 .tunBridge(tunBridge)
-                .extIntf(extIntf)
                 .managementIp(managementIp)
                 .dataIp(dataIp)
+                .nodeIp(nodeIp)
                 .state(state)
                 .extBridgeIp(extNetwork.extBridgeIp())
                 .extGatewayIp(extNetwork.extGatewayIp())
                 .extGatewayMac(extNetwork.extGatewayMac())
+                .extIntf(extNetwork.extIntf())
                 .podCidr(podCidr)
                 .build();
     }
@@ -273,13 +283,14 @@ public class DefaultK8sNode implements K8sNode {
                 .extBridge(extBridge)
                 .localBridge(deviceId)
                 .tunBridge(tunBridge)
-                .extIntf(extIntf)
                 .managementIp(managementIp)
                 .dataIp(dataIp)
+                .nodeIp(nodeIp)
                 .state(state)
                 .extBridgeIp(extNetwork.extBridgeIp())
                 .extGatewayIp(extNetwork.extGatewayIp())
                 .extGatewayMac(extNetwork.extGatewayMac())
+                .extIntf(extNetwork.extIntf())
                 .podCidr(podCidr)
                 .build();
     }
@@ -296,13 +307,14 @@ public class DefaultK8sNode implements K8sNode {
                 .extBridge(extBridge)
                 .localBridge(localBridge)
                 .tunBridge(deviceId)
-                .extIntf(extIntf)
                 .managementIp(managementIp)
                 .dataIp(dataIp)
+                .nodeIp(nodeIp)
                 .state(state)
                 .extBridgeIp(extNetwork.extBridgeIp())
                 .extGatewayIp(extNetwork.extGatewayIp())
                 .extGatewayMac(extNetwork.extGatewayMac())
+                .extIntf(extNetwork.extIntf())
                 .podCidr(podCidr)
                 .build();
     }
@@ -315,6 +327,11 @@ public class DefaultK8sNode implements K8sNode {
     @Override
     public IpAddress dataIp() {
         return dataIp;
+    }
+
+    @Override
+    public IpAddress nodeIp() {
+        return nodeIp;
     }
 
     @Override
@@ -339,13 +356,14 @@ public class DefaultK8sNode implements K8sNode {
                 .extBridge(extBridge)
                 .localBridge(localBridge)
                 .tunBridge(tunBridge)
-                .extIntf(extIntf)
                 .managementIp(managementIp)
                 .dataIp(dataIp)
+                .nodeIp(nodeIp)
                 .state(newState)
                 .extBridgeIp(extNetwork.extBridgeIp())
                 .extGatewayIp(extNetwork.extGatewayIp())
                 .extGatewayMac(extNetwork.extGatewayMac())
+                .extIntf(extNetwork.extIntf())
                 .podCidr(podCidr)
                 .build();
     }
@@ -362,13 +380,14 @@ public class DefaultK8sNode implements K8sNode {
                 .extBridge(extBridge)
                 .localBridge(localBridge)
                 .tunBridge(tunBridge)
-                .extIntf(extIntf)
                 .managementIp(managementIp)
                 .dataIp(dataIp)
+                .nodeIp(nodeIp)
                 .state(state)
                 .extBridgeIp(extNetwork.extBridgeIp())
                 .extGatewayIp(extNetwork.extGatewayIp())
                 .extGatewayMac(newMac)
+                .extIntf(extNetwork.extIntf())
                 .podCidr(podCidr)
                 .build();
     }
@@ -445,13 +464,70 @@ public class DefaultK8sNode implements K8sNode {
     }
 
     @Override
+    public PortNumber routerToExtPortNum() {
+        if (mode() == PASSTHROUGH) {
+            K8sHostService hostService =
+                    DefaultServiceDirectory.getService(K8sHostService.class);
+            Port port = null;
+            for (K8sHost host : hostService.hosts()) {
+                if (host.nodeNames().contains(hostname())) {
+                    for (K8sRouterBridge bridge : host.routerBridges()) {
+                        if (bridge.segmentId() == segmentId()) {
+                            port = port(bridge.deviceId(), routerToExtPatchPortName());
+                        }
+                    }
+                }
+            }
+
+            if (port == null) {
+                return null;
+            } else {
+                return port.number();
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public PortNumber extToRouterPortNum() {
+        return portNumber(extBridge, extToRouterPatchPortName());
+    }
+
+    @Override
+    public PortNumber routerPortNum() {
+        if (mode() == PASSTHROUGH) {
+            K8sHostService hostService =
+                    DefaultServiceDirectory.getService(K8sHostService.class);
+            Port port = null;
+            for (K8sHost host : hostService.hosts()) {
+                if (host.nodeNames().contains(hostname())) {
+                    for (K8sRouterBridge bridge : host.routerBridges()) {
+                        if (bridge.segmentId() == segmentId()) {
+                            port = port(bridge.deviceId(), routerPortName());
+                        }
+                    }
+                }
+            }
+
+            if (port == null) {
+                return null;
+            } else {
+                return port.number();
+            }
+        }
+
+        return null;
+    }
+
+    @Override
     public PortNumber extBridgePortNum() {
         return PortNumber.LOCAL;
     }
 
     @Override
     public PortNumber extIntfPortNum() {
-        if (this.extIntf == null) {
+        if (this.extIntf() == null) {
             return null;
         }
         return portNumber(extBridge, extIntf());
@@ -459,7 +535,11 @@ public class DefaultK8sNode implements K8sNode {
 
     @Override
     public MacAddress intgBridgeMac() {
-        return macAddress(intgBridge, intgBridgeName());
+        if (mode == PASSTHROUGH) {
+            return MacAddress.valueOf(DEFAULT_INTG_BRIDGE_MAC);
+        } else {
+            return macAddress(intgBridge, intgBridgeName());
+        }
     }
 
     @Override
@@ -516,16 +596,34 @@ public class DefaultK8sNode implements K8sNode {
     @Override
     public String intgBridgeName() {
         if (mode == PASSTHROUGH) {
-            return INTEGRATION_BRIDGE + "-" + uniqueString(5);
+            return INTEGRATION_BRIDGE + "-" + uniqueString(4);
         } else {
             return INTEGRATION_BRIDGE;
         }
     }
 
     @Override
+    public String intgEntryPortName() {
+        if (mode == PASSTHROUGH) {
+            return k8sIntgToOsPatchPortName();
+        } else {
+            return intgBridgeName();
+        }
+    }
+
+    @Override
+    public PortNumber intgEntryPortNum() {
+        if (mode == PASSTHROUGH) {
+            return portNumber(intgBridge, k8sIntgToOsPatchPortName());
+        } else {
+            return intgBridgePortNum();
+        }
+    }
+
+    @Override
     public String extBridgeName() {
         if (mode == PASSTHROUGH) {
-            return EXTERNAL_BRIDGE + "-" + uniqueString(5);
+            return EXTERNAL_BRIDGE + "-" + uniqueString(4);
         } else {
             return EXTERNAL_BRIDGE;
         }
@@ -534,7 +632,7 @@ public class DefaultK8sNode implements K8sNode {
     @Override
     public String localBridgeName() {
         if (mode == PASSTHROUGH) {
-            return LOCAL_BRIDGE + "-" + uniqueString(5);
+            return LOCAL_BRIDGE + "-" + uniqueString(4);
         } else {
             return LOCAL_BRIDGE;
         }
@@ -552,7 +650,7 @@ public class DefaultK8sNode implements K8sNode {
     @Override
     public String intgBridgePortName() {
         if (mode == PASSTHROUGH) {
-            return INTEGRATION_BRIDGE + "-" + uniqueString(5);
+            return INTEGRATION_BRIDGE + "-" + uniqueString(4);
         } else {
             return INTEGRATION_BRIDGE;
         }
@@ -561,7 +659,7 @@ public class DefaultK8sNode implements K8sNode {
     @Override
     public String extBridgePortName() {
         if (mode == PASSTHROUGH) {
-            return EXTERNAL_BRIDGE + "-" + uniqueString(5);
+            return EXTERNAL_BRIDGE + "-" + uniqueString(4);
         } else {
             return EXTERNAL_BRIDGE;
         }
@@ -570,7 +668,7 @@ public class DefaultK8sNode implements K8sNode {
     @Override
     public String localBridgePortName() {
         if (mode == PASSTHROUGH) {
-            return LOCAL_BRIDGE + "-" + uniqueString(5);
+            return LOCAL_BRIDGE + "-" + uniqueString(4);
         } else {
             return LOCAL_BRIDGE;
         }
@@ -579,7 +677,7 @@ public class DefaultK8sNode implements K8sNode {
     @Override
     public String tunBridgePortName() {
         if (mode == PASSTHROUGH) {
-            return TUNNEL_BRIDGE + "-" + uniqueString(5);
+            return TUNNEL_BRIDGE + "-" + uniqueString(4);
         } else {
             return TUNNEL_BRIDGE;
         }
@@ -588,7 +686,7 @@ public class DefaultK8sNode implements K8sNode {
     @Override
     public String intgToExtPatchPortName() {
         if (mode == PASSTHROUGH) {
-            return INTEGRATION_TO_EXTERNAL_BRIDGE + "-" + uniqueString(5);
+            return INTEGRATION_TO_EXTERNAL_BRIDGE + "-" + uniqueString(4);
         } else {
             return INTEGRATION_TO_EXTERNAL_BRIDGE;
         }
@@ -597,7 +695,7 @@ public class DefaultK8sNode implements K8sNode {
     @Override
     public String intgToTunPatchPortName() {
         if (mode == PASSTHROUGH) {
-            return INTEGRATION_TO_TUN_BRIDGE + "-" + uniqueString(5);
+            return INTEGRATION_TO_TUN_BRIDGE + "-" + uniqueString(4);
         } else {
             return INTEGRATION_TO_TUN_BRIDGE;
         }
@@ -606,7 +704,7 @@ public class DefaultK8sNode implements K8sNode {
     @Override
     public String intgToLocalPatchPortName() {
         if (mode == PASSTHROUGH) {
-            return INTEGRATION_TO_LOCAL_BRIDGE + "-" + uniqueString(5);
+            return INTEGRATION_TO_LOCAL_BRIDGE + "-" + uniqueString(4);
         } else {
             return INTEGRATION_TO_LOCAL_BRIDGE;
         }
@@ -615,7 +713,7 @@ public class DefaultK8sNode implements K8sNode {
     @Override
     public String localToIntgPatchPortName() {
         if (mode == PASSTHROUGH) {
-            return LOCAL_TO_INTEGRATION_BRIDGE + "-" + uniqueString(5);
+            return LOCAL_TO_INTEGRATION_BRIDGE + "-" + uniqueString(4);
         } else {
             return LOCAL_TO_INTEGRATION_BRIDGE;
         }
@@ -624,7 +722,7 @@ public class DefaultK8sNode implements K8sNode {
     @Override
     public String extToIntgPatchPortName() {
         if (mode == PASSTHROUGH) {
-            return PHYSICAL_EXTERNAL_BRIDGE + "-" + uniqueString(5);
+            return PHYSICAL_EXTERNAL_BRIDGE + "-" + uniqueString(4);
         } else {
             return PHYSICAL_EXTERNAL_BRIDGE;
         }
@@ -633,9 +731,72 @@ public class DefaultK8sNode implements K8sNode {
     @Override
     public String tunToIntgPatchPortName() {
         if (mode == PASSTHROUGH) {
-            return TUN_TO_INTEGRATION_BRIDGE + "-" + uniqueString(5);
+            return TUN_TO_INTEGRATION_BRIDGE + "-" + uniqueString(4);
         } else {
             return TUN_TO_INTEGRATION_BRIDGE;
+        }
+    }
+
+    @Override
+    public String k8sIntgToOsPatchPortName() {
+        if (mode == PASSTHROUGH) {
+            return K8S_INTEGRATION_TO_OS_BRIDGE + "-" + uniqueString(4);
+        } else {
+            return K8S_INTEGRATION_TO_OS_BRIDGE;
+        }
+    }
+
+    @Override
+    public String k8sExtToOsPatchPortName() {
+        if (mode == PASSTHROUGH) {
+            return K8S_EXTERNAL_TO_OS_BRIDGE + "-" + uniqueString(4);
+        } else {
+            return K8S_EXTERNAL_TO_OS_BRIDGE;
+        }
+    }
+
+    @Override
+    public String osToK8sIntgPatchPortName() {
+        if (mode == PASSTHROUGH) {
+            return OS_TO_K8S_INTEGRATION_BRIDGE + "-" + uniqueString(4);
+        } else {
+            return OS_TO_K8S_INTEGRATION_BRIDGE;
+        }
+    }
+
+    @Override
+    public String osToK8sExtPatchPortName() {
+        if (mode == PASSTHROUGH) {
+            return OS_TO_K8S_EXTERNAL_BRIDGE + "-" + uniqueString(4);
+        } else {
+            return OS_TO_K8S_EXTERNAL_BRIDGE;
+        }
+    }
+
+    @Override
+    public String routerToExtPatchPortName() {
+        if (mode == PASSTHROUGH) {
+            return ROUTER_TO_EXTERNAL + "-" + uniqueString(4);
+        } else {
+            return ROUTER_TO_EXTERNAL;
+        }
+    }
+
+    @Override
+    public String extToRouterPatchPortName() {
+        if (mode == PASSTHROUGH) {
+            return EXTERNAL_TO_ROUTER + "-" + uniqueString(4);
+        } else {
+            return EXTERNAL_TO_ROUTER;
+        }
+    }
+
+    @Override
+    public String routerPortName() {
+        if (mode == PASSTHROUGH) {
+            return ROUTER + "-" + segmentId();
+        } else {
+            return ROUTER;
         }
     }
 
@@ -657,9 +818,9 @@ public class DefaultK8sNode implements K8sNode {
                     extBridge.equals(that.extBridge) &&
                     localBridge.equals(that.localBridge) &&
                     tunBridge.equals(that.tunBridge) &&
-                    extIntf.equals(that.extIntf) &&
                     managementIp.equals(that.managementIp) &&
                     dataIp.equals(that.dataIp) &&
+                    nodeIp.equals(that.nodeIp) &&
                     extNetwork.equals(that.extNetwork) &&
                     podCidr.equals(that.podCidr) &&
                     state == that.state;
@@ -671,7 +832,7 @@ public class DefaultK8sNode implements K8sNode {
     @Override
     public int hashCode() {
         return Objects.hash(clusterName, hostname, type, segmentId, mode, intgBridge, extBridge,
-                localBridge, tunBridge, extIntf, managementIp, dataIp, state, extNetwork, podCidr);
+                localBridge, tunBridge, managementIp, dataIp, nodeIp, state, extNetwork, podCidr);
     }
 
     @Override
@@ -686,13 +847,14 @@ public class DefaultK8sNode implements K8sNode {
                 .add("extBridge", extBridge)
                 .add("localBridge", localBridge)
                 .add("tunBridge", tunBridge)
-                .add("extIntf", extIntf)
                 .add("managementIp", managementIp)
                 .add("dataIp", dataIp)
+                .add("nodeIp", nodeIp)
                 .add("state", state)
                 .add("extBridgeIp", extNetwork.extBridgeIp())
                 .add("extGatewayIp", extNetwork.extGatewayIp())
                 .add("extGatewayMac", extNetwork.extGatewayMac())
+                .add("extIntf", extNetwork.extIntf())
                 .add("podCidr", podCidr)
                 .toString();
     }
@@ -752,10 +914,12 @@ public class DefaultK8sNode implements K8sNode {
                 .extIntf(node.extIntf())
                 .managementIp(node.managementIp())
                 .dataIp(node.dataIp())
+                .nodeIp(node.nodeIp())
                 .state(node.state())
                 .extBridgeIp(node.extBridgeIp())
                 .extGatewayIp(node.extGatewayIp())
                 .extGatewayMac(node.extGatewayMac())
+                .extIntf(node.extIntf())
                 .podCidr(node.podCidr());
     }
 
@@ -772,6 +936,7 @@ public class DefaultK8sNode implements K8sNode {
         private DeviceId tunBridge;
         private IpAddress managementIp;
         private IpAddress dataIp;
+        private IpAddress nodeIp;
         private K8sNodeState state;
         private K8sApiConfig apiConfig;
         private String extIntf;
@@ -790,6 +955,7 @@ public class DefaultK8sNode implements K8sNode {
             checkArgument(type != null, NOT_NULL_MSG, "type");
             checkArgument(state != null, NOT_NULL_MSG, "state");
             checkArgument(managementIp != null, NOT_NULL_MSG, "management IP");
+            checkArgument(nodeIp != null, NOT_NULL_MSG, "node IP");
 
             if (StringUtils.isEmpty(clusterName)) {
                 clusterName = DEFAULT_CLUSTER_NAME;
@@ -803,6 +969,7 @@ public class DefaultK8sNode implements K8sNode {
                     .extBridgeIp(extBridgeIp)
                     .extGatewayIp(extGatewayIp)
                     .extGatewayMac(extGatewayMac)
+                    .extIntf(extIntf)
                     .build();
 
             return new DefaultK8sNode(clusterName,
@@ -814,9 +981,9 @@ public class DefaultK8sNode implements K8sNode {
                     extBridge,
                     localBridge,
                     tunBridge,
-                    extIntf,
                     managementIp,
                     dataIp,
+                    nodeIp,
                     state,
                     extNetwork,
                     podCidr);
@@ -877,12 +1044,6 @@ public class DefaultK8sNode implements K8sNode {
         }
 
         @Override
-        public Builder extIntf(String intf) {
-            this.extIntf = intf;
-            return this;
-        }
-
-        @Override
         public Builder managementIp(IpAddress managementIp) {
             this.managementIp = managementIp;
             return this;
@@ -891,6 +1052,12 @@ public class DefaultK8sNode implements K8sNode {
         @Override
         public Builder dataIp(IpAddress dataIp) {
             this.dataIp = dataIp;
+            return this;
+        }
+
+        @Override
+        public Builder nodeIp(IpAddress nodeIp) {
+            this.nodeIp = nodeIp;
             return this;
         }
 
@@ -915,6 +1082,12 @@ public class DefaultK8sNode implements K8sNode {
         @Override
         public Builder extGatewayMac(MacAddress extGatewayMac) {
             this.extGatewayMac = extGatewayMac;
+            return this;
+        }
+
+        @Override
+        public Builder extIntf(String intf) {
+            this.extIntf = intf;
             return this;
         }
 

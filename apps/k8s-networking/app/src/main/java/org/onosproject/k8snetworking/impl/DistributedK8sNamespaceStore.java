@@ -16,6 +16,8 @@
 package org.onosproject.k8snetworking.impl;
 
 import com.google.common.collect.ImmutableSet;
+import io.fabric8.kubernetes.api.model.FieldsV1;
+import io.fabric8.kubernetes.api.model.ManagedFieldsEntry;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceSpec;
 import io.fabric8.kubernetes.api.model.NamespaceStatus;
@@ -74,6 +76,8 @@ public class DistributedK8sNamespaceStore
             .register(ObjectMeta.class)
             .register(NamespaceSpec.class)
             .register(NamespaceStatus.class)
+            .register(ManagedFieldsEntry.class)
+            .register(FieldsV1.class)
             .register(LinkedHashMap.class)
             .build();
 

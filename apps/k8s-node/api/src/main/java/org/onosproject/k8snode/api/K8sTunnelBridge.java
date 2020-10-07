@@ -29,7 +29,7 @@ import static org.onosproject.k8snode.api.Constants.VXLAN_TUNNEL;
 /**
  * K8s tunnel bridge.
  */
-public class K8sTunnelBridge {
+public class K8sTunnelBridge implements K8sBridge {
 
     private static final String OF_PREFIX = "of:";
 
@@ -44,11 +44,7 @@ public class K8sTunnelBridge {
         this.tunnelId = tunnelId;
     }
 
-    /**
-     * Returns device identifier.
-     *
-     * @return device identifier
-     */
+    @Override
     public DeviceId deviceId() {
         return DeviceId.deviceId(dpid());
     }
@@ -62,20 +58,12 @@ public class K8sTunnelBridge {
         return tunnelId;
     }
 
-    /**
-     * Return the datapath identifier.
-     *
-     * @return datapath identifier
-     */
+    @Override
     public String dpid() {
         return genDpidFromName(name());
     }
 
-    /**
-     * Returns bridge name.
-     *
-     * @return bridge name
-     */
+    @Override
     public String name() {
         return TUNNEL_BRIDGE + "-" + tunnelId;
     }

@@ -2698,7 +2698,7 @@
           ],
           "source_info" : {
             "filename" : "include/control/../define.p4",
-            "line" : 165,
+            "line" : 166,
             "column" : 36,
             "source_fragment" : "4; ..."
           }
@@ -3116,7 +3116,7 @@
           ],
           "source_info" : {
             "filename" : "include/control/../define.p4",
-            "line" : 161,
+            "line" : 162,
             "column" : 24,
             "source_fragment" : "0x1; ..."
           }
@@ -9204,7 +9204,7 @@
           ],
           "source_info" : {
             "filename" : "include/control/../define.p4",
-            "line" : 126,
+            "line" : 127,
             "column" : 31,
             "source_fragment" : "0x8847; ..."
           }
@@ -9283,7 +9283,7 @@
           ],
           "source_info" : {
             "filename" : "include/control/../define.p4",
-            "line" : 125,
+            "line" : 126,
             "column" : 31,
             "source_fragment" : "0x8100; ..."
           }
@@ -12516,16 +12516,36 @@
             "filename" : "include/control/next.p4",
             "line" : 372,
             "column" : 15,
-            "source_fragment" : "hdr.ipv4.isValid()"
+            "source_fragment" : "hdr.ipv4.isValid() && fabric_metadata.fwd_type != FWD_BRIDGING"
           },
           "expression" : {
             "type" : "expression",
             "value" : {
-              "op" : "d2b",
-              "left" : null,
+              "op" : "and",
+              "left" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "d2b",
+                  "left" : null,
+                  "right" : {
+                    "type" : "field",
+                    "value" : ["ipv4", "$valid$"]
+                  }
+                }
+              },
               "right" : {
-                "type" : "field",
-                "value" : ["ipv4", "$valid$"]
+                "type" : "expression",
+                "value" : {
+                  "op" : "!=",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["scalars", "fabric_metadata_t._fwd_type8"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0x00"
+                  }
+                }
               }
             }
           },

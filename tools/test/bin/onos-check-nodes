@@ -21,3 +21,4 @@ for attempt in {1..5}; do
     diff $aux.1 $aux.2 && exit 0
     sleep 1
 done
+exit 1
