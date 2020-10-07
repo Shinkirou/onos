@@ -96,30 +96,38 @@ header meta_t {
 	bit<16> l4_dst_port;
 }
 
-header cm_meta_t {
-	bit<32> hash_ip_0;
-	bit<32> hash_ip_1;
-	bit<32> hash_ip_2;
-	bit<32> sketch_ip_0;
-	bit<32> sketch_ip_1;
-	bit<32> sketch_ip_2;
-	bit<32> sketch_ip_final;
-	bit<32> hash_5t_0;
-	bit<32> hash_5t_1;
-	bit<32> hash_5t_2;
-	bit<32> sketch_5t_0;
-	bit<32> sketch_5t_1;
-	bit<32> sketch_5t_2;
-	bit<32> sketch_5t_final;
-}
-
-header bm_meta_t {
+header cm_5t_meta_t {
 	bit<32> hash_0;
 	bit<32> hash_1;
 	bit<32> hash_2;
 	bit<32> sketch_0;
 	bit<32> sketch_1;
 	bit<32> sketch_2;
+	bit<32> sketch_final;
+}
+
+header cm_ip_meta_t {
+	bit<32> hash_0;
+	bit<32> hash_1;
+	bit<32> hash_2;
+	bit<32> sketch_0;
+	bit<32> sketch_1;
+	bit<32> sketch_2;
+	bit<32> sketch_final;
+}
+
+header bm_src_meta_t {
+	bit<32> hash_0;
+	bit<32> hash_1;
+	bit<32> sketch_0;
+	bit<32> sketch_1;
+}
+
+header bm_dst_meta_t {
+	bit<32> hash_0;
+	bit<32> hash_1;
+	bit<32> sketch_0;
+	bit<32> sketch_1;
 }
 
 header k_ary_meta_t {
@@ -201,8 +209,10 @@ header threshold_meta_t {
 
 struct metadata_t {
 	meta_t 					meta;
-	cm_meta_t 				cm;
-	bm_meta_t 				bm;
+	cm_5t_meta_t 			cm_5t;
+	cm_ip_meta_t 			cm_ip;
+	bm_src_meta_t 			bm_src;
+	bm_dst_meta_t 			bm_dst;
 	k_ary_meta_t 			k_ary;
 	ams_meta_t 				ams;
 	mv_meta_t 				mv;

@@ -1,12 +1,12 @@
-control c_amsSketch(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
+control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
 
-	register<bit<32>>(REG_SKETCH_SIZE)  register_0;
-	register<bit<32>>(REG_SKETCH_SIZE)  register_1;
-	register<bit<32>>(REG_SKETCH_SIZE)  register_2;
-	register<bit<32>>(1)                register_sum_0;
-	register<bit<32>>(1)                register_sum_1;
-	register<bit<32>>(1)                register_sum_2;
-	register<bit<32>>(REG_SKETCH_SIZE)  register_final;
+	register<bit<32>>(REG_SKETCH_SIZE)  reg_ams_0;
+	register<bit<32>>(REG_SKETCH_SIZE)  reg_ams_1;
+	register<bit<32>>(REG_SKETCH_SIZE)  reg_ams_2;
+	register<bit<32>>(1)                reg_ams_sum_0;
+	register<bit<32>>(1)                reg_ams_sum_1;
+	register<bit<32>>(1)                reg_ams_sum_2;
+	register<bit<32>>(REG_SKETCH_SIZE)  reg_ams_final;
 
 	action hash_0() {
 		hash(meta.ams.hash_0, 
@@ -30,7 +30,7 @@ control c_amsSketch(inout headers_t hdr, inout metadata_t meta, inout standard_m
 			(bit<32>)0, 
 			{hdr.ipv4.src_addr, hdr.ipv4.dst_addr},
 			(bit<32>)REG_SKETCH_SIZE);
-	}   
+	}
 
 	// Second hash function that returns 0 or 1, corresponding to {-1, +1} from the original sketch.
 	// These will be multiplied with the values to be added in the target counter.
@@ -61,13 +61,13 @@ control c_amsSketch(inout headers_t hdr, inout metadata_t meta, inout standard_m
 
 	action ams_update(bit<32> aux_0, bit<32> aux_1, bit<32> aux_2) {
 
-		register_0.read(meta.ams.sketch_0, (bit<32>)meta.ams.hash_0);
-		register_1.read(meta.ams.sketch_1, (bit<32>)meta.ams.hash_1);
-		register_2.read(meta.ams.sketch_2, (bit<32>)meta.ams.hash_2);
+		reg_ams_0.read(meta.ams.sketch_0, (bit<32>)meta.ams.hash_0);
+		reg_ams_1.read(meta.ams.sketch_1, (bit<32>)meta.ams.hash_1);
+		reg_ams_2.read(meta.ams.sketch_2, (bit<32>)meta.ams.hash_2);
 
-		register_sum_0.read(meta.ams.sum_0, (bit<32>)0);
-		register_sum_1.read(meta.ams.sum_1, (bit<32>)1);
-		register_sum_2.read(meta.ams.sum_2, (bit<32>)2);
+		reg_ams_sum_0.read(meta.ams.sum_0, (bit<32>)0);
+		reg_ams_sum_1.read(meta.ams.sum_1, (bit<32>)1);
+		reg_ams_sum_2.read(meta.ams.sum_2, (bit<32>)2);
 
 		// The update is made using the metadata, instead of directly on the registers.
 		// We also update the current sum value (removing the old sketch value from it first).
@@ -87,17 +87,17 @@ control c_amsSketch(inout headers_t hdr, inout metadata_t meta, inout standard_m
 								- ((meta.ams.sketch_2 - aux_2) * (meta.ams.sketch_2 - aux_2))
 								+ ((meta.ams.sketch_2) * (meta.ams.sketch_2));                                      
 
-		register_0.write((bit<32>)meta.ams.hash_0, meta.ams.sketch_0);
-		register_1.write((bit<32>)meta.ams.hash_1, meta.ams.sketch_1);
-		register_2.write((bit<32>)meta.ams.hash_2, meta.ams.sketch_2); 
+		reg_ams_0.write((bit<32>)meta.ams.hash_0, meta.ams.sketch_0);
+		reg_ams_1.write((bit<32>)meta.ams.hash_1, meta.ams.sketch_1);
+		reg_ams_2.write((bit<32>)meta.ams.hash_2, meta.ams.sketch_2); 
 
-		register_sum_0.write((bit<32>)0, meta.ams.sum_0);
-		register_sum_1.write((bit<32>)1, meta.ams.sum_1);
-		register_sum_2.write((bit<32>)2, meta.ams.sum_2);            
+		reg_ams_sum_0.write((bit<32>)0, meta.ams.sum_0);
+		reg_ams_sum_1.write((bit<32>)1, meta.ams.sum_1);
+		reg_ams_sum_2.write((bit<32>)2, meta.ams.sum_2);            
 	}
 
 	action ams_register_write() {
-		register_final.write((bit<32>)meta.ams.hash_2, meta.ams.sketch_final);
+		reg_ams_final.write((bit<32>)meta.ams.hash_2, meta.ams.sketch_final);
 	}
 
 	apply {

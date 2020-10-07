@@ -6,11 +6,13 @@
 #include "includes/headers.p4"
 #include "includes/parser.p4"
 #include "includes/deparser.p4"
-#include "includes/cmSketch.p4"
-#include "includes/bmSketch.p4"
-#include "includes/amsSketch.p4"
 #include "includes/threshold.p4"
-#include "includes/mvSketch.p4"
+#include "includes/sketches/cm_5t.p4"
+#include "includes/sketches/cm_ip.p4"
+#include "includes/sketches/bm_src.p4"
+#include "includes/sketches/bm_dst.p4"
+#include "includes/sketches/ams.p4"
+#include "includes/sketches/mv.p4"
 
 //------------------------------------------------------------------------------
 // INGRESS PIPELINE
@@ -24,11 +26,13 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
     counter(MAX_PORTS, CounterType.packets_and_bytes) rx_port_counter;
 
 	// Control blocks instantiations.
-	c_cmSketch()    cm;
-    c_bmSketch()    bm;
-    c_amsSketch()   ams;
     c_threshold()   threshold;
-    c_mvSketch()    mv;
+	c_cm_5t()       cm_5t;
+    c_cm_ip()       cm_ip;
+    c_bm_src()      bm_src;
+    c_bm_dst()      bm_dst;
+    c_ams()         ams;
+    c_mv()          mv;
 
     action send_to_cpu() {
         // Packets sent to the controller needs to be prepended with the packet-in header.
@@ -61,11 +65,6 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             hdr.udp.dst_port                : ternary;
             hdr.tcp.src_port                : ternary;
             hdr.tcp.dst_port                : ternary;
-            hdr.tcp.res                     : ternary;
-            hdr.tcp.ecn                     : ternary;
-            hdr.tcp.ctrl                    : ternary;
-            hdr.icmp.type                   : ternary;
-            hdr.icmp.code                   : ternary;
         }
         actions = {
             set_out_port;
@@ -76,43 +75,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         default_action = NoAction();
         size = 524288;
         counters = fwd_counter;
-    }
-
-    table t_cm {
-        key = {
-            hdr.ethernet.ether_type: exact;  
-        }
-        actions = {
-            _drop;
-        }
-    }
-
-    table t_bm {
-        key = {
-            hdr.ethernet.ether_type: exact;  
-        }
-        actions = {
-            _drop;
-        }
-    }
-
-    table t_ams {
-        key = {
-            hdr.ethernet.ether_type: exact;  
-        }
-        actions = {
-            _drop;
-        }
-    }
-
-    table t_mv {
-        key = {
-            hdr.ethernet.ether_type: exact;  
-        }
-        actions = {
-            _drop;
-        }
-    }                
+    }              
 
     // Defines the processing applied by this control block. 
     // You can see this as the main function applied to every packet received by the switch.
@@ -123,27 +86,19 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             // Skip table processing, set the egress port as requested by the controller (packet_out header) and remove the packet_out header.           
             standard_metadata.egress_spec = hdr.packet_out.egress_port;
             hdr.packet_out.setInvalid();
+        
         } else {
             
             // Packet received from data plane port.
             // Applies table t_fwd to the packet.   
             if (t_fwd.apply().hit) {
 
-                if (t_cm.apply().hit) {
-                    cm.apply(hdr, meta, standard_metadata);
-                }
-
-                if (t_bm.apply().hit) {
-                    bm.apply(hdr, meta, standard_metadata);
-                }
-
-                if (t_ams.apply().hit) {
-                    ams.apply(hdr, meta, standard_metadata);
-                }
-
-                if (t_mv.apply().hit) {
-                    mv.apply(hdr, meta, standard_metadata);
-                }                                
+                cm_5t.apply(hdr, meta, standard_metadata);
+                cm_ip.apply(hdr, meta, standard_metadata);
+                bm_src.apply(hdr, meta, standard_metadata);
+                bm_dst.apply(hdr, meta, standard_metadata);
+                ams.apply(hdr, meta, standard_metadata);
+                mv.apply(hdr, meta, standard_metadata);                              
 
                 threshold.apply(hdr, meta, standard_metadata);
 

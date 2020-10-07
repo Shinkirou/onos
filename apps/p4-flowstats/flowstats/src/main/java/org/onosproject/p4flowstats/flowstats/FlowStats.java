@@ -142,13 +142,13 @@ public class FlowStats {
     private boolean flowRuleMvSketch  = FLOW_RULE_MV_SKETCH_DEFAULT;
 
     @Activate
-    public void activate(ComponentContext context) {
+    public void activate() {
         // Register app and event listeners.
         log.info("Starting...");
         appId = coreService.registerApplication(APP_NAME);
         cfgService.registerProperties(getClass());
         flowRuleService.addListener(flowListener);
-        readComponentConfiguration(context);
+        // readComponentConfiguration(context);
         log.info("STARTED", appId.id());
     }
 
@@ -175,76 +175,76 @@ public class FlowStats {
     private void readComponentConfiguration(ComponentContext context) {
         Dictionary<?, ?> properties = context.getProperties();
 
-        Boolean flowRuleCmSketchEnabled = Tools.isPropertyEnabled(properties, FLOW_RULE_CM_SKETCH);
-        if (flowRuleCmSketchEnabled == null) {
-            log.info("Flow Rule: CM Sketch is not configured, " + "using current value of {}", flowRuleCmSketch);
-        } else {
-            flowRuleCmSketch = flowRuleCmSketchEnabled;
-            if (flowRuleCmSketch == true) {
-                // Hardcoded for now.
-                insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_cm");
-            }
-            log.info("Configured. Flow Rule: CM Sketch is {}", flowRuleCmSketch ? "enabled" : "disabled");
-        }
+        // Boolean flowRuleCmSketchEnabled = Tools.isPropertyEnabled(properties, FLOW_RULE_CM_SKETCH);
+        // if (flowRuleCmSketchEnabled == null) {
+        //     log.info("Flow Rule: CM Sketch is not configured, " + "using current value of {}", flowRuleCmSketch);
+        // } else {
+        //     flowRuleCmSketch = flowRuleCmSketchEnabled;
+        //     if (flowRuleCmSketch == true) {
+        //         // Hardcoded for now.
+        //         insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_cm");
+        //     }
+        //     log.info("Configured. Flow Rule: CM Sketch is {}", flowRuleCmSketch ? "enabled" : "disabled");
+        // }
 
-        Boolean flowRuleBmSketchEnabled = Tools.isPropertyEnabled(properties, FLOW_RULE_BM_SKETCH);
-        if (flowRuleBmSketchEnabled == null) {
-            log.info("Flow Rule: BM Sketch is not configured, " + "using current value of {}", flowRuleBmSketch);
-        } else {
-            flowRuleBmSketch = flowRuleBmSketchEnabled;
-            if (flowRuleBmSketch == true) {
-                // Hardcoded for now.
-                insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_bm");
-            }
-            log.info("Configured. Flow Rule: BM Sketch is {}", flowRuleBmSketch ? "enabled" : "disabled");
-        }
+        // Boolean flowRuleBmSketchEnabled = Tools.isPropertyEnabled(properties, FLOW_RULE_BM_SKETCH);
+        // if (flowRuleBmSketchEnabled == null) {
+        //     log.info("Flow Rule: BM Sketch is not configured, " + "using current value of {}", flowRuleBmSketch);
+        // } else {
+        //     flowRuleBmSketch = flowRuleBmSketchEnabled;
+        //     if (flowRuleBmSketch == true) {
+        //         // Hardcoded for now.
+        //         insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_bm");
+        //     }
+        //     log.info("Configured. Flow Rule: BM Sketch is {}", flowRuleBmSketch ? "enabled" : "disabled");
+        // }
 
-        Boolean flowRuleAmsSketchEnabled = Tools.isPropertyEnabled(properties, FLOW_RULE_AMS_SKETCH);
-        if (flowRuleAmsSketchEnabled == null) {
-            log.info("Flow Rule: AMS Sketch is not configured, " + "using current value of {}", flowRuleAmsSketch);
-        } else {
-            flowRuleAmsSketch = flowRuleAmsSketchEnabled;
-            if (flowRuleAmsSketch == true) {
-                // Hardcoded for now.
-                insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_ams");
-            }
-            log.info("Configured. Flow Rule: AMS Sketch is {}", flowRuleAmsSketch ? "enabled" : "disabled");
-        }
+        // Boolean flowRuleAmsSketchEnabled = Tools.isPropertyEnabled(properties, FLOW_RULE_AMS_SKETCH);
+        // if (flowRuleAmsSketchEnabled == null) {
+        //     log.info("Flow Rule: AMS Sketch is not configured, " + "using current value of {}", flowRuleAmsSketch);
+        // } else {
+        //     flowRuleAmsSketch = flowRuleAmsSketchEnabled;
+        //     if (flowRuleAmsSketch == true) {
+        //         // Hardcoded for now.
+        //         insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_ams");
+        //     }
+        //     log.info("Configured. Flow Rule: AMS Sketch is {}", flowRuleAmsSketch ? "enabled" : "disabled");
+        // }
 
-        Boolean flowRuleMvSketchEnabled = Tools.isPropertyEnabled(properties, FLOW_RULE_MV_SKETCH);
-        if (flowRuleMvSketchEnabled == null) {
-            log.info("Flow Rule: MV Sketch is not configured, " + "using current value of {}", flowRuleMvSketch);
-        } else {
-            flowRuleMvSketch = flowRuleMvSketchEnabled;
-            if (flowRuleMvSketch == true) {
-                // Hardcoded for now.
-                insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_mv");
-            }
-            log.info("Configured. Flow Rule: MV Sketch is {}", flowRuleMvSketch ? "enabled" : "disabled");
-        }                        
+        // Boolean flowRuleMvSketchEnabled = Tools.isPropertyEnabled(properties, FLOW_RULE_MV_SKETCH);
+        // if (flowRuleMvSketchEnabled == null) {
+        //     log.info("Flow Rule: MV Sketch is not configured, " + "using current value of {}", flowRuleMvSketch);
+        // } else {
+        //     flowRuleMvSketch = flowRuleMvSketchEnabled;
+        //     if (flowRuleMvSketch == true) {
+        //         // Hardcoded for now.
+        //         insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_mv");
+        //     }
+        //     log.info("Configured. Flow Rule: MV Sketch is {}", flowRuleMvSketch ? "enabled" : "disabled");
+        // }                        
     }
 
-    private void insertSketchFlowRule(DeviceId switchId, String tableId) {
+    // private void insertSketchFlowRule(DeviceId switchId, String tableId) {
 
-        PiMatchFieldId etherTypeMatchFieldId = PiMatchFieldId.of("hdr.ethernet.ether_type");
-        PiTableId forwardingTableId = PiTableId.of(tableId);
+    //     PiMatchFieldId etherTypeMatchFieldId = PiMatchFieldId.of("hdr.ethernet.ether_type");
+    //     PiTableId forwardingTableId = PiTableId.of(tableId);
 
-        // IPv4.
-        byte[] matchExactBytes1 = {0x08, 0x00};
+    //     // IPv4.
+    //     byte[] matchExactBytes1 = {0x08, 0x00};
 
-        PiCriterion match = PiCriterion.builder().matchExact(etherTypeMatchFieldId, matchExactBytes1).build();
+    //     PiCriterion match = PiCriterion.builder().matchExact(etherTypeMatchFieldId, matchExactBytes1).build();
 
-        PiActionId actionId = PiActionId.of("c_ingress._drop");
+    //     PiActionId actionId = PiActionId.of("c_ingress._drop");
         
-        PiAction action = PiAction.builder()
-                .withId(actionId)
-                .build();
+    //     PiAction action = PiAction.builder()
+    //             .withId(actionId)
+    //             .build();
 
-        log.info("Inserting INGRESS rule on switch {}: table={}, match={}, action={}",
-                 switchId, forwardingTableId, match, action);
+    //     log.info("Inserting INGRESS rule on switch {}: table={}, match={}, action={}",
+    //              switchId, forwardingTableId, match, action);
 
-        insertPiFlowRule(switchId, forwardingTableId, match, action);
-    }
+    //     insertPiFlowRule(switchId, forwardingTableId, match, action);
+    // }
 
     private void insertPiFlowRule(DeviceId switchId, PiTableId tableId, PiCriterion piCriterion, PiAction piAction) {
         

@@ -58,7 +58,7 @@ public final class OsgiPropertyConstants {
     static final boolean MATCH_TCP_UDP_PORTS_DEFAULT = true;
 
     static final String MATCH_ICMP_FIELDS = "matchIcmpFields";
-    static final boolean MATCH_ICMP_FIELDS_DEFAULT = true;
+    static final boolean MATCH_ICMP_FIELDS_DEFAULT = false;
 
     static final String IGNORE_IPV4_MCAST_PACKETS = "ignoreIPv4Multicast";
     static final boolean IGNORE_IPV4_MCAST_PACKETS_DEFAULT = false;

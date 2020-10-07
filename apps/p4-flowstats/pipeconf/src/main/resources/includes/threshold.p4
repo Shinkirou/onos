@@ -1,48 +1,48 @@
 control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
 
     // Stores the total packet count.
-    register<bit<32>>(1)  traffic_global_register;
+    register<bit<32>>(1)  reg_thres_traffic_global;
 
     // Stores the total packet count, excluding the packets in the current stage (for each flow).
-    register<bit<32>>(REG_SKETCH_SIZE)  traffic_global_flow_register;
+    register<bit<32>>(REG_SKETCH_SIZE)  reg_thres_traffic_global_flow;
     // Stores the packet count for the current stage (for each flow).
-    register<bit<32>>(REG_SKETCH_SIZE)  traffic_flow_register;
+    register<bit<32>>(REG_SKETCH_SIZE)  reg_thres_traffic_flow;
     // Store the timestamp corresponding to the beginning of the current stage (for each flow).
-    register<bit<48>>(REG_SKETCH_SIZE)  time_flow_register;
+    register<bit<48>>(REG_SKETCH_SIZE)  reg_thres_time_flow;
 
     // Increase the global traffic counter.
     action global_traffic_counter_incr() {
 
-        traffic_global_register.read(meta.threshold.global_traffic, (bit<32>)0); 
+        reg_thres_traffic_global.read(meta.threshold.global_traffic, (bit<32>)0); 
         meta.threshold.global_traffic = meta.threshold.global_traffic + 1;
-        traffic_global_register.write((bit<32>)0, meta.threshold.global_traffic);
+        reg_thres_traffic_global.write((bit<32>)0, meta.threshold.global_traffic);
     }
 
     // Increase the traffic counter for a specific flow.
     action flow_traffic_counter_incr() {
 
-        traffic_flow_register.read(meta.threshold.flow_traffic, (bit<32>)meta.threshold.hash_flow);
+        reg_thres_traffic_flow.read(meta.threshold.flow_traffic, (bit<32>)meta.threshold.hash_flow);
         meta.threshold.flow_traffic = meta.threshold.flow_traffic + 1;
-        traffic_flow_register.write((bit<32>)meta.threshold.hash_flow, meta.threshold.flow_traffic);
+        reg_thres_traffic_flow.write((bit<32>)meta.threshold.hash_flow, meta.threshold.flow_traffic);
     }
 
     // Update the time value for the current flow with the global timestamp.
     action time_flow_update() {
-        time_flow_register.write((bit<32>)meta.threshold.hash_flow, standard_metadata.ingress_global_timestamp); 
+        reg_thres_time_flow.write((bit<32>)meta.threshold.hash_flow, standard_metadata.ingress_global_timestamp); 
     }
 
     // Reset the counters for a specific flow.
     action flow_traffic_counter_reset() {
-        traffic_flow_register.write((bit<32>)meta.threshold.hash_flow, 0);
-        traffic_global_flow_register.write((bit<32>)meta.threshold.hash_flow, meta.threshold.global_traffic);
+        reg_thres_traffic_flow.write((bit<32>)meta.threshold.hash_flow, 0);
+        reg_thres_traffic_global_flow.write((bit<32>)meta.threshold.hash_flow, meta.threshold.global_traffic);
     }
 
     action check_flow_time() {
-        time_flow_register.read(meta.threshold.flow_time, (bit<32>)meta.threshold.hash_flow); 
+        reg_thres_time_flow.read(meta.threshold.flow_time, (bit<32>)meta.threshold.hash_flow); 
     }    
 
     action check_flow_global_traffic() {
-        traffic_global_flow_register.read(meta.threshold.flow_global_traffic, (bit<32>)meta.threshold.hash_flow);
+        reg_thres_traffic_global_flow.read(meta.threshold.flow_global_traffic, (bit<32>)meta.threshold.hash_flow);
     }
 
     action send_to_cpu_threshold() {
@@ -61,10 +61,10 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
         hdr.packet_in.tcp_flags     = hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl;
         hdr.packet_in.icmp_type     = (bit<9>)hdr.icmp.type;
         hdr.packet_in.icmp_code     = (bit<9>)hdr.icmp.code;
-        hdr.packet_in.cm_ip         = meta.cm.sketch_ip_final;
-        hdr.packet_in.cm_5t         = meta.cm.sketch_5t_final;
-        hdr.packet_in.bm_src        = meta.bm.sketch_1;
-        hdr.packet_in.bm_dst        = meta.bm.sketch_2;
+        hdr.packet_in.cm_5t         = meta.cm_5t.sketch_final;
+        hdr.packet_in.cm_ip         = meta.cm_ip.sketch_final;
+        hdr.packet_in.bm_src        = meta.bm_src.sketch_1;
+        hdr.packet_in.bm_dst        = meta.bm_dst.sketch_1;
         hdr.packet_in.ams           = meta.ams.sketch_final;
 
         // Check if the current MV sketch key (strongest candidate) matches the current flow key.
@@ -78,7 +78,7 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
 	apply {
 
         // The current threshold hash has already been calculated for the cm sketch.
-        meta.threshold.hash_flow = meta.cm.hash_5t_0;
+        meta.threshold.hash_flow = meta.cm_5t.hash_0;
 
         global_traffic_counter_incr();
         flow_traffic_counter_incr();
