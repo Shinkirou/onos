@@ -43,7 +43,7 @@ control c_cm_ip(inout headers_t hdr, inout metadata_t meta, inout standard_metad
 	}
 
 	action cm_write_0() {
-		register_0.write(meta.reg.current_index, meta.epoch.sketch_temp);
+		register_0.write(1, 1);
 	}
 
 	action cm_write_1() {
@@ -224,82 +224,87 @@ control c_cm_ip(inout headers_t hdr, inout metadata_t meta, inout standard_metad
 
 	apply {
 
-		hash_cm_ip_0();
-		hash_cm_ip_1();
-		hash_cm_ip_2();
+		@atomic {
 
-		// CM ip Hash 0 - Counter 0.
+			hash_cm_ip_0();
+			hash_cm_ip_1();
+			hash_cm_ip_2();
 
-		// Obtain the next hash value to be used.
-		// This value will be translated by set_virtual_reg into the actual physical register and index.
+			// CM ip Hash 0 - Counter 0.
 
-		meta.reg.current_sketch_hash = meta.cm_ip.hash_0;
+			// Obtain the next hash value to be used.
+			// This value will be translated by set_virtual_reg into the actual physical register and index.
 
-		cm_ip_set_reg_0.apply(hdr, meta, standard_metadata);
+			meta.reg.current_sketch_hash = meta.cm_ip.hash_0;
 
-		// After determining the register position, check if the epoch has changed.
-		// The obtained sketch value after the check will be stored in meta.epoch.sketch_temp.
-		cm_ip_epoch_0.apply(hdr, meta, standard_metadata);
+			cm_ip_set_reg_0.apply(hdr, meta, standard_metadata);
 
-		// Update the sketch value.
+			// After determining the register position, check if the epoch has changed.
+			// The obtained sketch value after the check will be stored in meta.epoch.sketch_temp.
+			cm_ip_epoch_0.apply(hdr, meta, standard_metadata);
 
-		cm_incr();
+			// Update the sketch value.
 
-		current_register();
+			cm_incr();
 
-		t_cm_ip_0.apply();
+			current_register();
 
-		meta.cm_ip.sketch_0 = meta.epoch.sketch_temp;
+			t_cm_ip_0.apply();
 
-		// CM ip Hash 1 - Counter 1.
+			meta.cm_ip.sketch_0 = meta.epoch.sketch_temp;
 
-		meta.reg.current_sketch_hash = meta.cm_ip.hash_1;
+			// CM ip Hash 1 - Counter 1.
 
-		cm_ip_set_reg_1.apply(hdr, meta, standard_metadata);
-		cm_ip_epoch_1.apply(hdr, meta, standard_metadata);
+			meta.reg.current_sketch_hash = meta.cm_ip.hash_1;
 
-		cm_incr();
+			cm_ip_set_reg_1.apply(hdr, meta, standard_metadata);
+			cm_ip_epoch_1.apply(hdr, meta, standard_metadata);
 
-		current_register();
+			cm_incr();
 
-		t_cm_ip_1.apply();			
+			current_register();
 
-		meta.cm_ip.sketch_1 = meta.epoch.sketch_temp;
+			t_cm_ip_1.apply();			
 
-		// CM ip Hash 2 - Counter 2.
+			meta.cm_ip.sketch_1 = meta.epoch.sketch_temp;
 
-		meta.reg.current_sketch_hash = meta.cm_ip.hash_2;
+			// CM ip Hash 2 - Counter 2.
 
-		cm_ip_set_reg_2.apply(hdr, meta, standard_metadata);
-		cm_ip_epoch_2.apply(hdr, meta, standard_metadata);
+			meta.reg.current_sketch_hash = meta.cm_ip.hash_2;
 
-		cm_incr();
+			cm_ip_set_reg_2.apply(hdr, meta, standard_metadata);
+			cm_ip_epoch_2.apply(hdr, meta, standard_metadata);
 
-		current_register();
+			cm_incr();
 
-		t_cm_ip_2.apply();			
+			current_register();
 
-		meta.cm_ip.sketch_2 = meta.epoch.sketch_temp;
+			t_cm_ip_2.apply();			
 
-		// CM ip Final Value.
+			meta.cm_ip.sketch_2 = meta.epoch.sketch_temp;
 
-		cm_ip_set_reg_final.apply(hdr, meta, standard_metadata);
-		
-		// No need to apply an epoch check here, since all the cm values are already in the correct epoch
-		// and one of them will be the final value.
+			// CM ip Final Value.
 
-		meta.epoch.sketch_temp = meta.cm_ip.sketch_0;
+			cm_ip_set_reg_final.apply(hdr, meta, standard_metadata);
+			
+			// No need to apply an epoch check here, since all the cm values are already in the correct epoch
+			// and one of them will be the final value.
 
-		if (meta.epoch.sketch_temp > meta.cm_ip.sketch_1) {
-			meta.epoch.sketch_temp = meta.cm_ip.sketch_1;
+			meta.cm_ip.sketch_final = meta.cm_ip.sketch_0;
+
+			if (meta.cm_ip.sketch_final > meta.cm_ip.sketch_1) {
+				meta.cm_ip.sketch_final = meta.cm_ip.sketch_1;
+			}
+			
+			if (meta.cm_ip.sketch_final > meta.cm_ip.sketch_2) {
+				meta.cm_ip.sketch_final = meta.cm_ip.sketch_2;
+			}
+
+			meta.epoch.sketch_temp = meta.cm_ip.sketch_final;
+
+			current_register();
+
+			t_cm_ip_final.apply();		
 		}
-		
-		if (meta.epoch.sketch_temp > meta.cm_ip.sketch_2) {
-			meta.epoch.sketch_temp = meta.cm_ip.sketch_2;
-		}
-
-		current_register();
-
-		t_cm_ip_final.apply();		
 	}
 }

@@ -101,6 +101,15 @@ public class Dma {
     private static Map<Long,Long> flowCountMap    = new ConcurrentHashMap<Long,Long>();
     private static Map<Long,FlowRule> flowRuleMap = new ConcurrentHashMap<Long,FlowRule>();
 
+    private static final PiActionParamId ACT_PARAM_ID_CM_5T     = PiActionParamId.of("cm_5t_flag");
+    private static final PiActionParamId ACT_PARAM_ID_CM_IP     = PiActionParamId.of("cm_ip_flag");
+    private static final PiActionParamId ACT_PARAM_ID_BM_SRC    = PiActionParamId.of("bm_src_flag");
+    private static final PiActionParamId ACT_PARAM_ID_BM_DST    = PiActionParamId.of("bm_dst_flag");
+    private static final PiActionParamId ACT_PARAM_ID_AMS       = PiActionParamId.of("ams_flag");
+    private static final PiActionParamId ACT_PARAM_ID_MV        = PiActionParamId.of("mv_flag");
+    private static final PiActionParamId ACT_PARAM_ID_REG_NUM   = PiActionParamId.of("virtual_register_num");
+    private static final PiActionParamId ACT_PARAM_ID_HASH      = PiActionParamId.of("hash_size");      
+
     // Default priority used for flow rules installed by this app.
     private static final int FLOW_RULE_PRIORITY = 100;
 
@@ -218,7 +227,7 @@ public class Dma {
             flowRuleMvSketch = flowRuleMvSketchEnabled;
             if (flowRuleMvSketch == true) {
                 // Hardcoded for now.
-                insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_mv");
+                // insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_mv");
             }
             log.info("Configured. Flow Rule: MV Sketch is {}", flowRuleMvSketch ? "enabled" : "disabled");
         }                        
@@ -230,14 +239,22 @@ public class Dma {
         PiTableId forwardingTableId = PiTableId.of(tableId);
 
         // IPv4.
-        byte[] matchExactBytes1 = {0x08, 0x00};
+        short matchExactShort1 = 0x800;
 
-        PiCriterion match = PiCriterion.builder().matchExact(etherTypeMatchFieldId, matchExactBytes1).build();
+        PiCriterion match = PiCriterion.builder().matchExact(etherTypeMatchFieldId, matchExactShort1).build();
 
-        PiActionId actionId = PiActionId.of("c_ingress._drop");
+        PiActionId actionId = PiActionId.of("c_ingress.sketch_config");
         
         PiAction action = PiAction.builder()
                 .withId(actionId)
+                .withParameter(new PiActionParam(ACT_PARAM_ID_CM_5T, 0))
+                .withParameter(new PiActionParam(ACT_PARAM_ID_CM_IP, 0))
+                .withParameter(new PiActionParam(ACT_PARAM_ID_BM_SRC, 0))
+                .withParameter(new PiActionParam(ACT_PARAM_ID_BM_DST, 0))
+                .withParameter(new PiActionParam(ACT_PARAM_ID_AMS, 0))
+                .withParameter(new PiActionParam(ACT_PARAM_ID_MV, 0))
+                .withParameter(new PiActionParam(ACT_PARAM_ID_REG_NUM, 19))
+                .withParameter(new PiActionParam(ACT_PARAM_ID_HASH, 32768))
                 .build();
 
         log.info("Inserting INGRESS rule on switch {}: table={}, match={}, action={}",
@@ -290,6 +307,8 @@ public class Dma {
             flowRuleService.removeFlowRules(flowRule);
             return;
         }
+
+        // insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_sketches");
 
         FlowEntry flowEntry = getFlowEntry(flowRule);
 

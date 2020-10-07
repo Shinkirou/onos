@@ -38,20 +38,23 @@ control c_set_reg(inout headers_t hdr, inout metadata_t meta, inout standard_met
 
 	apply {
 
-		// Given the total number of virtual registers and the current virtual register,
-		// set its corresponding physical register and starting index.
-		t_set_reg.apply();
+		@atomic {
 
-		// Calculate the remaining space in the physical register, to determine if the current hash value fits.
-		register_setup();
+			// Given the total number of virtual registers and the current virtual register,
+			// set its corresponding physical register and starting index.
+			t_set_reg.apply();
 
-		// If the hash is less than the remaining space in the register, we do not increment the current register value.
-		// The current index value is incremented with the hash.
-		// Otherwise, the hash value spills over and we advance to the next physical registers.
-		if (meta.reg.current_sketch_hash < meta.reg.index_remaining) {
-			meta.reg.current_index = meta.reg.current_index + meta.reg.current_sketch_hash;
-		} else {
-			calculate_register_index(meta.reg.current_sketch_hash);
+			// Calculate the remaining space in the physical register, to determine if the current hash value fits.
+			register_setup();
+
+			// If the hash is less than the remaining space in the register, we do not increment the current register value.
+			// The current index value is incremented with the hash.
+			// Otherwise, the hash value spills over and we advance to the next physical registers.
+			if (meta.reg.current_sketch_hash < meta.reg.index_remaining) {
+				meta.reg.current_index = meta.reg.current_index + meta.reg.current_sketch_hash;
+			} else {
+				calculate_register_index(meta.reg.current_sketch_hash);
+			}
 		}
 	}
 }

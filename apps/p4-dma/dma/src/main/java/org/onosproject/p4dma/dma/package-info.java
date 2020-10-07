@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 /**
- * P4 Flowstats application classes.
+ * P4 dma application classes.
  */
-package org.onosproject.p4flowstats.flowstats;
+package org.onosproject.p4dma.dma;

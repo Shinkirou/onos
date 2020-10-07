@@ -32,6 +32,8 @@ import org.onosproject.net.flow.TrafficTreatment;
 import org.onosproject.net.flow.criteria.Criterion;
 import org.onosproject.net.flow.instructions.Instruction;
 import org.onosproject.net.flow.instructions.Instructions.OutputInstruction;
+import org.onosproject.net.flow.instructions.PiInstruction;
+import org.onosproject.net.pi.runtime.PiTableAction;
 import org.onosproject.net.packet.DefaultInboundPacket;
 import org.onosproject.net.packet.InboundPacket;
 import org.onosproject.net.packet.OutboundPacket;
@@ -57,6 +59,7 @@ import static org.onlab.util.ImmutableByteSequence.copyFrom;
 import static org.onosproject.net.PortNumber.CONTROLLER;
 import static org.onosproject.net.PortNumber.FLOOD;
 import static org.onosproject.net.flow.instructions.Instruction.Type.OUTPUT;
+import static org.onosproject.net.flow.instructions.Instruction.Type.PROTOCOL_INDEPENDENT;
 import static org.onosproject.net.pi.model.PiPacketOperationType.PACKET_OUT;
 
 import java.nio.charset.StandardCharsets;
@@ -72,6 +75,13 @@ import java.net.URL;
 import java.lang.StringIndexOutOfBoundsException;
 import java.math.BigInteger;
 
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
+import java.io.FileOutputStream;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 /**
  * Implementation of a pipeline interpreter for the dma.p4 program.
  */
@@ -80,7 +90,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     private static final String DOT                 = ".";
     private static final String HDR                 = "hdr";
     private static final String C_INGRESS           = "c_ingress";
-    private static final String T_FWD            = "t_fwd";
+    private static final String T_FWD               = "t_fwd";
     private static final String EGRESS_PORT         = "egress_port";
     private static final String INGRESS_PORT        = "ingress_port";
     private static final String ETHERNET            = "ethernet";
@@ -122,16 +132,27 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     private static final PiMatchFieldId ICMP_CODE_ID    = PiMatchFieldId.of(HDR + DOT + ICMP + DOT + "code");
     private static final PiMatchFieldId ETH_TYPE_ID     = PiMatchFieldId.of(HDR + DOT + ETHERNET + DOT + "ether_type");
 
-    private static final PiTableId TABLE_FWD_ID = PiTableId.of(C_INGRESS + DOT + T_FWD);
+    private static final PiTableId TABLE_FWD_ID         = PiTableId.of(C_INGRESS + DOT + T_FWD);
+    private static final PiTableId TABLE_SKETCHES_ID    = PiTableId.of(C_INGRESS + DOT + "t_sketches");
 
     private static final PiActionId ACT_ID_NOP              = PiActionId.of("NoAction");
     private static final PiActionId ACT_ID_SEND_TO_CPU      = PiActionId.of(C_INGRESS + DOT + "send_to_cpu");
     private static final PiActionId ACT_ID_SET_EGRESS_PORT  = PiActionId.of(C_INGRESS + DOT + "set_out_port");
+    private static final PiActionId ACT_ID_SKETCH_CONFIG    = PiActionId.of(C_INGRESS + DOT + "sketch_config");
 
-    private static final PiActionParamId ACT_PARAM_ID_PORT = PiActionParamId.of("port");
+    private static final PiActionParamId ACT_PARAM_ID_PORT      = PiActionParamId.of("port");
+    private static final PiActionParamId ACT_PARAM_ID_CM_5T     = PiActionParamId.of("cm_5t_flag");
+    private static final PiActionParamId ACT_PARAM_ID_CM_IP     = PiActionParamId.of("cm_ip_flag");
+    private static final PiActionParamId ACT_PARAM_ID_BM_SRC    = PiActionParamId.of("bm_src_flag");
+    private static final PiActionParamId ACT_PARAM_ID_BM_DST    = PiActionParamId.of("bm_dst_flag");
+    private static final PiActionParamId ACT_PARAM_ID_AMS       = PiActionParamId.of("ams_flag");
+    private static final PiActionParamId ACT_PARAM_ID_MV        = PiActionParamId.of("mv_flag");
+    private static final PiActionParamId ACT_PARAM_ID_REG_NUM   = PiActionParamId.of("virtual_register_num");
+    private static final PiActionParamId ACT_PARAM_ID_HASH      = PiActionParamId.of("hash_size");   
 
     private static final Map<Integer, PiTableId> TABLE_MAP = new ImmutableMap.Builder<Integer, PiTableId>()
                                                                     .put(0, TABLE_FWD_ID)
+                                                                    .put(1, TABLE_SKETCHES_ID)
                                                                     .build();
 
     private static final Map<Criterion.Type, PiMatchFieldId> CRITERION_MAP =
@@ -147,9 +168,6 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                     .put(Criterion.Type.TCP_DST, TCP_DST_ID)
                     .put(Criterion.Type.UDP_SRC, UDP_SRC_ID)
                     .put(Criterion.Type.UDP_DST, UDP_DST_ID)
-                    .put(Criterion.Type.TCP_FLAGS, TCP_FLAGS_ID)
-                    .put(Criterion.Type.ICMPV4_TYPE, ICMP_TYPE_ID)
-                    .put(Criterion.Type.ICMPV4_CODE, ICMP_CODE_ID)
                     .build();
 
     private static final int sizeOfIntInHalfBytes = 8;
@@ -172,6 +190,74 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
     @Override
     public PiAction mapTreatment(TrafficTreatment treatment, PiTableId piTableId) throws PiInterpreterException {
+
+        // if (treatment.allInstructions().size() == 0) {
+        //     // 0 instructions means "NoAction"
+        //     return PiAction.builder().withId(ACT_ID_NOP).build();
+        // } else if (treatment.allInstructions().size() > 1) {
+        //     // We understand treatments with only 1 instruction.
+        //     throw new PiInterpreterException("Treatment has multiple instructions");
+        // }
+
+        // // Get the first and only instruction.
+        // Instruction instruction = treatment.allInstructions().get(0);
+
+        // if (instruction.type() == OUTPUT) {
+
+        //     try {
+        //         try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+        //                       new FileOutputStream("/home/shinkirou/spid/filename11111.txt"), "utf-8"))) {
+        //            writer.write("Test");
+        //         }
+        //     } catch (IOException e) {
+        //         e.printStackTrace();
+        //     }             
+
+        //     OutputInstruction outInstruction = (OutputInstruction) instruction;
+        //     PortNumber port = outInstruction.port();
+        //     if (!port.isLogical()) {
+        //         return PiAction.builder()
+        //                 .withId(ACT_ID_SET_EGRESS_PORT)
+        //                 .withParameter(new PiActionParam(
+        //                         ACT_PARAM_ID_PORT, copyFrom(port.toLong())))
+        //                 .build();
+        //     } else if (port.equals(CONTROLLER)) {
+        //         return PiAction.builder()
+        //                 .withId(ACT_ID_SEND_TO_CPU)
+        //                 .build();
+        //     } else {
+        //         throw new PiInterpreterException(format(
+        //                 "Output on logical port '%s' not supported", port));
+        //     }
+        // } else {
+
+        //     try {
+        //         try (Writer writer1 = new BufferedWriter(new OutputStreamWriter(
+        //                       new FileOutputStream("/home/shinkirou/spid/filename.txt"), "utf-8"))) {
+        //            writer1.write("Test");
+        //         }
+        //     } catch (IOException e) {
+        //         e.printStackTrace();
+        //     }            
+
+        //     PiInstruction piInstruction = (PiInstruction) instruction;
+        //     PiTableAction action = piInstruction.action();         
+
+        //     // if (action.toString() == "c_ingress.sketch_config") {
+        //     return PiAction.builder()
+        //             .withId(ACT_ID_SKETCH_CONFIG)
+        //             .withParameter(new PiActionParam(ACT_PARAM_ID_CM_5T, 0))
+        //             .withParameter(new PiActionParam(ACT_PARAM_ID_CM_IP, 0))
+        //             .withParameter(new PiActionParam(ACT_PARAM_ID_BM_SRC, 0))
+        //             .withParameter(new PiActionParam(ACT_PARAM_ID_BM_DST, 0))
+        //             .withParameter(new PiActionParam(ACT_PARAM_ID_AMS, 0))
+        //             .withParameter(new PiActionParam(ACT_PARAM_ID_MV, 0))
+        //             .withParameter(new PiActionParam(ACT_PARAM_ID_REG_NUM, 19))
+        //             .withParameter(new PiActionParam(ACT_PARAM_ID_HASH, 32768))
+        //             .build();
+        //     // }
+        // }
+
 
         if (piTableId != TABLE_FWD_ID) {
             throw new PiInterpreterException(
@@ -481,7 +567,13 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                                         "\"ams\": \"" + amsString + "\" , " +
                                         "\"mv\": \"" + mvString + "\"}";
                                         
-                    dmaPost(dma);                   
+                    dmaPost(dma);      
+                    
+                    // try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                    //               new FileOutputStream("/home/shinkirou/spid/filename.txt"), "utf-8"))) {
+                    //    writer.write(dma);
+                    // }
+
                 }
             }
         } catch (IOException e) {
