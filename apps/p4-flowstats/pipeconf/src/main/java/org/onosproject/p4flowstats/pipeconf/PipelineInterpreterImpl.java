@@ -35,18 +35,19 @@ import org.onosproject.net.flow.instructions.Instructions.OutputInstruction;
 import org.onosproject.net.packet.DefaultInboundPacket;
 import org.onosproject.net.packet.InboundPacket;
 import org.onosproject.net.packet.OutboundPacket;
-import org.onosproject.net.pi.model.PiActionId;
-import org.onosproject.net.pi.model.PiActionParamId;
-import org.onosproject.net.pi.model.PiMatchFieldId;
-import org.onosproject.net.pi.model.PiPacketMetadataId;
-import org.onosproject.net.pi.model.PiPipelineInterpreter;
-import org.onosproject.net.pi.model.PiTableId;
+import org.onosproject.net.pi.model.*;
 import org.onosproject.net.pi.runtime.PiAction;
 import org.onosproject.net.pi.runtime.PiActionParam;
 import org.onosproject.net.pi.runtime.PiPacketMetadata;
 import org.onosproject.net.pi.runtime.PiPacketOperation;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -58,19 +59,6 @@ import static org.onosproject.net.PortNumber.CONTROLLER;
 import static org.onosproject.net.PortNumber.FLOOD;
 import static org.onosproject.net.flow.instructions.Instruction.Type.OUTPUT;
 import static org.onosproject.net.pi.model.PiPacketOperationType.PACKET_OUT;
-
-import java.nio.charset.StandardCharsets;
-import java.io.IOException;
-
-import java.net.InetAddress;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import java.lang.StringIndexOutOfBoundsException;
-import java.math.BigInteger;
 
 /**
  * Implementation of a pipeline interpreter for the flowstats.p4 program.
@@ -344,7 +332,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
                 ByteBuffer ipProtoBB = packetMetadataIpProto.get().value().asReadOnlyBuffer();
                 short ipProto = ipProtoBB.getShort();
-                String ipProtoString = "";
+                String ipProtoString;
                 if (ipProto > 0) {
                     ipProtoString = Short.toString(ipProto);
                 } else {
@@ -355,7 +343,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
                 ByteBuffer portSrcBB = packetMetadataPortSrc.get().value().asReadOnlyBuffer();
                 short portSrc = portSrcBB.getShort();
-                String portSrcString = "";
+                String portSrcString;
                 if (portSrc > 0) {
                     portSrcString = Short.toString(portSrc);
                 } else {
@@ -366,7 +354,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
                 ByteBuffer portDstBB = packetMetadataPortDst.get().value().asReadOnlyBuffer();
                 short portDst = portDstBB.getShort();
-                String portDstString = "";
+                String portDstString;
                 if (portDst > 0) {
                     portDstString = Short.toString(portDst);
                 } else {
@@ -377,7 +365,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
                 ByteBuffer tcpFlagsBB = packetMetadataTcpFlags.get().value().asReadOnlyBuffer();
                 short tcpFlags = tcpFlagsBB.getShort();
-                String tcpFlagsString = "";
+                String tcpFlagsString;
                 if (tcpFlags > 0) {
                     tcpFlagsString = Short.toString(tcpFlags);
                 } else {
@@ -388,7 +376,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
                 ByteBuffer icmpTypeBB = packetMetadataIcmpType.get().value().asReadOnlyBuffer();
                 short icmpType = icmpTypeBB.getShort();
-                String icmpTypeString = "";
+                String icmpTypeString;
                 if (icmpType > 0) {
                     icmpTypeString = Short.toString(icmpType);
                 } else {
@@ -399,7 +387,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
                 ByteBuffer icmpCodeBB = packetMetadataIcmpCode.get().value().asReadOnlyBuffer();
                 short icmpCode = icmpCodeBB.getShort();
-                String icmpCodeString = ""; 
+                String icmpCodeString;
                 if (icmpCode > 0) {
                     icmpCodeString = Short.toString(icmpCode);
                 } else {
@@ -430,7 +418,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
                 ByteBuffer mvBB = packetMetadataMv.get().value().asReadOnlyBuffer();
                 short mv = mvBB.getShort();
-                String mvString = "";
+                String mvString;
                 if (mv > 0) {
                     mvString = Short.toString(mv);
                 } else {
@@ -463,7 +451,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                 //     e.printStackTrace();
                 // }
 
-                if ((ipSrc != 0) && (ipDst != 0)) {
+                if ((ipSrc != 0) && (ipDst != 0) && (!ipSrcString.equals("10.0.0.1")) && (!ipSrcString.equals("10.0.0.2"))) {
 
                     String flowStats = "{\"timestamp\": \"" + tsString + "\" , " +
                                         "\"ipSrc\": \"" + ipSrcString + "\" , " +
@@ -480,7 +468,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                                         "\"bmDst\": \"" + bmDstString + "\" , " +
                                         "\"ams\": \"" + amsString + "\" , " +
                                         "\"mv\": \"" + mvString + "\"}";
-                                        
+
                     flowstatsPost(flowStats);                   
                 }
             }
@@ -546,8 +534,8 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
     public void flowstatsPost(String flowstats) {
 
-        HttpURLConnection conn = null;
-        DataOutputStream os = null;
+        HttpURLConnection conn;
+        DataOutputStream os;
 
         try {
 
