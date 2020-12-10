@@ -7,10 +7,13 @@
 #include "includes/parser.p4"
 #include "includes/deparser.p4"
 #include "includes/threshold.p4"
-#include "includes/sketches/cm_5t.p4"
-#include "includes/sketches/cm_ip.p4"
-#include "includes/sketches/bm_src.p4"
-#include "includes/sketches/bm_dst.p4"
+#include "includes/sketches/cm.p4"
+#include "includes/sketches/bm_ip_src.p4"
+#include "includes/sketches/bm_ip_dst.p4"
+#include "includes/sketches/bm_ip_src_port_src.p4"
+#include "includes/sketches/bm_ip_src_port_dst.p4"
+#include "includes/sketches/bm_ip_dst_port_src.p4"
+#include "includes/sketches/bm_ip_dst_port_dst.p4"
 #include "includes/sketches/ams.p4"
 #include "includes/sketches/mv.p4"
 
@@ -25,14 +28,17 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
     counter(MAX_PORTS, CounterType.packets_and_bytes) tx_port_counter;
     counter(MAX_PORTS, CounterType.packets_and_bytes) rx_port_counter;
 
-	// Control blocks instantiations.
-    c_threshold()   threshold;
-	c_cm_5t()       cm_5t;
-    c_cm_ip()       cm_ip;
-    c_bm_src()      bm_src;
-    c_bm_dst()      bm_dst;
-    c_ams()         ams;
-    c_mv()          mv;
+    // Control block instantiations.
+    c_threshold()           threshold;
+    c_cm()                  cm;
+    c_bm_ip_src()           bm_ip_src;              // Number of different IPs contacted by a src IP.
+    c_bm_ip_dst()           bm_ip_dst;              // Number of different IPs contacted by a dst IP.
+    c_bm_ip_src_port_src()  bm_ip_src_port_src;     // Number of different src ports used by a src IP.
+    c_bm_ip_src_port_dst()  bm_ip_src_port_dst;     // Number of different dst ports contacted by a src IP.
+    c_bm_ip_dst_port_src()  bm_ip_dst_port_src;     // Number of different src ports used to contact a src IP.
+    c_bm_ip_dst_port_dst()  bm_ip_dst_port_dst;     // Number of different dst ports contacted for each dst IP.
+    c_ams()                 ams;
+    c_mv()                  mv;
 
     action send_to_cpu() {
         // Packets sent to the controller needs to be prepended with the packet-in header.
@@ -61,10 +67,6 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             hdr.ipv4.protocol               : ternary;
             hdr.ipv4.src_addr               : ternary;
             hdr.ipv4.dst_addr               : ternary;
-            hdr.udp.src_port                : ternary;
-            hdr.udp.dst_port                : ternary;
-            hdr.tcp.src_port                : ternary;
-            hdr.tcp.dst_port                : ternary;
         }
         actions = {
             set_out_port;
@@ -93,10 +95,13 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             // Applies table t_fwd to the packet.   
             if (t_fwd.apply().hit) {
 
-                cm_5t.apply(hdr, meta, standard_metadata);
-                cm_ip.apply(hdr, meta, standard_metadata);
-                bm_src.apply(hdr, meta, standard_metadata);
-                bm_dst.apply(hdr, meta, standard_metadata);
+                cm.apply(hdr, meta, standard_metadata);
+                bm_ip_src.apply(hdr, meta, standard_metadata);
+                bm_ip_dst.apply(hdr, meta, standard_metadata);
+                bm_ip_src_port_src.apply(hdr, meta, standard_metadata);
+                bm_ip_src_port_dst.apply(hdr, meta, standard_metadata);
+                bm_ip_dst_port_src.apply(hdr, meta, standard_metadata);
+                bm_ip_dst_port_dst.apply(hdr, meta, standard_metadata);
                 ams.apply(hdr, meta, standard_metadata);
                 mv.apply(hdr, meta, standard_metadata);                              
 

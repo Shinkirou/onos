@@ -41,8 +41,7 @@ import org.onosproject.net.pi.runtime.PiActionParam;
 import org.onosproject.net.pi.runtime.PiPacketMetadata;
 import org.onosproject.net.pi.runtime.PiPacketOperation;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
@@ -68,7 +67,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     private static final String DOT                 = ".";
     private static final String HDR                 = "hdr";
     private static final String C_INGRESS           = "c_ingress";
-    private static final String T_FWD            = "t_fwd";
+    private static final String T_FWD               = "t_fwd";
     private static final String EGRESS_PORT         = "egress_port";
     private static final String INGRESS_PORT        = "ingress_port";
     private static final String ETHERNET            = "ethernet";
@@ -83,10 +82,13 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     private static final String TCP_FLAGS           = "tcp_flags";
     private static final String ICMP_TYPE           = "icmp_type";
     private static final String ICMP_CODE           = "icmp_code";
-    private static final String CM_IP               = "cm_ip";
-    private static final String CM_5T               = "cm_5t";
-    private static final String BM_SRC              = "bm_src";
-    private static final String BM_DST              = "bm_dst";
+    private static final String CM                  = "cm";
+    private static final String BM_IP_SRC           = "bm_ip_src";
+    private static final String BM_IP_DST           = "bm_ip_dst";
+    private static final String BM_IP_SRC_PORT_SRC  = "bm_ip_src_port_src";
+    private static final String BM_IP_SRC_PORT_DST  = "bm_ip_src_port_dst";
+    private static final String BM_IP_DST_PORT_SRC  = "bm_ip_dst_port_src";
+    private static final String BM_IP_DST_PORT_DST  = "bm_ip_dst_port_dst";
     private static final String AMS                 = "ams";
     private static final String MV                  = "mv";
     private static final int PORT_FIELD_BITWIDTH    = 9;
@@ -239,12 +241,21 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     public InboundPacket mapInboundPacket(PiPacketOperation packetIn, DeviceId deviceId) throws PiInterpreterException {
         
         // We assume that the packet is ethernet, which is fine since mytunnel.p4 can deparse only ethernet packets.
-        Ethernet ethPkt;       
+        Ethernet ethPkt;
 
         try {
             ethPkt = Ethernet.deserializer().deserialize(packetIn.data().asArray(), 0, packetIn.data().size());
         } catch (DeserializationException dex) {
             throw new PiInterpreterException(dex.getMessage());
+        }
+
+        try {
+            try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream("/home/shinkirou/spid/filename.txt"), StandardCharsets.UTF_8))) {
+                    writer.write("abc");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         // Returns the ingress port packet metadata.
@@ -286,23 +297,35 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
         Optional<PiPacketMetadata> packetMetadataIcmpCode = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(ICMP_CODE))
-                .findFirst();                 
+                .findFirst();
 
-        Optional<PiPacketMetadata> packetMetadataCmIp = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(CM_IP))
+        Optional<PiPacketMetadata> packetMetadataCm = packetIn.metadatas().stream()
+                .filter(metadata -> metadata.id().toString().equals(CM))
                 .findFirst(); 
 
-        Optional<PiPacketMetadata> packetMetadataCm5t = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(CM_5T))
+        Optional<PiPacketMetadata> packetMetadataBmIpSrc = packetIn.metadatas().stream()
+                .filter(metadata -> metadata.id().toString().equals(BM_IP_SRC))
                 .findFirst(); 
 
-        Optional<PiPacketMetadata> packetMetadataBmSrc = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(BM_SRC))
-                .findFirst(); 
+        Optional<PiPacketMetadata> packetMetadataBmIpDst = packetIn.metadatas().stream()
+                .filter(metadata -> metadata.id().toString().equals(BM_IP_DST))
+                .findFirst();
 
-        Optional<PiPacketMetadata> packetMetadataBmDst = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(BM_DST))
-                .findFirst();   
+        Optional<PiPacketMetadata> packetMetadataBmIpSrcPortSrc = packetIn.metadatas().stream()
+                .filter(metadata -> metadata.id().toString().equals(BM_IP_SRC_PORT_SRC))
+                .findFirst();
+
+        Optional<PiPacketMetadata> packetMetadataBmIpSrcPortDst = packetIn.metadatas().stream()
+                .filter(metadata -> metadata.id().toString().equals(BM_IP_SRC_PORT_DST))
+                .findFirst();
+
+        Optional<PiPacketMetadata> packetMetadataBmIpDstPortSrc = packetIn.metadatas().stream()
+                .filter(metadata -> metadata.id().toString().equals(BM_IP_DST_PORT_SRC))
+                .findFirst();
+
+        Optional<PiPacketMetadata> packetMetadataBmIpDstPortDst = packetIn.metadatas().stream()
+                .filter(metadata -> metadata.id().toString().equals(BM_IP_DST_PORT_DST))
+                .findFirst();
 
         Optional<PiPacketMetadata> packetMetadataAms = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(AMS))
@@ -310,11 +333,20 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
         Optional<PiPacketMetadata> packetMetadataMv = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(MV))
-                .findFirst();                                                                                                                                               
+                .findFirst();
 
         try {                   
 
             if (packetMetadataIpDst.isPresent() && packetMetadataIpSrc.isPresent()) {
+
+                try {
+                    try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                            new FileOutputStream("/home/shinkirou/spid/filename1.txt"), StandardCharsets.UTF_8))) {
+                        writer.write("abc");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 ByteBuffer tsBB = packetMetadataTs.get().value().asReadOnlyBuffer();
                 long ts = tsBB.getLong();
@@ -396,21 +428,33 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                     icmpCodeString = Integer.toString(icmpCodeParsed);
                 }                               
 
-                ByteBuffer cmIpBB = packetMetadataCmIp.get().value().asReadOnlyBuffer();
-                int cmIp = cmIpBB.getInt();
-                String cmIpString = Integer.toString(cmIp);
+                ByteBuffer cmBB = packetMetadataCm.get().value().asReadOnlyBuffer();
+                int cm = cmBB.getInt();
+                String cmString = Integer.toString(cm);
 
-                ByteBuffer cm5tBB = packetMetadataCm5t.get().value().asReadOnlyBuffer();
-                int cm5t = cm5tBB.getInt();
-                String cm5tString = Integer.toString(cm5t);
+                ByteBuffer bmIpSrcBB = packetMetadataBmIpSrc.get().value().asReadOnlyBuffer();
+                int bmIpSrc = bmIpSrcBB.getInt();
+                String bmIpSrcString = Integer.toString(bmIpSrc);
 
-                ByteBuffer bmSrcBB = packetMetadataBmSrc.get().value().asReadOnlyBuffer();
-                int bmSrc = bmSrcBB.getInt();
-                String bmSrcString = Integer.toString(bmSrc);
+                ByteBuffer bmIpDstBB = packetMetadataBmIpDst.get().value().asReadOnlyBuffer();
+                int bmIpDst = bmIpDstBB.getInt();
+                String bmIpDstString = Integer.toString(bmIpDst);
 
-                ByteBuffer bmDstBB = packetMetadataBmDst.get().value().asReadOnlyBuffer();
-                int bmDst = bmDstBB.getInt();
-                String bmDstString = Integer.toString(bmDst);
+                ByteBuffer bmIpSrcPortSrcBB = packetMetadataBmIpSrcPortSrc.get().value().asReadOnlyBuffer();
+                int bmIpSrcPortSrc = bmIpSrcPortSrcBB.getInt();
+                String bmIpSrcPortSrcString = Integer.toString(bmIpSrcPortSrc);
+
+                ByteBuffer bmIpSrcPortDstBB = packetMetadataBmIpSrcPortDst.get().value().asReadOnlyBuffer();
+                int bmIpSrcPortDst = bmIpSrcPortDstBB.getInt();
+                String bmIpSrcPortDstString = Integer.toString(bmIpSrcPortDst);
+
+                ByteBuffer bmIpDstPortSrcBB = packetMetadataBmIpDstPortSrc.get().value().asReadOnlyBuffer();
+                int bmIpDstPortSrc = bmIpDstPortSrcBB.getInt();
+                String bmIpDstPortSrcString = Integer.toString(bmIpDstPortSrc);
+
+                ByteBuffer bmIpDstPortDstBB = packetMetadataBmIpDstPortDst.get().value().asReadOnlyBuffer();
+                int bmIpDstPortDst = bmIpDstPortDstBB.getInt();
+                String bmIpDstPortDstString = Integer.toString(bmIpDstPortDst);
 
                 ByteBuffer amsBB = packetMetadataAms.get().value().asReadOnlyBuffer();
                 int ams = amsBB.getInt();
@@ -453,23 +497,37 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
                 if ((ipSrc != 0) && (ipDst != 0) && (!ipSrcString.equals("10.0.0.1")) && (!ipSrcString.equals("10.0.0.2"))) {
 
-                    String flowStats = "{\"timestamp\": \"" + tsString + "\" , " +
-                                        "\"ipSrc\": \"" + ipSrcString + "\" , " +
-                                        "\"ipDst\": \"" + ipDstString + "\" , " +
-                                        "\"ipProto\": \"" + ipProtoString + "\" , " +
-                                        "\"srcPort\": \"" + portSrcString + "\" , " +
-                                        "\"dstPort\": \"" + portDstString + "\" , " +
-                                        "\"tcpFlags\": \"" + tcpFlagsString + "\" , " +
-                                        "\"icmpType\": \"" + icmpTypeString + "\" , " +
-                                        "\"icmpCode\": \"" + icmpCodeString + "\" , " +
-                                        "\"cmIp\": \"" + cmIpString + "\" , " +
-                                        "\"cm5t\": \"" + cm5tString + "\" , " +
-                                        "\"bmSrc\": \"" + bmSrcString + "\" , " +
-                                        "\"bmDst\": \"" + bmDstString + "\" , " +
-                                        "\"ams\": \"" + amsString + "\" , " +
-                                        "\"mv\": \"" + mvString + "\"}";
+                    String flowStats =
+                            "{\"initial_ts\": \"" + tsString + "\" , " +
+                            "\"current_ts\": \"" + tsString + "\" , " +
+                            "\"ip_src\": \"" + ipSrcString + "\" , " +
+                            "\"ip_dst\": \"" + ipDstString + "\" , " +
+                            "\"ip_proto\": \"" + ipProtoString + "\" , " +
+                            "\"port_src\": \"" + portSrcString + "\" , " +
+                            "\"port_dst\": \"" + portDstString + "\" , " +
+                            "\"tcp_flags\": \"" + tcpFlagsString + "\" , " +
+                            "\"icmp_type\": \"" + icmpTypeString + "\" , " +
+                            "\"icmp_code\": \"" + icmpCodeString + "\" , " +
+                            "\"cm\": \"" + cmString + "\" , " +
+                            "\"bm_ip_src\": \"" + bmIpSrcString + "\" , " +
+                            "\"bm_ip_dst\": \"" + bmIpDstString + "\" , " +
+                            "\"bm_ip_src_port_src\": \"" + bmIpSrcPortSrcString + "\" , " +
+                            "\"bm_ip_src_port_dst\": \"" + bmIpSrcPortDstString + "\" , " +
+                            "\"bm_ip_dst_port_src\": \"" + bmIpDstPortSrcString + "\" , " +
+                            "\"bm_ip_dst_port_dst\": \"" + bmIpDstPortDstString + "\" , " +
+                            "\"ams\": \"" + amsString + "\" , " +
+                            "\"mv\": \"" + mvString + "\"}";
 
-                    flowstatsPost(flowStats);                   
+                    try {
+                        try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                                new FileOutputStream("/home/shinkirou/spid/filenamec.txt"), StandardCharsets.UTF_8))) {
+                            writer.write("abc");
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    flowstatsPost(flowStats);
                 }
             }
         } catch (IOException e) {
