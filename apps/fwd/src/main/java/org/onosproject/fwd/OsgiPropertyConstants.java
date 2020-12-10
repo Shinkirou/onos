@@ -55,7 +55,7 @@ public final class OsgiPropertyConstants {
     static final boolean MATCH_IPV6_FLOW_LABEL_DEFAULT = false;
 
     static final String MATCH_TCP_UDP_PORTS = "matchTcpUdpPorts";
-    static final boolean MATCH_TCP_UDP_PORTS_DEFAULT = true;
+    static final boolean MATCH_TCP_UDP_PORTS_DEFAULT = false;
 
     static final String MATCH_ICMP_FIELDS = "matchIcmpFields";
     static final boolean MATCH_ICMP_FIELDS_DEFAULT = false;
