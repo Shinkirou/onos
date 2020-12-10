@@ -64,6 +64,7 @@ import static org.onosproject.k8snetworking.api.Constants.DST;
 import static org.onosproject.k8snetworking.api.Constants.HOST_PREFIX;
 import static org.onosproject.k8snetworking.api.Constants.K8S_NETWORKING_APP_ID;
 import static org.onosproject.k8snetworking.api.Constants.LOCAL_ENTRY_TABLE;
+import static org.onosproject.k8snetworking.api.Constants.NODE_IP_PREFIX;
 import static org.onosproject.k8snetworking.api.Constants.PRIORITY_ARP_REPLY_RULE;
 import static org.onosproject.k8snetworking.api.Constants.PRIORITY_GATEWAY_RULE;
 import static org.onosproject.k8snetworking.api.Constants.PRIORITY_INTER_NODE_RULE;
@@ -226,14 +227,12 @@ public class K8sSwitchingGatewayHandler {
         }
     }
 
-    private void setInterNodeRoutingRules(K8sNetwork k8sNetwork, boolean install) {
-        K8sNode srcNode = k8sNodeService.node(k8sNetwork.name());
-
+    private void setInterNodeRoutingRules(K8sNode srcNode, boolean install) {
         if (srcNode == null) {
             return;
         }
 
-        for (K8sNode dstNode : k8sNodeService.completeNodes()) {
+        for (K8sNode dstNode : k8sNodeService.nodes()) {
             if (StringUtils.equals(srcNode.hostname(), dstNode.hostname())) {
                 continue;
             }
@@ -279,6 +278,23 @@ public class K8sSwitchingGatewayHandler {
                         appId,
                         dstNode.tunBridge(),
                         transformedSelector,
+                        treatment,
+                        PRIORITY_INTER_NODE_RULE,
+                        TUN_ENTRY_TABLE,
+                        install);
+
+                String nodeIpPrefix = NODE_IP_PREFIX + ".0.0.0/8";
+
+                TrafficSelector nodePortSelector = DefaultTrafficSelector.builder()
+                        .matchEthType(Ethernet.TYPE_IPV4)
+                        .matchIPSrc(IpPrefix.valueOf(nodeIpPrefix))
+                        .matchIPDst(IpPrefix.valueOf(dstNode.podCidr()))
+                        .build();
+
+                k8sFlowRuleService.setRule(
+                        appId,
+                        dstNode.tunBridge(),
+                        nodePortSelector,
                         treatment,
                         PRIORITY_INTER_NODE_RULE,
                         TUN_ENTRY_TABLE,
@@ -407,7 +423,9 @@ public class K8sSwitchingGatewayHandler {
             setGatewayRule(event.subject(), true);
             setLocalBridgeRules(event.subject(), true);
             setLocalBridgeArpRules(event.subject(), true);
-            setInterNodeRoutingRules(event.subject(), true);
+
+            K8sNode k8sNode = k8sNodeService.node(event.subject().networkId());
+            setInterNodeRoutingRules(k8sNode, true);
         }
 
         private void processNetworkRemoval(K8sNetworkEvent event) {
@@ -418,7 +436,9 @@ public class K8sSwitchingGatewayHandler {
             setGatewayRule(event.subject(), false);
             setLocalBridgeRules(event.subject(), false);
             setLocalBridgeArpRules(event.subject(), false);
-            setInterNodeRoutingRules(event.subject(), false);
+
+            K8sNode k8sNode = k8sNodeService.node(event.subject().networkId());
+            setInterNodeRoutingRules(k8sNode, false);
         }
     }
 
@@ -449,7 +469,8 @@ public class K8sSwitchingGatewayHandler {
             k8sNetworkService.networks().forEach(n -> setGatewayRule(n, true));
             k8sNetworkService.networks().forEach(n -> setLocalBridgeRules(n, true));
             k8sNetworkService.networks().forEach(n -> setLocalBridgeArpRules(n, true));
-            k8sNetworkService.networks().forEach(n -> setInterNodeRoutingRules(n, true));
+
+            setInterNodeRoutingRules(node, true);
         }
     }
 }

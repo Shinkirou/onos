@@ -177,7 +177,6 @@ public class K8sNodeWebResource extends AbstractWebResource {
         return Response.noContent().build();
     }
 
-
     /**
      * Obtains the state of the kubernetes node.
      *

@@ -631,7 +631,9 @@ public class K8sServiceHandler {
                 .matchIPSrc(prefix)
                 .matchIPDst(IpPrefix.valueOf(network.cidr()));
 
-        k8sNodeService.completeNodes().forEach(n -> {
+        Set<K8sNode> nodes = install ? k8sNodeService.completeNodes() : k8sNodeService.nodes();
+
+        nodes.forEach(n -> {
             TrafficTreatment.Builder tBuilder = DefaultTrafficTreatment.builder()
                     .setTunnelId(Long.valueOf(network.segmentId()));
 
@@ -982,7 +984,6 @@ public class K8sServiceHandler {
                     eventExecutor.execute(() -> processNodeCompletion(k8sNode));
                     break;
                 case K8S_NODE_INCOMPLETE:
-                case K8S_NODE_REMOVED:
                 default:
                     break;
             }
