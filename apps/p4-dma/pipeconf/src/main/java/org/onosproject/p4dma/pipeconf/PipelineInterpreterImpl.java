@@ -32,23 +32,21 @@ import org.onosproject.net.flow.TrafficTreatment;
 import org.onosproject.net.flow.criteria.Criterion;
 import org.onosproject.net.flow.instructions.Instruction;
 import org.onosproject.net.flow.instructions.Instructions.OutputInstruction;
-import org.onosproject.net.flow.instructions.PiInstruction;
-import org.onosproject.net.pi.runtime.PiTableAction;
 import org.onosproject.net.packet.DefaultInboundPacket;
 import org.onosproject.net.packet.InboundPacket;
 import org.onosproject.net.packet.OutboundPacket;
-import org.onosproject.net.pi.model.PiActionId;
-import org.onosproject.net.pi.model.PiActionParamId;
-import org.onosproject.net.pi.model.PiMatchFieldId;
-import org.onosproject.net.pi.model.PiPacketMetadataId;
-import org.onosproject.net.pi.model.PiPipelineInterpreter;
-import org.onosproject.net.pi.model.PiTableId;
+import org.onosproject.net.pi.model.*;
 import org.onosproject.net.pi.runtime.PiAction;
 import org.onosproject.net.pi.runtime.PiActionParam;
 import org.onosproject.net.pi.runtime.PiPacketMetadata;
 import org.onosproject.net.pi.runtime.PiPacketOperation;
 
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -59,28 +57,7 @@ import static org.onlab.util.ImmutableByteSequence.copyFrom;
 import static org.onosproject.net.PortNumber.CONTROLLER;
 import static org.onosproject.net.PortNumber.FLOOD;
 import static org.onosproject.net.flow.instructions.Instruction.Type.OUTPUT;
-import static org.onosproject.net.flow.instructions.Instruction.Type.PROTOCOL_INDEPENDENT;
 import static org.onosproject.net.pi.model.PiPacketOperationType.PACKET_OUT;
-
-import java.nio.charset.StandardCharsets;
-import java.io.IOException;
-
-import java.net.InetAddress;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import java.lang.StringIndexOutOfBoundsException;
-import java.math.BigInteger;
-
-import java.io.BufferedWriter;
-import java.io.OutputStreamWriter;
-import java.io.FileOutputStream;
-import java.io.Writer;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 /**
  * Implementation of a pipeline interpreter for the dma.p4 program.
@@ -105,10 +82,13 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     private static final String TCP_FLAGS           = "tcp_flags";
     private static final String ICMP_TYPE           = "icmp_type";
     private static final String ICMP_CODE           = "icmp_code";
-    private static final String CM_IP               = "cm_ip";
-    private static final String CM_5T               = "cm_5t";
-    private static final String BM_SRC              = "bm_src";
-    private static final String BM_DST              = "bm_dst";
+    private static final String CM                  = "cm";
+    private static final String BM_IP_SRC           = "bm_ip_src";
+    private static final String BM_IP_DST           = "bm_ip_dst";
+    private static final String BM_IP_SRC_PORT_SRC  = "bm_ip_src_port_src";
+    private static final String BM_IP_SRC_PORT_DST  = "bm_ip_src_port_dst";
+    private static final String BM_IP_DST_PORT_SRC  = "bm_ip_dst_port_src";
+    private static final String BM_IP_DST_PORT_DST  = "bm_ip_dst_port_dst";
     private static final String AMS                 = "ams";
     private static final String MV                  = "mv";
     private static final int PORT_FIELD_BITWIDTH    = 9;
@@ -132,28 +112,17 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     private static final PiMatchFieldId ICMP_CODE_ID    = PiMatchFieldId.of(HDR + DOT + ICMP + DOT + "code");
     private static final PiMatchFieldId ETH_TYPE_ID     = PiMatchFieldId.of(HDR + DOT + ETHERNET + DOT + "ether_type");
 
-    private static final PiTableId TABLE_FWD_ID         = PiTableId.of(C_INGRESS + DOT + T_FWD);
-    private static final PiTableId TABLE_SKETCHES_ID    = PiTableId.of(C_INGRESS + DOT + "t_sketches");
+    private static final PiTableId TABLE_FWD_ID = PiTableId.of(C_INGRESS + DOT + T_FWD);
 
     private static final PiActionId ACT_ID_NOP              = PiActionId.of("NoAction");
     private static final PiActionId ACT_ID_SEND_TO_CPU      = PiActionId.of(C_INGRESS + DOT + "send_to_cpu");
     private static final PiActionId ACT_ID_SET_EGRESS_PORT  = PiActionId.of(C_INGRESS + DOT + "set_out_port");
-    private static final PiActionId ACT_ID_SKETCH_CONFIG    = PiActionId.of(C_INGRESS + DOT + "sketch_config");
 
-    private static final PiActionParamId ACT_PARAM_ID_PORT      = PiActionParamId.of("port");
-    private static final PiActionParamId ACT_PARAM_ID_CM_5T     = PiActionParamId.of("cm_5t_flag");
-    private static final PiActionParamId ACT_PARAM_ID_CM_IP     = PiActionParamId.of("cm_ip_flag");
-    private static final PiActionParamId ACT_PARAM_ID_BM_SRC    = PiActionParamId.of("bm_src_flag");
-    private static final PiActionParamId ACT_PARAM_ID_BM_DST    = PiActionParamId.of("bm_dst_flag");
-    private static final PiActionParamId ACT_PARAM_ID_AMS       = PiActionParamId.of("ams_flag");
-    private static final PiActionParamId ACT_PARAM_ID_MV        = PiActionParamId.of("mv_flag");
-    private static final PiActionParamId ACT_PARAM_ID_REG_NUM   = PiActionParamId.of("virtual_register_num");
-    private static final PiActionParamId ACT_PARAM_ID_HASH      = PiActionParamId.of("hash_size");   
+    private static final PiActionParamId ACT_PARAM_ID_PORT = PiActionParamId.of("port");
 
     private static final Map<Integer, PiTableId> TABLE_MAP = new ImmutableMap.Builder<Integer, PiTableId>()
-                                                                    .put(0, TABLE_FWD_ID)
-                                                                    .put(1, TABLE_SKETCHES_ID)
-                                                                    .build();
+            .put(0, TABLE_FWD_ID)
+            .build();
 
     private static final Map<Criterion.Type, PiMatchFieldId> CRITERION_MAP =
             ImmutableMap.<Criterion.Type, PiMatchFieldId>builder()
@@ -168,6 +137,9 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                     .put(Criterion.Type.TCP_DST, TCP_DST_ID)
                     .put(Criterion.Type.UDP_SRC, UDP_SRC_ID)
                     .put(Criterion.Type.UDP_DST, UDP_DST_ID)
+                    .put(Criterion.Type.TCP_FLAGS, TCP_FLAGS_ID)
+                    .put(Criterion.Type.ICMPV4_TYPE, ICMP_TYPE_ID)
+                    .put(Criterion.Type.ICMPV4_CODE, ICMP_CODE_ID)
                     .build();
 
     private static final int sizeOfIntInHalfBytes = 8;
@@ -190,74 +162,6 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
     @Override
     public PiAction mapTreatment(TrafficTreatment treatment, PiTableId piTableId) throws PiInterpreterException {
-
-        // if (treatment.allInstructions().size() == 0) {
-        //     // 0 instructions means "NoAction"
-        //     return PiAction.builder().withId(ACT_ID_NOP).build();
-        // } else if (treatment.allInstructions().size() > 1) {
-        //     // We understand treatments with only 1 instruction.
-        //     throw new PiInterpreterException("Treatment has multiple instructions");
-        // }
-
-        // // Get the first and only instruction.
-        // Instruction instruction = treatment.allInstructions().get(0);
-
-        // if (instruction.type() == OUTPUT) {
-
-        //     try {
-        //         try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-        //                       new FileOutputStream("/home/shinkirou/spid/filename11111.txt"), "utf-8"))) {
-        //            writer.write("Test");
-        //         }
-        //     } catch (IOException e) {
-        //         e.printStackTrace();
-        //     }             
-
-        //     OutputInstruction outInstruction = (OutputInstruction) instruction;
-        //     PortNumber port = outInstruction.port();
-        //     if (!port.isLogical()) {
-        //         return PiAction.builder()
-        //                 .withId(ACT_ID_SET_EGRESS_PORT)
-        //                 .withParameter(new PiActionParam(
-        //                         ACT_PARAM_ID_PORT, copyFrom(port.toLong())))
-        //                 .build();
-        //     } else if (port.equals(CONTROLLER)) {
-        //         return PiAction.builder()
-        //                 .withId(ACT_ID_SEND_TO_CPU)
-        //                 .build();
-        //     } else {
-        //         throw new PiInterpreterException(format(
-        //                 "Output on logical port '%s' not supported", port));
-        //     }
-        // } else {
-
-        //     try {
-        //         try (Writer writer1 = new BufferedWriter(new OutputStreamWriter(
-        //                       new FileOutputStream("/home/shinkirou/spid/filename.txt"), "utf-8"))) {
-        //            writer1.write("Test");
-        //         }
-        //     } catch (IOException e) {
-        //         e.printStackTrace();
-        //     }            
-
-        //     PiInstruction piInstruction = (PiInstruction) instruction;
-        //     PiTableAction action = piInstruction.action();         
-
-        //     // if (action.toString() == "c_ingress.sketch_config") {
-        //     return PiAction.builder()
-        //             .withId(ACT_ID_SKETCH_CONFIG)
-        //             .withParameter(new PiActionParam(ACT_PARAM_ID_CM_5T, 0))
-        //             .withParameter(new PiActionParam(ACT_PARAM_ID_CM_IP, 0))
-        //             .withParameter(new PiActionParam(ACT_PARAM_ID_BM_SRC, 0))
-        //             .withParameter(new PiActionParam(ACT_PARAM_ID_BM_DST, 0))
-        //             .withParameter(new PiActionParam(ACT_PARAM_ID_AMS, 0))
-        //             .withParameter(new PiActionParam(ACT_PARAM_ID_MV, 0))
-        //             .withParameter(new PiActionParam(ACT_PARAM_ID_REG_NUM, 19))
-        //             .withParameter(new PiActionParam(ACT_PARAM_ID_HASH, 32768))
-        //             .build();
-        //     // }
-        // }
-
 
         if (piTableId != TABLE_FWD_ID) {
             throw new PiInterpreterException(
@@ -350,234 +254,137 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                 .filter(metadata -> metadata.id().toString().equals(INGRESS_PORT))
                 .findFirst();
 
-        Optional<PiPacketMetadata> packetMetadataTs = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(TIMESTAMP))
-                .findFirst();
-
         Optional<PiPacketMetadata> packetMetadataIpSrc = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(IP_SRC))
-                .findFirst();  
-                
+                .findFirst();
+
         Optional<PiPacketMetadata> packetMetadataIpDst = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(IP_DST))
                 .findFirst();
 
-        Optional<PiPacketMetadata> packetMetadataIpProto = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(IP_PROTO))
-                .findFirst();                
+        if (packetMetadataIpDst.isPresent() && packetMetadataIpSrc.isPresent()) {
 
-        Optional<PiPacketMetadata> packetMetadataPortSrc = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(PORT_SRC))
-                .findFirst();
+            ByteBuffer[] packetMetadataArray = new ByteBuffer[18];
 
-        Optional<PiPacketMetadata> packetMetadataPortDst = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(PORT_DST))
-                .findFirst(); 
+            ByteBuffer ipSrcBB = packetMetadataIpSrc.get().value().asReadOnlyBuffer();
+            ByteBuffer ipDstBB = packetMetadataIpDst.get().value().asReadOnlyBuffer();
 
-        Optional<PiPacketMetadata> packetMetadataTcpFlags = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(TCP_FLAGS))
-                .findFirst();                
+            packetMetadataArray[1] = ipSrcBB;
+            packetMetadataArray[2] = ipDstBB;
 
-        Optional<PiPacketMetadata> packetMetadataIcmpType = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(ICMP_TYPE))
-                .findFirst(); 
+            Optional<PiPacketMetadata> packetMetadataTs = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(TIMESTAMP))
+                    .findFirst();
 
-        Optional<PiPacketMetadata> packetMetadataIcmpCode = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(ICMP_CODE))
-                .findFirst();                 
+            packetMetadataTs.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[0] = piPacketMetadata.value().asReadOnlyBuffer());
 
-        Optional<PiPacketMetadata> packetMetadataCmIp = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(CM_IP))
-                .findFirst(); 
+            Optional<PiPacketMetadata> packetMetadataIpProto = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(IP_PROTO))
+                    .findFirst();
 
-        Optional<PiPacketMetadata> packetMetadataCm5t = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(CM_5T))
-                .findFirst(); 
+            packetMetadataIpProto.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[3] = piPacketMetadata.value().asReadOnlyBuffer());
 
-        Optional<PiPacketMetadata> packetMetadataBmSrc = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(BM_SRC))
-                .findFirst(); 
+            Optional<PiPacketMetadata> packetMetadataPortSrc = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(PORT_SRC))
+                    .findFirst();
 
-        Optional<PiPacketMetadata> packetMetadataBmDst = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(BM_DST))
-                .findFirst();   
+            packetMetadataPortSrc.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[4] = piPacketMetadata.value().asReadOnlyBuffer());
 
-        Optional<PiPacketMetadata> packetMetadataAms = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(AMS))
-                .findFirst();
+            Optional<PiPacketMetadata> packetMetadataPortDst = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(PORT_DST))
+                    .findFirst();
 
-        Optional<PiPacketMetadata> packetMetadataMv = packetIn.metadatas().stream()
-                .filter(metadata -> metadata.id().toString().equals(MV))
-                .findFirst();                                                                                                                                               
+            packetMetadataPortDst.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[5] = piPacketMetadata.value().asReadOnlyBuffer());
 
-        try {                   
+            Optional<PiPacketMetadata> packetMetadataTcpFlags = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(TCP_FLAGS))
+                    .findFirst();
 
-            if (packetMetadataIpDst.isPresent() && packetMetadataIpSrc.isPresent()) {
+            packetMetadataTcpFlags.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[6] = piPacketMetadata.value().asReadOnlyBuffer());
 
-                ByteBuffer tsBB = packetMetadataTs.get().value().asReadOnlyBuffer();
-                long ts = tsBB.getLong();
-                String tsString = Long.toString(ts);
+            Optional<PiPacketMetadata> packetMetadataIcmpType = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(ICMP_TYPE))
+                    .findFirst();
 
-                ByteBuffer ipSrcBB = packetMetadataIpSrc.get().value().asReadOnlyBuffer();
-                int ipSrc = ipSrcBB.getInt();
-                String ipSrcHex = decToHex(ipSrc);
-                String ipSrcString = InetAddress.getByAddress(hexStringToByteArray(ipSrcHex)).toString().split("/")[1];
+            packetMetadataIcmpType.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[7] = piPacketMetadata.value().asReadOnlyBuffer());
 
-                ByteBuffer ipDstBB = packetMetadataIpDst.get().value().asReadOnlyBuffer();
-                int ipDst = ipDstBB.getInt();
-                String ipDstHex = decToHex(ipDst);
-                String ipDstString = InetAddress.getByAddress(hexStringToByteArray(ipDstHex)).toString().split("/")[1];                
+            Optional<PiPacketMetadata> packetMetadataIcmpCode = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(ICMP_CODE))
+                    .findFirst();
 
-                ByteBuffer ipProtoBB = packetMetadataIpProto.get().value().asReadOnlyBuffer();
-                short ipProto = ipProtoBB.getShort();
-                String ipProtoString = "";
-                if (ipProto > 0) {
-                    ipProtoString = Short.toString(ipProto);
-                } else {
-                    String ipProtoHex = decToHex(ipProto & 0xffff);
-                    int ipProtoParsed = (int) Long.parseLong(ipProtoHex, 16);
-                    ipProtoString = Integer.toString(ipProtoParsed);
-                }
+            packetMetadataIcmpCode.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[8] = piPacketMetadata.value().asReadOnlyBuffer());
 
-                ByteBuffer portSrcBB = packetMetadataPortSrc.get().value().asReadOnlyBuffer();
-                short portSrc = portSrcBB.getShort();
-                String portSrcString = "";
-                if (portSrc > 0) {
-                    portSrcString = Short.toString(portSrc);
-                } else {
-                    String portSrcHex = decToHex(portSrc & 0xffff);
-                    int portSrcParsed = (int) Long.parseLong(portSrcHex, 16);
-                    portSrcString = Integer.toString(portSrcParsed);
-                }
+            Optional<PiPacketMetadata> packetMetadataCm = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(CM))
+                    .findFirst();
 
-                ByteBuffer portDstBB = packetMetadataPortDst.get().value().asReadOnlyBuffer();
-                short portDst = portDstBB.getShort();
-                String portDstString = "";
-                if (portDst > 0) {
-                    portDstString = Short.toString(portDst);
-                } else {
-                    String portDstHex = decToHex(portDst & 0xffff);
-                    int portDstParsed = (int) Long.parseLong(portDstHex, 16);
-                    portDstString = Integer.toString(portDstParsed);
-                }
+            packetMetadataCm.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[9] = piPacketMetadata.value().asReadOnlyBuffer());
 
-                ByteBuffer tcpFlagsBB = packetMetadataTcpFlags.get().value().asReadOnlyBuffer();
-                short tcpFlags = tcpFlagsBB.getShort();
-                String tcpFlagsString = "";
-                if (tcpFlags > 0) {
-                    tcpFlagsString = Short.toString(tcpFlags);
-                } else {
-                    String tcpFlagsHex = decToHex(tcpFlags & 0xffff);
-                    int tcpFlagsParsed = (int) Long.parseLong(tcpFlagsHex, 16);
-                    tcpFlagsString = Integer.toString(tcpFlagsParsed);
-                }                                                
+            Optional<PiPacketMetadata> packetMetadataBmIpSrc = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(BM_IP_SRC))
+                    .findFirst();
 
-                ByteBuffer icmpTypeBB = packetMetadataIcmpType.get().value().asReadOnlyBuffer();
-                short icmpType = icmpTypeBB.getShort();
-                String icmpTypeString = "";
-                if (icmpType > 0) {
-                    icmpTypeString = Short.toString(icmpType);
-                } else {
-                    String icmpTypeHex = decToHex(icmpType & 0xffff);
-                    int icmpTypeParsed = (int) Long.parseLong(icmpTypeHex, 16);
-                    icmpTypeString = Integer.toString(icmpTypeParsed);
-                }
+            packetMetadataBmIpSrc.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[10] = piPacketMetadata.value().asReadOnlyBuffer());
 
-                ByteBuffer icmpCodeBB = packetMetadataIcmpCode.get().value().asReadOnlyBuffer();
-                short icmpCode = icmpCodeBB.getShort();
-                String icmpCodeString = ""; 
-                if (icmpCode > 0) {
-                    icmpCodeString = Short.toString(icmpCode);
-                } else {
-                    String icmpCodeHex = decToHex(icmpCode & 0xffff);
-                    int icmpCodeParsed = (int) Long.parseLong(icmpCodeHex, 16);
-                    icmpCodeString = Integer.toString(icmpCodeParsed);
-                }                               
+            Optional<PiPacketMetadata> packetMetadataBmIpDst = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(BM_IP_DST))
+                    .findFirst();
 
-                ByteBuffer cmIpBB = packetMetadataCmIp.get().value().asReadOnlyBuffer();
-                int cmIp = cmIpBB.getInt();
-                String cmIpString = Integer.toString(cmIp);
+            packetMetadataBmIpDst.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[11] = piPacketMetadata.value().asReadOnlyBuffer());
 
-                ByteBuffer cm5tBB = packetMetadataCm5t.get().value().asReadOnlyBuffer();
-                int cm5t = cm5tBB.getInt();
-                String cm5tString = Integer.toString(cm5t);
+            Optional<PiPacketMetadata> packetMetadataBmIpSrcPortSrc = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(BM_IP_SRC_PORT_SRC))
+                    .findFirst();
 
-                ByteBuffer bmSrcBB = packetMetadataBmSrc.get().value().asReadOnlyBuffer();
-                int bmSrc = bmSrcBB.getInt();
-                String bmSrcString = Integer.toString(bmSrc);
+            packetMetadataBmIpSrcPortSrc.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[12] = piPacketMetadata.value().asReadOnlyBuffer());
 
-                ByteBuffer bmDstBB = packetMetadataBmDst.get().value().asReadOnlyBuffer();
-                int bmDst = bmDstBB.getInt();
-                String bmDstString = Integer.toString(bmDst);
+            Optional<PiPacketMetadata> packetMetadataBmIpSrcPortDst = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(BM_IP_SRC_PORT_DST))
+                    .findFirst();
 
-                ByteBuffer amsBB = packetMetadataAms.get().value().asReadOnlyBuffer();
-                int ams = amsBB.getInt();
-                String amsString = Integer.toString(ams);
+            packetMetadataBmIpSrcPortDst.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[13] = piPacketMetadata.value().asReadOnlyBuffer());
 
-                ByteBuffer mvBB = packetMetadataMv.get().value().asReadOnlyBuffer();
-                short mv = mvBB.getShort();
-                String mvString = "";
-                if (mv > 0) {
-                    mvString = Short.toString(mv);
-                } else {
-                    String mvHex = decToHex(mv & 0xffff);
-                    int mvParsed = (int) Long.parseLong(mvHex, 16);
-                    mvString = Integer.toString(mvParsed);
-                }
+            Optional<PiPacketMetadata> packetMetadataBmIpDstPortSrc = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(BM_IP_DST_PORT_SRC))
+                    .findFirst();
 
-                // long mv = mvBB.getLong();
-                // String mvBinaryString = Long.toBinaryString(mv);
+            packetMetadataBmIpDstPortSrc.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[14] = piPacketMetadata.value().asReadOnlyBuffer());
 
-                // String mvSrcString = "";
-                // String mvDstString = "";
+            Optional<PiPacketMetadata> packetMetadataBmIpDstPortDst = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(BM_IP_DST_PORT_DST))
+                    .findFirst();
 
-                // try {
-                    
-                //     String mvBinarySrcString = mvBinaryString.substring(0, 32);
-                //     String mvBinaryDstString = mvBinaryString.substring(32);
+            packetMetadataBmIpDstPortDst.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[15] = piPacketMetadata.value().asReadOnlyBuffer());
 
-                //     long mv1 = new BigInteger(mvBinarySrcString, 2).longValue();
-                //     long mv2 = new BigInteger(mvBinaryDstString, 2).longValue();
+            Optional<PiPacketMetadata> packetMetadataAms = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(AMS))
+                    .findFirst();
 
-                //     String mvSrcHex = Long.toHexString(mv1);
-                //     String mvDstHex = Long.toHexString(mv2);                     
+            packetMetadataAms.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[16] = piPacketMetadata.value().asReadOnlyBuffer());
 
-                //     mvSrcString = InetAddress.getByAddress(hexStringToByteArray(mvSrcHex)).toString().split("/")[1];
-                //     mvDstString = InetAddress.getByAddress(hexStringToByteArray(mvDstHex)).toString().split("/")[1];         
+            Optional<PiPacketMetadata> packetMetadataMv = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(MV))
+                    .findFirst();
 
-                // } catch (StringIndexOutOfBoundsException e) {
-                //     e.printStackTrace();
-                // }
+            packetMetadataMv.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[17] = piPacketMetadata.value().asReadOnlyBuffer());
 
-                if ((ipSrc != 0) && (ipDst != 0)) {
-
-                    String dma = "{\"timestamp\": \"" + tsString + "\" , " +
-                                        "\"ipSrc\": \"" + ipSrcString + "\" , " +
-                                        "\"ipDst\": \"" + ipDstString + "\" , " +
-                                        "\"ipProto\": \"" + ipProtoString + "\" , " +
-                                        "\"srcPort\": \"" + portSrcString + "\" , " +
-                                        "\"dstPort\": \"" + portDstString + "\" , " +
-                                        "\"tcpFlags\": \"" + tcpFlagsString + "\" , " +
-                                        "\"icmpType\": \"" + icmpTypeString + "\" , " +
-                                        "\"icmpCode\": \"" + icmpCodeString + "\" , " +
-                                        "\"cmIp\": \"" + cmIpString + "\" , " +
-                                        "\"cm5t\": \"" + cm5tString + "\" , " +
-                                        "\"bmSrc\": \"" + bmSrcString + "\" , " +
-                                        "\"bmDst\": \"" + bmDstString + "\" , " +
-                                        "\"ams\": \"" + amsString + "\" , " +
-                                        "\"mv\": \"" + mvString + "\"}";
-                                        
-                    dmaPost(dma);      
-                    
-                    // try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-                    //               new FileOutputStream("/home/shinkirou/spid/filename.txt"), "utf-8"))) {
-                    //    writer.write(dma);
-                    // }
-
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+            retrievePacketMetadata(packetMetadataArray);
         }
 
         if (packetMetadataIngress.isPresent()) {
@@ -636,10 +443,134 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
         return data;
     }
 
+    public void retrievePacketMetadata(ByteBuffer[] packetMetadataArray) {
+
+        try {
+
+            String tsString = Long.toString(packetMetadataArray[0].getLong());
+
+            String ipSrcHex = decToHex(packetMetadataArray[1].getInt());
+            String ipSrcString = InetAddress.getByAddress(hexStringToByteArray(ipSrcHex)).toString().split("/")[1];
+
+            String ipDstHex = decToHex(packetMetadataArray[2].getInt());
+            String ipDstString = InetAddress.getByAddress(hexStringToByteArray(ipDstHex)).toString().split("/")[1];
+
+            short ipProto = packetMetadataArray[3].getShort();
+            String ipProtoString;
+            if (ipProto > 0) {
+                ipProtoString = Short.toString(ipProto);
+            } else {
+                String ipProtoHex = decToHex(ipProto & 0xffff);
+                int ipProtoParsed = (int) Long.parseLong(ipProtoHex, 16);
+                ipProtoString = Integer.toString(ipProtoParsed);
+            }
+
+            short portSrc = packetMetadataArray[4].getShort();
+            String portSrcString;
+            if (portSrc > 0) {
+                portSrcString = Short.toString(portSrc);
+            } else {
+                String portSrcHex = decToHex(portSrc & 0xffff);
+                int portSrcParsed = (int) Long.parseLong(portSrcHex, 16);
+                portSrcString = Integer.toString(portSrcParsed);
+            }
+
+            short portDst = packetMetadataArray[5].getShort();
+            String portDstString;
+            if (portDst > 0) {
+                portDstString = Short.toString(portDst);
+            } else {
+                String portDstHex = decToHex(portDst & 0xffff);
+                int portDstParsed = (int) Long.parseLong(portDstHex, 16);
+                portDstString = Integer.toString(portDstParsed);
+            }
+
+            short tcpFlags = packetMetadataArray[6].getShort();
+            String tcpFlagsString;
+            if (tcpFlags > 0) {
+                tcpFlagsString = Short.toString(tcpFlags);
+            } else {
+                String tcpFlagsHex = decToHex(tcpFlags & 0xffff);
+                int tcpFlagsParsed = (int) Long.parseLong(tcpFlagsHex, 16);
+                tcpFlagsString = Integer.toString(tcpFlagsParsed);
+            }
+
+            short icmpType = packetMetadataArray[7].getShort();
+            String icmpTypeString;
+            if (icmpType > 0) {
+                icmpTypeString = Short.toString(icmpType);
+            } else {
+                String icmpTypeHex = decToHex(icmpType & 0xffff);
+                int icmpTypeParsed = (int) Long.parseLong(icmpTypeHex, 16);
+                icmpTypeString = Integer.toString(icmpTypeParsed);
+            }
+
+            short icmpCode = packetMetadataArray[8].getShort();
+            String icmpCodeString;
+            if (icmpCode > 0) {
+                icmpCodeString = Short.toString(icmpCode);
+            } else {
+                String icmpCodeHex = decToHex(icmpCode & 0xffff);
+                int icmpCodeParsed = (int) Long.parseLong(icmpCodeHex, 16);
+                icmpCodeString = Integer.toString(icmpCodeParsed);
+            }
+
+            String cmString = Integer.toString(packetMetadataArray[9].getInt());
+            String bmIpSrcString = Integer.toString(packetMetadataArray[10].getInt());
+            String bmIpDstString = Integer.toString(packetMetadataArray[11].getInt());
+            String bmIpSrcPortSrcString = Integer.toString(packetMetadataArray[12].getInt());
+            String bmIpSrcPortDstString = Integer.toString(packetMetadataArray[13].getInt());
+            String bmIpDstPortSrcString = Integer.toString(packetMetadataArray[14].getInt());
+            String bmIpDstPortDstString = Integer.toString(packetMetadataArray[15].getInt());
+            String amsString = Integer.toString(packetMetadataArray[16].getInt());
+
+            short mv = packetMetadataArray[17].getShort();
+            String mvString;
+            if (mv > 0) {
+                mvString = Short.toString(mv);
+            } else {
+                String mvHex = decToHex(mv & 0xffff);
+                int mvParsed = (int) Long.parseLong(mvHex, 16);
+                mvString = Integer.toString(mvParsed);
+            }
+
+            if ((!ipSrcString.equals("0")) &&
+                (!ipDstString.equals("0")) &&
+                (!ipSrcString.equals("10.0.0.1")) &&
+                (!ipSrcString.equals("10.0.0.2"))) {
+
+                String dma =
+                        "{\"initial_ts\": \"" + tsString + "\" , " +
+                        "\"current_ts\": \"" + tsString + "\" , " +
+                        "\"ip_src\": \"" + ipSrcString + "\" , " +
+                        "\"ip_dst\": \"" + ipDstString + "\" , " +
+                        "\"ip_proto\": \"" + ipProtoString + "\" , " +
+                        "\"port_src\": \"" + portSrcString + "\" , " +
+                        "\"port_dst\": \"" + portDstString + "\" , " +
+                        "\"tcp_flags\": \"" + tcpFlagsString + "\" , " +
+                        "\"icmp_type\": \"" + icmpTypeString + "\" , " +
+                        "\"icmp_code\": \"" + icmpCodeString + "\" , " +
+                        "\"cm\": \"" + cmString + "\" , " +
+                        "\"bm_ip_src\": \"" + bmIpSrcString + "\" , " +
+                        "\"bm_ip_dst\": \"" + bmIpDstString + "\" , " +
+                        "\"bm_ip_src_port_src\": \"" + bmIpSrcPortSrcString + "\" , " +
+                        "\"bm_ip_src_port_dst\": \"" + bmIpSrcPortDstString + "\" , " +
+                        "\"bm_ip_dst_port_src\": \"" + bmIpDstPortSrcString + "\" , " +
+                        "\"bm_ip_dst_port_dst\": \"" + bmIpDstPortDstString + "\" , " +
+                        "\"ams\": \"" + amsString + "\" , " +
+                        "\"mv\": \"" + mvString + "\"}";
+
+                dmaPost(dma);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void dmaPost(String dma) {
 
-        HttpURLConnection conn = null;
-        DataOutputStream os = null;
+        HttpURLConnection conn;
+        DataOutputStream os;
 
         try {
 

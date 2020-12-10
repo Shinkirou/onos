@@ -9,10 +9,13 @@
 #include "includes/set_reg.p4"
 #include "includes/epoch.p4"
 #include "includes/threshold.p4"
-#include "includes/sketches/cm_5t.p4"
-#include "includes/sketches/cm_ip.p4"
-#include "includes/sketches/bm_src.p4"
-#include "includes/sketches/bm_dst.p4"
+#include "includes/sketches/cm.p4"
+#include "includes/sketches/bm_ip_src.p4"
+#include "includes/sketches/bm_ip_dst.p4"
+#include "includes/sketches/bm_ip_src_port_src.p4"
+#include "includes/sketches/bm_ip_src_port_dst.p4"
+#include "includes/sketches/bm_ip_dst_port_src.p4"
+#include "includes/sketches/bm_ip_dst_port_dst.p4"
 #include "includes/sketches/ams.p4"
 #include "includes/sketches/mv.p4"
 
@@ -27,16 +30,19 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
     counter(MAX_PORTS, CounterType.packets_and_bytes) tx_port_counter;
     counter(MAX_PORTS, CounterType.packets_and_bytes) rx_port_counter;
 
-    c_threshold() threshold;
-
-	c_cm_5t() 	cm_5t;
-	c_cm_ip()	cm_ip;
-	c_bm_src()	bm_src; 
-	c_bm_dst()	bm_dst;
-	c_ams() 	ams;
-	c_mv() 		mv;
+    // Control block instantiations.
+    c_threshold()           threshold;
+    c_cm()                  cm;
+    c_bm_ip_src()           bm_ip_src;              // Number of different IPs contacted by a src IP.
+    c_bm_ip_dst()           bm_ip_dst;              // Number of different IPs contacted by a dst IP.
+    c_bm_ip_src_port_src()  bm_ip_src_port_src;     // Number of different src ports used by a src IP.
+    c_bm_ip_src_port_dst()  bm_ip_src_port_dst;     // Number of different dst ports contacted by a src IP.
+    c_bm_ip_dst_port_src()  bm_ip_dst_port_src;     // Number of different src ports used to contact a src IP.
+    c_bm_ip_dst_port_dst()  bm_ip_dst_port_dst;     // Number of different dst ports contacted for each dst IP.
+    c_ams() 	            ams;
+    c_mv()                  mv;
 	
-	action _drop() {}
+    action _drop() {}
 	
     action send_to_cpu() {
         // Packets sent to the controller needs to be prepended with the packet-in header.
@@ -51,39 +57,41 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         standard_metadata.egress_spec = port;
     }
 
-	action sketch_config(bit<32> cm_5t_flag, bit<32> cm_ip_flag, bit<32> bm_src_flag, bit<32> bm_dst_flag, bit<32> ams_flag, bit<32> mv_flag, bit<32> virtual_register_num, bit<32> hash_size) {
+    action sketch_config(bit<32> cm_flag, bit<32> bm_ip_src_flag, bit<32> bm_ip_dst_flag,
+                         bit<32> bm_ip_src_port_src_flag, bit<32> bm_ip_src_port_dst_flag,
+                         bit<32> bm_ip_dst_port_src_flag, bit<32> bm_ip_dst_port_dst_flag,
+                         bit<32> ams_flag, bit<32> mv_flag, bit<32> virtual_register_num, bit<32> hash_size) {
 		
-		meta.reg.cm_5t = cm_5t_flag;
-		meta.reg.cm_ip = cm_ip_flag;
-		meta.reg.bm_src = bm_src_flag;
-		meta.reg.bm_dst = bm_dst_flag;
-		meta.reg.ams = ams_flag;
-		meta.reg.mv = mv_flag;
+        meta.reg.cm = cm_flag;
+        meta.reg.bm_ip_src = bm_ip_src_flag;
+        meta.reg.bm_ip_dst = bm_ip_dst_flag;
+        meta.reg.bm_ip_src_port_src = bm_ip_src_port_src_flag;
+        meta.reg.bm_ip_src_port_dst = bm_ip_src_port_dst_flag;
+        meta.reg.bm_ip_dst_port_src = bm_ip_dst_port_src_flag;
+        meta.reg.bm_ip_dst_port_dst = bm_ip_dst_port_dst_flag;
+        meta.reg.ams = ams_flag;
+        meta.reg.mv = mv_flag;
 
-		meta.reg.virtual_register_num = virtual_register_num;
-		meta.reg.hash_size = hash_size;
-	}
+        meta.reg.virtual_register_num = virtual_register_num;
+        meta.reg.hash_size = hash_size;
+    }
 
-	action epoch_read() {
-		register_epoch.read(meta.epoch.current_epoch, 0);
-	}
+    action epoch_read() {
+        register_epoch.read(meta.epoch.current_epoch, 0);
+    }
 
-	// Table counter used to count packets and bytes matched by each entry of t_fwd table.
+    // Table counter used to count packets and bytes matched by each entry of t_fwd table.
     direct_counter(CounterType.packets_and_bytes) fwd_counter;	
 		
-	table t_fwd {
-		key = {
-			standard_metadata.ingress_port  : ternary;
-			hdr.ethernet.dst_addr           : ternary;
-			hdr.ethernet.src_addr           : ternary;
-			hdr.ethernet.ether_type         : ternary;
-			hdr.ipv4.protocol               : ternary;
-			hdr.ipv4.src_addr               : ternary;
-			hdr.ipv4.dst_addr               : ternary;
-			hdr.udp.src_port                : ternary;
-			hdr.udp.dst_port                : ternary;
-			hdr.tcp.src_port                : ternary;
-			hdr.tcp.dst_port                : ternary;
+    table t_fwd {
+        key = {
+            standard_metadata.ingress_port  : ternary;
+            hdr.ethernet.dst_addr           : ternary;
+            hdr.ethernet.src_addr           : ternary;
+            hdr.ethernet.ether_type         : ternary;
+            hdr.ipv4.protocol               : ternary;
+            hdr.ipv4.src_addr               : ternary;
+            hdr.ipv4.dst_addr               : ternary;
         }
         actions = {
             set_out_port;
@@ -96,21 +104,21 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         counters = fwd_counter;
     }
 
-	table t_sketches {
-		key = {
-			hdr.ethernet.ether_type : exact;
+    table t_sketches {
+        key = {
+            hdr.ethernet.ether_type : exact;
         }		
-		actions = {
-			sketch_config;
-			_drop;
-		}
-		default_action = _drop();
-	}
+        actions = {
+            sketch_config;
+            _drop;
+        }
+        default_action = _drop();
+    }
 	
-	apply {
+    apply {
 
-		meta.reg.current_register = 0;
-		meta.reg.current_index = 0;
+        meta.reg.current_register = 0;
+        meta.reg.current_index = 0;
 
         if (standard_metadata.ingress_port == CPU_PORT) {
 
@@ -123,52 +131,63 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 
             // Packet received from data plane port.
             // Applies table t_fwd to the packet. 				
-			if (t_fwd.apply().hit) {
+            if (t_fwd.apply().hit) {
 
-				// Check which sketches are active.
-				// Update the number of required virtual registers accordingly.	
+                // Check which sketches are active.
+                // Update the number of required virtual registers accordingly.
 
-				if (hdr.ipv4.isValid()) {
+                if (hdr.ipv4.isValid()) {
 					
-					t_sketches.apply();
+                    t_sketches.apply();
 
-					// Read the epoch value bit defined by the operator in register_epoch.
-					// This value will be used to check against the epoch values stored in the sketch registers.
-					epoch_read();			
+                    // Read the epoch value bit defined by the operator in register_epoch.
+                    // This value will be used to check against the epoch values stored in the sketch registers.
+                    epoch_read();
 
-					// Execute the active sketching algorithms.
-					// Defined by the operator through the t_sketches table rules.
+                    // Execute the active sketching algorithms.
+                    // Defined by the operator through the t_sketches table rules.
 
-					if (meta.reg.cm_5t == 0) {
-						cm_5t.apply(hdr, meta, standard_metadata);
-					}
+                    if (meta.reg.cm == 0) {
+                        cm.apply(hdr, meta, standard_metadata);
+                    }
 
-					if (meta.reg.cm_ip == 0) {
-						cm_ip.apply(hdr, meta, standard_metadata);
-					}
+                    if (meta.reg.bm_ip_src == 0) {
+                        bm_ip_src.apply(hdr, meta, standard_metadata);
+                    }
 
-					if (meta.reg.bm_src == 0) {
-						bm_src.apply(hdr, meta, standard_metadata);
-					}
+                    if (meta.reg.bm_ip_dst == 0) {
+                        bm_ip_dst.apply(hdr, meta, standard_metadata);
+                    }
 
-					if (meta.reg.bm_dst == 0) {
-						bm_dst.apply(hdr, meta, standard_metadata);
-					}
+                    if (meta.reg.bm_ip_src_port_src == 0) {
+                        bm_ip_src_port_src.apply(hdr, meta, standard_metadata);
+                    }
 
-					if (meta.reg.ams == 0) {
-						ams.apply(hdr, meta, standard_metadata);
-					}
+                    if (meta.reg.bm_ip_src_port_dst == 0) {
+                        bm_ip_src_port_dst.apply(hdr, meta, standard_metadata);
+                    }
+                    if (meta.reg.bm_ip_dst_port_src == 0) {
+                        bm_ip_dst_port_src.apply(hdr, meta, standard_metadata);
+                    }
 
-					if (meta.reg.mv == 0) {
-						mv.apply(hdr, meta, standard_metadata);
-					}							
-				}
+                    if (meta.reg.bm_ip_dst_port_dst == 0) {
+                        bm_ip_dst_port_dst.apply(hdr, meta, standard_metadata);
+                    }
 
-				threshold.apply(hdr, meta, standard_metadata);
+                    if (meta.reg.ams == 0) {
+                        ams.apply(hdr, meta, standard_metadata);
+                    }
+
+                    if (meta.reg.mv == 0) {
+                        mv.apply(hdr, meta, standard_metadata);
+                    }
+                }
+
+                threshold.apply(hdr, meta, standard_metadata);
 				
-				return;
-			}
-		}
+                return;
+            }
+        }
 
         if (standard_metadata.egress_spec < MAX_PORTS) {
             tx_port_counter.count((bit<32>) standard_metadata.egress_spec);
@@ -176,7 +195,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         if (standard_metadata.ingress_port < MAX_PORTS) {
             rx_port_counter.count((bit<32>) standard_metadata.ingress_port);
         }
-	}
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -184,7 +203,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 //------------------------------------------------------------------------------
 
 control c_egress(inout headers_t hdr,inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-	apply {}
+    apply {}
 }
 
 //------------------------------------------------------------------------------
@@ -192,11 +211,11 @@ control c_egress(inout headers_t hdr,inout metadata_t meta, inout standard_metad
 //------------------------------------------------------------------------------
 
 control c_verify_checksum(inout headers_t hdr, inout metadata_t meta) {   
-	apply {}
+    apply {}
 }
 
 control c_compute_checksum(inout headers_t hdr, inout metadata_t meta) {
-	apply {}
+    apply {}
 }
 
 //------------------------------------------------------------------------------

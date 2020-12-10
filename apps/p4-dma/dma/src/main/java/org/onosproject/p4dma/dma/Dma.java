@@ -16,79 +16,28 @@
 
 package org.onosproject.p4dma.dma;
 
-import com.google.common.collect.Lists;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.onlab.packet.IpAddress;
+import org.onosproject.cfg.ComponentConfigService;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.core.CoreService;
-import org.onosproject.net.DeviceId;
-import org.onosproject.net.Host;
-import org.onosproject.net.Link;
-import org.onosproject.net.Path;
-import org.onosproject.net.PortNumber;
-import org.onosproject.net.flow.DefaultFlowRule;
-import org.onosproject.net.flow.DefaultTrafficSelector;
-import org.onosproject.net.flow.DefaultTrafficTreatment;
-import org.onosproject.net.flow.FlowRule;
-import org.onosproject.net.flow.FlowRuleService;
-import org.onosproject.net.flow.criteria.PiCriterion;
-import org.onosproject.net.host.HostEvent;
-import org.onosproject.net.host.HostListener;
+import org.onosproject.net.flow.*;
+import org.onosproject.net.flow.criteria.Criterion.Type;
+import org.onosproject.net.flow.criteria.EthCriterion;
+import org.onosproject.net.flow.criteria.IPCriterion;
 import org.onosproject.net.host.HostService;
-import org.onosproject.net.pi.model.PiActionId;
-import org.onosproject.net.pi.model.PiActionParamId;
-import org.onosproject.net.pi.model.PiMatchFieldId;
-import org.onosproject.net.pi.model.PiTableId;
-import org.onosproject.net.pi.runtime.PiAction;
-import org.onosproject.net.pi.runtime.PiActionParam;
-import org.onosproject.net.topology.Topology;
 import org.onosproject.net.topology.TopologyService;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
-import static org.onosproject.net.flow.FlowRuleEvent.Type.RULE_UPDATED;
-import static org.onosproject.net.flow.FlowRuleEvent.Type.RULE_ADDED;
-import org.onosproject.net.flow.FlowRuleListener;
-import org.onosproject.net.flow.FlowRuleEvent;
-import org.onosproject.net.flow.FlowEntry;
 import java.util.Map;
-import org.onosproject.net.flow.criteria.Criterion.Type;
-import org.onosproject.net.flow.criteria.IPCriterion;
-import org.onosproject.net.flow.criteria.Criterion;
-import org.onosproject.net.flow.criteria.EthCriterion;
-
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.onosproject.cfg.ComponentConfigService;
-import org.osgi.service.component.ComponentContext;
-import java.util.Dictionary;
-import org.onlab.util.Tools;
+import static org.onosproject.net.flow.FlowRuleEvent.Type.RULE_ADDED;
+import static org.onosproject.net.flow.FlowRuleEvent.Type.RULE_UPDATED;
+import static org.slf4j.LoggerFactory.getLogger;
 
-import static org.onosproject.p4dma.dma.OsgiPropertyConstants.FLOW_RULE_CM_SKETCH;
-import static org.onosproject.p4dma.dma.OsgiPropertyConstants.FLOW_RULE_CM_SKETCH_DEFAULT;
-import static org.onosproject.p4dma.dma.OsgiPropertyConstants.FLOW_RULE_BM_SKETCH;
-import static org.onosproject.p4dma.dma.OsgiPropertyConstants.FLOW_RULE_BM_SKETCH_DEFAULT;
-import static org.onosproject.p4dma.dma.OsgiPropertyConstants.FLOW_RULE_AMS_SKETCH;
-import static org.onosproject.p4dma.dma.OsgiPropertyConstants.FLOW_RULE_AMS_SKETCH_DEFAULT;
-import static org.onosproject.p4dma.dma.OsgiPropertyConstants.FLOW_RULE_MV_SKETCH;
-import static org.onosproject.p4dma.dma.OsgiPropertyConstants.FLOW_RULE_MV_SKETCH_DEFAULT;
-
-@Component(    
-    immediate = true,
-    service = Dma.class,
-    property = {
-        FLOW_RULE_CM_SKETCH  + ":Boolean=" + FLOW_RULE_CM_SKETCH_DEFAULT,
-        FLOW_RULE_BM_SKETCH  + ":Boolean=" + FLOW_RULE_BM_SKETCH_DEFAULT,
-        FLOW_RULE_AMS_SKETCH + ":Boolean=" + FLOW_RULE_AMS_SKETCH_DEFAULT,
-        FLOW_RULE_MV_SKETCH  + ":Boolean=" + FLOW_RULE_MV_SKETCH_DEFAULT,
-    }
-)
 public class Dma {
 
     private static final String APP_NAME = "org.onosproject.p4dma.dma";
@@ -100,15 +49,6 @@ public class Dma {
     private static Long globalMinFlowCount = 1L;
     private static Map<Long,Long> flowCountMap    = new ConcurrentHashMap<Long,Long>();
     private static Map<Long,FlowRule> flowRuleMap = new ConcurrentHashMap<Long,FlowRule>();
-
-    private static final PiActionParamId ACT_PARAM_ID_CM_5T     = PiActionParamId.of("cm_5t_flag");
-    private static final PiActionParamId ACT_PARAM_ID_CM_IP     = PiActionParamId.of("cm_ip_flag");
-    private static final PiActionParamId ACT_PARAM_ID_BM_SRC    = PiActionParamId.of("bm_src_flag");
-    private static final PiActionParamId ACT_PARAM_ID_BM_DST    = PiActionParamId.of("bm_dst_flag");
-    private static final PiActionParamId ACT_PARAM_ID_AMS       = PiActionParamId.of("ams_flag");
-    private static final PiActionParamId ACT_PARAM_ID_MV        = PiActionParamId.of("mv_flag");
-    private static final PiActionParamId ACT_PARAM_ID_REG_NUM   = PiActionParamId.of("virtual_register_num");
-    private static final PiActionParamId ACT_PARAM_ID_HASH      = PiActionParamId.of("hash_size");      
 
     // Default priority used for flow rules installed by this app.
     private static final int FLOW_RULE_PRIORITY = 100;
@@ -144,20 +84,13 @@ public class Dma {
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
 
-    // Sketch flow rule variables.
-    private boolean flowRuleCmSketch  = FLOW_RULE_CM_SKETCH_DEFAULT;
-    private boolean flowRuleBmSketch  = FLOW_RULE_BM_SKETCH_DEFAULT;
-    private boolean flowRuleAmsSketch = FLOW_RULE_AMS_SKETCH_DEFAULT;
-    private boolean flowRuleMvSketch  = FLOW_RULE_MV_SKETCH_DEFAULT;
-
     @Activate
-    public void activate(ComponentContext context) {
+    public void activate() {
         // Register app and event listeners.
         log.info("Starting...");
         appId = coreService.registerApplication(APP_NAME);
         cfgService.registerProperties(getClass());
         flowRuleService.addListener(flowListener);
-        readComponentConfiguration(context);
         log.info("STARTED", appId.id());
     }
 
@@ -169,113 +102,6 @@ public class Dma {
         flowRuleService.removeListener(flowListener);
         flowRuleService.removeFlowRulesById(appId);
         log.info("STOPPED");
-    }
-
-    @Modified
-    public void modified(ComponentContext context) {
-        readComponentConfiguration(context);
-    }    
-
-    /**
-     * Extracts properties from the component configuration context.
-     *
-     * @param context the component context
-     */
-    private void readComponentConfiguration(ComponentContext context) {
-        Dictionary<?, ?> properties = context.getProperties();
-
-        Boolean flowRuleCmSketchEnabled = Tools.isPropertyEnabled(properties, FLOW_RULE_CM_SKETCH);
-        if (flowRuleCmSketchEnabled == null) {
-            log.info("Flow Rule: CM Sketch is not configured, " + "using current value of {}", flowRuleCmSketch);
-        } else {
-            flowRuleCmSketch = flowRuleCmSketchEnabled;
-            if (flowRuleCmSketch == true) {
-                // Hardcoded for now.
-                insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_cm");
-            }
-            log.info("Configured. Flow Rule: CM Sketch is {}", flowRuleCmSketch ? "enabled" : "disabled");
-        }
-
-        Boolean flowRuleBmSketchEnabled = Tools.isPropertyEnabled(properties, FLOW_RULE_BM_SKETCH);
-        if (flowRuleBmSketchEnabled == null) {
-            log.info("Flow Rule: BM Sketch is not configured, " + "using current value of {}", flowRuleBmSketch);
-        } else {
-            flowRuleBmSketch = flowRuleBmSketchEnabled;
-            if (flowRuleBmSketch == true) {
-                // Hardcoded for now.
-                insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_bm");
-            }
-            log.info("Configured. Flow Rule: BM Sketch is {}", flowRuleBmSketch ? "enabled" : "disabled");
-        }
-
-        Boolean flowRuleAmsSketchEnabled = Tools.isPropertyEnabled(properties, FLOW_RULE_AMS_SKETCH);
-        if (flowRuleAmsSketchEnabled == null) {
-            log.info("Flow Rule: AMS Sketch is not configured, " + "using current value of {}", flowRuleAmsSketch);
-        } else {
-            flowRuleAmsSketch = flowRuleAmsSketchEnabled;
-            if (flowRuleAmsSketch == true) {
-                // Hardcoded for now.
-                insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_ams");
-            }
-            log.info("Configured. Flow Rule: AMS Sketch is {}", flowRuleAmsSketch ? "enabled" : "disabled");
-        }
-
-        Boolean flowRuleMvSketchEnabled = Tools.isPropertyEnabled(properties, FLOW_RULE_MV_SKETCH);
-        if (flowRuleMvSketchEnabled == null) {
-            log.info("Flow Rule: MV Sketch is not configured, " + "using current value of {}", flowRuleMvSketch);
-        } else {
-            flowRuleMvSketch = flowRuleMvSketchEnabled;
-            if (flowRuleMvSketch == true) {
-                // Hardcoded for now.
-                // insertSketchFlowRule(DeviceId.deviceId("device:bmv2:s1"), "c_ingress.t_mv");
-            }
-            log.info("Configured. Flow Rule: MV Sketch is {}", flowRuleMvSketch ? "enabled" : "disabled");
-        }                        
-    }
-
-    private void insertSketchFlowRule(DeviceId switchId, String tableId) {
-
-        PiMatchFieldId etherTypeMatchFieldId = PiMatchFieldId.of("hdr.ethernet.ether_type");
-        PiTableId forwardingTableId = PiTableId.of(tableId);
-
-        // IPv4.
-        short matchExactShort1 = 0x800;
-
-        PiCriterion match = PiCriterion.builder().matchExact(etherTypeMatchFieldId, matchExactShort1).build();
-
-        PiActionId actionId = PiActionId.of("c_ingress.sketch_config");
-        
-        PiAction action = PiAction.builder()
-                .withId(actionId)
-                .withParameter(new PiActionParam(ACT_PARAM_ID_CM_5T, 0))
-                .withParameter(new PiActionParam(ACT_PARAM_ID_CM_IP, 0))
-                .withParameter(new PiActionParam(ACT_PARAM_ID_BM_SRC, 0))
-                .withParameter(new PiActionParam(ACT_PARAM_ID_BM_DST, 0))
-                .withParameter(new PiActionParam(ACT_PARAM_ID_AMS, 0))
-                .withParameter(new PiActionParam(ACT_PARAM_ID_MV, 0))
-                .withParameter(new PiActionParam(ACT_PARAM_ID_REG_NUM, 19))
-                .withParameter(new PiActionParam(ACT_PARAM_ID_HASH, 32768))
-                .build();
-
-        log.info("Inserting INGRESS rule on switch {}: table={}, match={}, action={}",
-                 switchId, forwardingTableId, match, action);
-
-        insertPiFlowRule(switchId, forwardingTableId, match, action);
-    }
-
-    private void insertPiFlowRule(DeviceId switchId, PiTableId tableId, PiCriterion piCriterion, PiAction piAction) {
-        
-        FlowRule rule = DefaultFlowRule.builder()
-                .forDevice(switchId)
-                .forTable(tableId)
-                .fromApp(appId)
-                .withPriority(FLOW_RULE_PRIORITY)
-                .makePermanent()
-                .withSelector(DefaultTrafficSelector.builder().matchPi(piCriterion).build())
-                .withTreatment(DefaultTrafficTreatment.builder().piTableAction(piAction).build())
-                .build();
-        
-        flowRuleService.applyFlowRules(rule);
     }
 
     private void writeUpdatedFlow(FlowRule flowRule) {
@@ -312,6 +138,7 @@ public class Dma {
 
         FlowEntry flowEntry = getFlowEntry(flowRule);
 
+        assert flowEntry != null;
         Long flowPackets = flowEntry.packets() + 1;
 
         Long flowId = flowRule.id().value();
@@ -329,15 +156,12 @@ public class Dma {
 
             flowPacketsMap.put(flowId, Long.toString(flowPackets));
             flowBytesMap.put(flowId, Long.toString(flowEntry.bytes()));
-
-        } else {
-            return;
         }
     }
 
     private Long checkFlowUpdate(Long flowPackets, Long flowId) {
 
-        Long flowPacketsOld = 0L;
+        Long flowPacketsOld;
 
         try {
             flowPacketsOld = Long.parseLong(flowPacketsMap.get(flowId));    
@@ -381,7 +205,6 @@ public class Dma {
            
             if (flowCountMap.size() < FLOW_TABLE_SIZE) {
                 flowCountMap.put(flowId, newFlowPackets);
-                flowRuleMap.putIfAbsent(flowId, flowRule);
             } else {
                 Long minFlowCountKey = getMinFlowCount();
                 FlowRule minFlowRule = flowRuleMap.get(minFlowCountKey);
@@ -389,8 +212,8 @@ public class Dma {
                 Long minFlowCount = flowCountMap.get(minFlowCountKey);
                 flowCountMap.remove(minFlowCountKey);
                 flowCountMap.put(flowId, minFlowCount + newFlowPackets);
-                flowRuleMap.putIfAbsent(flowId, flowRule);
             }
+            flowRuleMap.putIfAbsent(flowId, flowRule);
         }
     }
 
@@ -411,12 +234,11 @@ public class Dma {
     private Long getMinFlowCount() {
         
         Long minFlowKey = 0L;
-        Long minFlowCount = Long.MAX_VALUE;
+        long minFlowCount = Long.MAX_VALUE;
         
         for (Long key : flowCountMap.keySet()) {
             Long flowCount = flowCountMap.get(key);
-            if (flowCount == globalMinFlowCount) {
-                minFlowCount = flowCount;
+            if (flowCount.equals(globalMinFlowCount)) {
                 minFlowKey = key;
                 return minFlowKey;
             }
