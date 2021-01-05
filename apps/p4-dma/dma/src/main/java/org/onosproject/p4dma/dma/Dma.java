@@ -42,13 +42,13 @@ public class Dma {
 
     private static final String APP_NAME = "org.onosproject.p4dma.dma";
 
-    private static Map<Long,String> flowPacketsMap  = new ConcurrentHashMap<Long,String>();
-    private static Map<Long,String> flowBytesMap    = new ConcurrentHashMap<Long,String>();
+    private static Map<Long,String> flowPacketsMap  = new ConcurrentHashMap<>();
+    private static Map<Long,String> flowBytesMap    = new ConcurrentHashMap<>();
 
     // Aux structs for the space-saving algorithm flow count. 
     private static Long globalMinFlowCount = 1L;
-    private static Map<Long,Long> flowCountMap    = new ConcurrentHashMap<Long,Long>();
-    private static Map<Long,FlowRule> flowRuleMap = new ConcurrentHashMap<Long,FlowRule>();
+    private static Map<Long,Long> flowCountMap    = new ConcurrentHashMap<>();
+    private static Map<Long,FlowRule> flowRuleMap = new ConcurrentHashMap<>();
 
     // Default priority used for flow rules installed by this app.
     private static final int FLOW_RULE_PRIORITY = 100;

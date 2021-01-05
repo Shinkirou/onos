@@ -71,8 +71,8 @@ public final class PortStatisticsDiscoveryImpl extends AbstractHandlerBehaviour 
 
         // Get the pipeconf of this device.
         PiPipeconfService piPipeconfService = handler().get(PiPipeconfService.class);
-        if (!piPipeconfService.ofDevice(deviceId).isPresent() ||
-                !piPipeconfService.getPipeconf(piPipeconfService.ofDevice(deviceId).get()).isPresent()) {
+        if (piPipeconfService.ofDevice(deviceId).isEmpty() ||
+                piPipeconfService.getPipeconf(piPipeconfService.ofDevice(deviceId).get()).isEmpty()) {
             log.warn("Unable to get the pipeconf of {}, aborting operation", deviceId);
             return Collections.emptyList();
         }

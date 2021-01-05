@@ -82,7 +82,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 
     // Table counter used to count packets and bytes matched by each entry of t_fwd table.
     direct_counter(CounterType.packets_and_bytes) fwd_counter;	
-		
+
     table t_fwd {
         key = {
             standard_metadata.ingress_port  : ternary;
@@ -114,7 +114,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         }
         default_action = _drop();
     }
-	
+
     apply {
 
         meta.reg.current_register = 0;
