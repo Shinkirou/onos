@@ -75,7 +75,12 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     private static final String STANDARD_METADATA   = "standard_metadata";
     private static final String IP_SRC              = "ip_src";
     private static final String IP_DST              = "ip_dst";
-    private static final String CM                  = "cm";
+    private static final String CM_IP_SRC_IP_DST    = "cm_ip_src_ip_dst";
+    private static final String CM_IP_DST_PORT_21  = "cm_ip_dst_port_21";
+    private static final String CM_IP_DST_PORT_22  = "cm_ip_dst_port_22";
+    private static final String CM_IP_DST_PORT_80  = "cm_ip_dst_port_80";
+    private static final String CM_IP_DST_TCP_SYN   = "cm_ip_dst_tcp_syn";
+    private static final String CM_IP_DST_ICMP      = "cm_ip_dst_icmp";
     private static final String BM_IP_SRC           = "bm_ip_src";
     private static final String BM_IP_DST           = "bm_ip_dst";
     private static final String BM_IP_SRC_PORT_SRC  = "bm_ip_src_port_src";
@@ -212,7 +217,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     public InboundPacket mapInboundPacket(PiPacketOperation packetIn, DeviceId deviceId) throws PiInterpreterException {
         
         // We assume that the packet is ethernet, which is fine since mytunnel.p4 can deparse only ethernet packets.
-        Ethernet ethPkt;       
+        Ethernet ethPkt;
 
         try {
             ethPkt = Ethernet.deserializer().deserialize(packetIn.data().asArray(), 0, packetIn.data().size());
@@ -243,54 +248,89 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
             packetMetadataArray[0] = ipSrcBB;
             packetMetadataArray[1] = ipDstBB;
 
-            Optional<PiPacketMetadata> packetMetadataCm = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(CM))
+            Optional<PiPacketMetadata> packetMetadataCmIpSrcIpDst = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(CM_IP_SRC_IP_DST))
                     .findFirst();
 
-            packetMetadataCm.ifPresent(
+            packetMetadataCmIpSrcIpDst.ifPresent(
                     piPacketMetadata -> packetMetadataArray[2] = piPacketMetadata.value().asReadOnlyBuffer());
+
+            Optional<PiPacketMetadata> packetMetadataCmIpDstPort21 = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(CM_IP_DST_PORT_21))
+                    .findFirst();
+
+            packetMetadataCmIpDstPort21.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[3] = piPacketMetadata.value().asReadOnlyBuffer());
+
+            Optional<PiPacketMetadata> packetMetadataCmIpDstPort22 = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(CM_IP_DST_PORT_22))
+                    .findFirst();
+
+            packetMetadataCmIpDstPort22.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[4] = piPacketMetadata.value().asReadOnlyBuffer());
+
+            Optional<PiPacketMetadata> packetMetadataCmIpDstPort80 = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(CM_IP_DST_PORT_80))
+                    .findFirst();
+
+            packetMetadataCmIpDstPort80.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[5] = piPacketMetadata.value().asReadOnlyBuffer());
+
+            Optional<PiPacketMetadata> packetMetadataCmIpDstTcpSyn = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(CM_IP_DST_TCP_SYN))
+                    .findFirst();
+
+            packetMetadataCmIpDstTcpSyn.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[6] = piPacketMetadata.value().asReadOnlyBuffer());
+
+            Optional<PiPacketMetadata> packetMetadataCmIpDstIcmp = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(CM_IP_DST_ICMP))
+                    .findFirst();
+
+            packetMetadataCmIpDstIcmp.ifPresent(
+                    piPacketMetadata -> packetMetadataArray[7] = piPacketMetadata.value().asReadOnlyBuffer());
 
             Optional<PiPacketMetadata> packetMetadataBmIpSrc = packetIn.metadatas().stream()
                     .filter(metadata -> metadata.id().toString().equals(BM_IP_SRC))
                     .findFirst();
 
             packetMetadataBmIpSrc.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[3] = piPacketMetadata.value().asReadOnlyBuffer());
+                    piPacketMetadata -> packetMetadataArray[8] = piPacketMetadata.value().asReadOnlyBuffer());
 
             Optional<PiPacketMetadata> packetMetadataBmIpDst = packetIn.metadatas().stream()
                     .filter(metadata -> metadata.id().toString().equals(BM_IP_DST))
                     .findFirst();
 
             packetMetadataBmIpDst.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[4] = piPacketMetadata.value().asReadOnlyBuffer());
+                    piPacketMetadata -> packetMetadataArray[9] = piPacketMetadata.value().asReadOnlyBuffer());
 
             Optional<PiPacketMetadata> packetMetadataBmIpSrcPortSrc = packetIn.metadatas().stream()
                     .filter(metadata -> metadata.id().toString().equals(BM_IP_SRC_PORT_SRC))
                     .findFirst();
 
             packetMetadataBmIpSrcPortSrc.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[5] = piPacketMetadata.value().asReadOnlyBuffer());
+                    piPacketMetadata -> packetMetadataArray[10] = piPacketMetadata.value().asReadOnlyBuffer());
 
             Optional<PiPacketMetadata> packetMetadataBmIpSrcPortDst = packetIn.metadatas().stream()
                     .filter(metadata -> metadata.id().toString().equals(BM_IP_SRC_PORT_DST))
                     .findFirst();
 
             packetMetadataBmIpSrcPortDst.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[6] = piPacketMetadata.value().asReadOnlyBuffer());
+                    piPacketMetadata -> packetMetadataArray[11] = piPacketMetadata.value().asReadOnlyBuffer());
 
             Optional<PiPacketMetadata> packetMetadataBmIpDstPortSrc = packetIn.metadatas().stream()
                     .filter(metadata -> metadata.id().toString().equals(BM_IP_DST_PORT_SRC))
                     .findFirst();
 
             packetMetadataBmIpDstPortSrc.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[7] = piPacketMetadata.value().asReadOnlyBuffer());
+                    piPacketMetadata -> packetMetadataArray[12] = piPacketMetadata.value().asReadOnlyBuffer());
 
             Optional<PiPacketMetadata> packetMetadataBmIpDstPortDst = packetIn.metadatas().stream()
                     .filter(metadata -> metadata.id().toString().equals(BM_IP_DST_PORT_DST))
                     .findFirst();
 
             packetMetadataBmIpDstPortDst.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[8] = piPacketMetadata.value().asReadOnlyBuffer());
+                    piPacketMetadata -> packetMetadataArray[13] = piPacketMetadata.value().asReadOnlyBuffer());
 
             retrievePacketMetadata(packetMetadataArray);
         }
@@ -361,13 +401,18 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
             String ipDstHex = decToHex(packetMetadataArray[1].getInt());
             String ipDstStr = InetAddress.getByAddress(hexStringToByteArray(ipDstHex)).toString().split("/")[1];
 
-            String cmStr = Integer.toString(packetMetadataArray[2].getInt());
-            String bmIpSrcStr = Integer.toString(packetMetadataArray[3].getInt());
-            String bmIpDstStr = Integer.toString(packetMetadataArray[4].getInt());
-            String bmIpSrcPortSrcStr = Integer.toString(packetMetadataArray[5].getInt());
-            String bmIpSrcPortDstStr = Integer.toString(packetMetadataArray[6].getInt());
-            String bmIpDstPortSrcStr = Integer.toString(packetMetadataArray[7].getInt());
-            String bmIpDstPortDstStr = Integer.toString(packetMetadataArray[8].getInt());
+            String cmIpSrcIpDstStr = Integer.toString(packetMetadataArray[2].getInt());
+            String cmIpDstPort21Str = Integer.toString(packetMetadataArray[3].getInt());
+            String cmIpDstPort22Str = Integer.toString(packetMetadataArray[4].getInt());
+            String cmIpDstPort80Str = Integer.toString(packetMetadataArray[5].getInt());
+            String cmIpDstTcpSynStr = Integer.toString(packetMetadataArray[6].getInt());
+            String cmIpDstIcmpStr = Integer.toString(packetMetadataArray[7].getInt());
+            String bmIpSrcStr = Integer.toString(packetMetadataArray[8].getInt());
+            String bmIpDstStr = Integer.toString(packetMetadataArray[9].getInt());
+            String bmIpSrcPortSrcStr = Integer.toString(packetMetadataArray[10].getInt());
+            String bmIpSrcPortDstStr = Integer.toString(packetMetadataArray[11].getInt());
+            String bmIpDstPortSrcStr = Integer.toString(packetMetadataArray[12].getInt());
+            String bmIpDstPortDstStr = Integer.toString(packetMetadataArray[13].getInt());
 
             if ((!ipSrcStr.equals("0")) &&
                 (!ipDstStr.equals("0")) &&
@@ -377,7 +422,12 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                 String dma =
                         "{\"ip_src\": \"" + ipSrcStr + "\" , " +
                         "\"ip_dst\": \"" + ipDstStr + "\" , " +
-                        "\"cm\": \"" + cmStr + "\" , " +
+                        "\"cm_ip_src_ip_dst\": \"" + cmIpSrcIpDstStr + "\" , " +
+                        "\"cm_ip_dst_port_21\": \"" + cmIpDstPort21Str + "\" , " +
+                        "\"cm_ip_dst_port_22\": \"" + cmIpDstPort22Str + "\" , " +
+                        "\"cm_ip_dst_port_80\": \"" + cmIpDstPort80Str + "\" , " +
+                        "\"cm_ip_dst_tcp_syn\": \"" + cmIpDstTcpSynStr + "\" , " +
+                        "\"cm_ip_dst_icmp\": \"" + cmIpDstIcmpStr + "\" , " +
                         "\"bm_ip_src\": \"" + bmIpSrcStr + "\" , " +
                         "\"bm_ip_dst\": \"" + bmIpDstStr + "\" , " +
                         "\"bm_ip_src_port_src\": \"" + bmIpSrcPortSrcStr + "\" , " +

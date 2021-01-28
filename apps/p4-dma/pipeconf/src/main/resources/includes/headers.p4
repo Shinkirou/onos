@@ -60,7 +60,12 @@ header packet_in_header_t {
     bit<12> tcp_flags;
     bit<9>  icmp_type;
     bit<9>  icmp_code;
-    bit<32> cm;
+    bit<32> cm_ip_src_ip_dst;
+    bit<32> cm_ip_dst_port_21;
+    bit<32> cm_ip_dst_port_22;
+    bit<32> cm_ip_dst_port_80;
+    bit<32> cm_ip_dst_tcp_syn;
+    bit<32> cm_ip_dst_icmp;
     bit<32> bm_ip_src;
     bit<32> bm_ip_dst;
     bit<32> bm_ip_src_port_src;
@@ -93,7 +98,10 @@ header reg_meta_t {
     bit<32> current_index;
     bit<32> current_sketch_hash;
     bit<32> index_remaining;
-    bit<32> cm;
+    bit<32> cm_ip_src_ip_dst;
+    bit<32> cm_ip_dst_port_dst;
+    bit<32> cm_ip_dst_tcp_flags;
+    bit<32> cm_ip_dst_proto;
     bit<32> bm_ip_src;
     bit<32> bm_ip_dst;
     bit<32> bm_ip_src_port_src;
@@ -113,7 +121,40 @@ header epoch_meta_t {
     bit<6>  padding;
 }
 
-header cm_meta_t {
+header cm_ip_src_ip_dst_meta_t {
+    bit<32> hash_0;
+    bit<32> hash_1;
+    bit<32> hash_2;
+    bit<32> sketch_0;
+    bit<32> sketch_1;
+    bit<32> sketch_2;
+    bit<32> sketch_final;
+    bit<32> sketch_temp;
+}
+
+header cm_ip_dst_port_dst_meta_t {
+    bit<32> hash_0;
+    bit<32> hash_1;
+    bit<32> hash_2;
+    bit<32> sketch_0;
+    bit<32> sketch_1;
+    bit<32> sketch_2;
+    bit<32> sketch_final;
+    bit<32> sketch_temp;
+}
+
+header cm_ip_dst_tcp_flags_meta_t {
+    bit<32> hash_0;
+    bit<32> hash_1;
+    bit<32> hash_2;
+    bit<32> sketch_0;
+    bit<32> sketch_1;
+    bit<32> sketch_2;
+    bit<32> sketch_final;
+    bit<32> sketch_temp;
+}
+
+header cm_ip_dst_proto_meta_t {
     bit<32> hash_0;
     bit<32> hash_1;
     bit<32> hash_2;
@@ -200,7 +241,10 @@ struct metadata_t {
     meta_t 	                meta;
     reg_meta_t	                reg;
     epoch_meta_t                epoch;
-    cm_meta_t	                cm;
+    cm_ip_src_ip_dst_meta_t	cm_ip_src_ip_dst;
+    cm_ip_dst_port_dst_meta_t   cm_ip_dst_port_dst;
+    cm_ip_dst_tcp_flags_meta_t  cm_ip_dst_tcp_flags;
+    cm_ip_dst_proto_meta_t      cm_ip_dst_proto;
     bm_ip_src_meta_t            bm_ip_src;
     bm_ip_dst_meta_t 	        bm_ip_dst;
     bm_ip_src_port_src_meta_t 	bm_ip_src_port_src;

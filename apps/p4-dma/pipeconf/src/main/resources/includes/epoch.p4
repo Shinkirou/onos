@@ -102,6 +102,53 @@ control c_epoch(inout headers_t hdr, inout metadata_t meta, inout standard_metad
         register_23.read(meta.epoch.sketch_temp, meta.reg.current_index);
     }
 
+    action epoch_check_24() {
+        register_24.read(meta.epoch.sketch_temp, meta.reg.current_index);
+    }
+    action epoch_check_25() {
+        register_25.read(meta.epoch.sketch_temp, meta.reg.current_index);
+    }
+
+    action epoch_check_26() {
+        register_26.read(meta.epoch.sketch_temp, meta.reg.current_index);
+    }
+
+    action epoch_check_27() {
+        register_27.read(meta.epoch.sketch_temp, meta.reg.current_index);
+    }
+
+    action epoch_check_28() {
+        register_28.read(meta.epoch.sketch_temp, meta.reg.current_index);
+    }
+
+    action epoch_check_29() {
+        register_29.read(meta.epoch.sketch_temp, meta.reg.current_index);
+    }
+
+    action epoch_check_30() {
+        register_30.read(meta.epoch.sketch_temp, meta.reg.current_index);
+    }
+
+    action epoch_check_31() {
+        register_31.read(meta.epoch.sketch_temp, meta.reg.current_index);
+    }
+
+    action epoch_check_32() {
+        register_32.read(meta.epoch.sketch_temp, meta.reg.current_index);
+    }
+
+    action epoch_check_33() {
+        register_33.read(meta.epoch.sketch_temp, meta.reg.current_index);
+    }
+
+    action epoch_check_34() {
+        register_34.read(meta.epoch.sketch_temp, meta.reg.current_index);
+    }
+
+    action epoch_check_35() {
+        register_35.read(meta.epoch.sketch_temp, meta.reg.current_index);
+    }
+
     action change_index_epoch() {
 
         meta.epoch.sketch_temp = 0;
@@ -143,6 +190,18 @@ control c_epoch(inout headers_t hdr, inout metadata_t meta, inout standard_metad
             epoch_check_21;
             epoch_check_22;
             epoch_check_23;
+            epoch_check_24;
+            epoch_check_25;
+            epoch_check_26;
+            epoch_check_27;
+            epoch_check_28;
+            epoch_check_29;
+            epoch_check_30;
+            epoch_check_31;
+            epoch_check_32;
+            epoch_check_33;
+            epoch_check_34;
+            epoch_check_35;
         }
     }
 

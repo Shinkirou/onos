@@ -4,47 +4,65 @@
 
 // The following registers are divided by sketch, assuming their original configuration with all active sketches.
 
-// Count-min sketch (5-tuple)
+// Count-min sketch (IP src, IP dst)
 register<bit<32>>(32768) register_0;
 register<bit<32>>(32768) register_1;
 register<bit<32>>(32768) register_2;
 register<bit<32>>(32768) register_3;
 
-// Bitmap sketch (Src IP)
+// Count-min sketch (IP dst, port dst)
 register<bit<32>>(32768) register_4;
 register<bit<32>>(32768) register_5;
-
-// Bitmap sketch (Dst IP)
 register<bit<32>>(32768) register_6;
 register<bit<32>>(32768) register_7;
 
-// Bitmap sketch (Src IP Src Port)
+// Count-min sketch (IP Dst, TCP flags)
 register<bit<32>>(32768) register_8;
 register<bit<32>>(32768) register_9;
-
-// Bitmap sketch (Src IP Dst Port)
 register<bit<32>>(32768) register_10;
 register<bit<32>>(32768) register_11;
 
-// Bitmap sketch (Dst IP Src Port)
+// Count-min sketch (IP dst, proto)
 register<bit<32>>(32768) register_12;
 register<bit<32>>(32768) register_13;
-
-// Bitmap sketch (Dst IP Dst Port)
 register<bit<32>>(32768) register_14;
 register<bit<32>>(32768) register_15;
 
-// AMS sketch
+// Bitmap sketch (IP src)
 register<bit<32>>(32768) register_16;
 register<bit<32>>(32768) register_17;
+
+// Bitmap sketch (IP dst)
 register<bit<32>>(32768) register_18;
 register<bit<32>>(32768) register_19;
 
-// MV sketch
+// Bitmap sketch (IP src, port src)
 register<bit<32>>(32768) register_20;
 register<bit<32>>(32768) register_21;
+
+// Bitmap sketch (IP src, port dst)
 register<bit<32>>(32768) register_22;
 register<bit<32>>(32768) register_23;
+
+// Bitmap sketch (IP dst, port src)
+register<bit<32>>(32768) register_24;
+register<bit<32>>(32768) register_25;
+
+// Bitmap sketch (IP dst, port dst)
+register<bit<32>>(32768) register_26;
+register<bit<32>>(32768) register_27;
+
+// AMS sketch
+register<bit<32>>(32768) register_28;
+register<bit<32>>(32768) register_29;
+register<bit<32>>(32768) register_30;
+register<bit<32>>(32768) register_31;
+
+// MV sketch
+register<bit<32>>(32768) register_32;
+register<bit<32>>(32768) register_33;
+register<bit<32>>(32768) register_34;
+register<bit<32>>(32768) register_35;
 
 //------------------------------------------------------------------------------
 // EPOCH REGISTER

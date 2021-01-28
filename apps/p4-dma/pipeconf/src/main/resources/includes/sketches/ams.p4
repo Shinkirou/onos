@@ -4,9 +4,15 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
     c_set_reg() ams_set_reg_1;
     c_set_reg() ams_set_reg_2;
     c_set_reg() ams_set_reg_final;
+
     c_epoch()   ams_epoch_0;
     c_epoch()   ams_epoch_1;
     c_epoch()   ams_epoch_2;
+
+    c_sketch_write() ams_write_0;
+    c_sketch_write() ams_write_1;
+    c_sketch_write() ams_write_2;
+    c_sketch_write() ams_write_final;
 
     register<bit<32>>(1) register_sum_0;
     register<bit<32>>(1) register_sum_1;
@@ -71,217 +77,6 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
         meta.epoch.sketch_temp = meta.epoch.sketch_temp + aux;
     }
 
-    action ams_write_0() {
-        register_0.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_1() {
-        register_1.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_2() {
-        register_2.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_3() {
-        register_3.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_4() {
-        register_4.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_5() {
-        register_5.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_6() {
-        register_6.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_7() {
-        register_7.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_8() {
-        register_8.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_9() {
-        register_9.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_10() {
-        register_10.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_11() {
-        register_11.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_12() {
-        register_12.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_13() {
-        register_13.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_14() {
-        register_14.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_15() {
-        register_15.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_16() {
-        register_16.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_17() {
-        register_17.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_18() {
-        register_18.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_19() {
-        register_19.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_20() {
-        register_20.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_21() {
-        register_21.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_22() {
-        register_22.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    action ams_write_23() {
-        register_23.write(meta.reg.current_index, meta.epoch.sketch_temp);
-    }
-
-    table t_ams_0 {
-        key = {
-            current_register_temp: exact;
-        }
-        actions = {
-            ams_write_0;
-            ams_write_1;
-            ams_write_2;
-            ams_write_3;
-            ams_write_4;
-            ams_write_5;
-            ams_write_6;
-            ams_write_7;
-            ams_write_8;
-            ams_write_9;
-            ams_write_10;
-            ams_write_11;
-            ams_write_12;
-            ams_write_14;
-            ams_write_15;
-            ams_write_16;
-            ams_write_17;
-            ams_write_18;
-            ams_write_19;
-            ams_write_20;
-        }
-    }
-
-    table t_ams_1 {
-        key = {
-            current_register_temp: exact;
-        }
-        actions = {
-            ams_write_1;
-            ams_write_2;
-            ams_write_3;
-            ams_write_4;
-            ams_write_5;
-            ams_write_6;
-            ams_write_7;
-            ams_write_8;
-            ams_write_9;
-            ams_write_10;
-            ams_write_11;
-            ams_write_12;
-            ams_write_13;
-            ams_write_14;
-            ams_write_15;
-            ams_write_16;
-            ams_write_17;
-            ams_write_18;
-            ams_write_19;
-            ams_write_20;
-            ams_write_21;
-        }
-    }
-
-    table t_ams_2 {
-        key = {
-            current_register_temp: exact;
-        }
-        actions = {
-            ams_write_2;
-            ams_write_3;
-            ams_write_4;
-            ams_write_5;
-            ams_write_6;
-            ams_write_7;
-            ams_write_8;
-            ams_write_9;
-            ams_write_10;
-            ams_write_11;
-            ams_write_12;
-            ams_write_13;
-            ams_write_14;
-            ams_write_15;
-            ams_write_16;
-            ams_write_17;
-            ams_write_18;
-            ams_write_19;
-            ams_write_20;
-            ams_write_21;
-            ams_write_22;
-        }
-    }
-
-    table t_ams_final {
-        key = {
-            current_register_temp: exact;
-        }
-        actions = {
-            ams_write_3;
-            ams_write_4;
-            ams_write_5;
-            ams_write_6;
-            ams_write_7;
-            ams_write_8;
-            ams_write_9;
-            ams_write_10;
-            ams_write_11;
-            ams_write_12;
-            ams_write_13;
-            ams_write_14;
-            ams_write_15;
-            ams_write_16;
-            ams_write_17;
-            ams_write_18;
-            ams_write_19;
-            ams_write_20;
-            ams_write_21;
-            ams_write_22;
-            ams_write_23;
-        }
-    }
-
     apply {
 
         hash_ams_0();
@@ -337,7 +132,7 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
 
         current_register();
 
-        t_ams_0.apply();
+        ams_write_0.apply(hdr, meta, standard_metadata);
 
         // AMS Counter 1.
 
@@ -368,7 +163,7 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
 
         current_register();
 
-        t_ams_1.apply();
+        ams_write_1.apply(hdr, meta, standard_metadata);
 
         // AMS Counter 2.
 
@@ -399,7 +194,7 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
 
         current_register();
 
-        t_ams_2.apply();
+        ams_write_2.apply(hdr, meta, standard_metadata);
 
         // AMS Final Value.
 
@@ -430,6 +225,6 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
 
         current_register();
 
-        t_ams_final.apply();
+        ams_write_final.apply(hdr, meta, standard_metadata);
     }
 }

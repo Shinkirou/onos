@@ -9,7 +9,11 @@
 #include "includes/set_reg.p4"
 #include "includes/epoch.p4"
 #include "includes/threshold.p4"
-#include "includes/sketches/cm.p4"
+#include "includes/sketch_write.p4"
+#include "includes/sketches/cm_ip_src_ip_dst.p4"
+#include "includes/sketches/cm_ip_dst_port_dst.p4"
+#include "includes/sketches/cm_ip_dst_tcp_flags.p4"
+#include "includes/sketches/cm_ip_dst_proto.p4"
 #include "includes/sketches/bm_ip_src.p4"
 #include "includes/sketches/bm_ip_dst.p4"
 #include "includes/sketches/bm_ip_src_port_src.p4"
@@ -32,7 +36,10 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 
     // Control block instantiations.
     c_threshold()           threshold;
-    c_cm()                  cm;
+    c_cm_ip_src_ip_dst()    cm_ip_src_ip_dst;
+    c_cm_ip_dst_port_dst()  cm_ip_dst_port_dst;
+    c_cm_ip_dst_tcp_flags() cm_ip_dst_tcp_flags;
+    c_cm_ip_dst_proto()     cm_ip_dst_proto;
     c_bm_ip_src()           bm_ip_src;              // Number of different IPs contacted by a src IP.
     c_bm_ip_dst()           bm_ip_dst;              // Number of different IPs contacted by a dst IP.
     c_bm_ip_src_port_src()  bm_ip_src_port_src;     // Number of different src ports used by a src IP.
@@ -57,12 +64,16 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         standard_metadata.egress_spec = port;
     }
 
-    action sketch_config(bit<32> cm_flag, bit<32> bm_ip_src_flag, bit<32> bm_ip_dst_flag,
-                         bit<32> bm_ip_src_port_src_flag, bit<32> bm_ip_src_port_dst_flag,
-                         bit<32> bm_ip_dst_port_src_flag, bit<32> bm_ip_dst_port_dst_flag,
-                         bit<32> ams_flag, bit<32> mv_flag, bit<32> virtual_register_num, bit<32> hash_size) {
+    action sketch_config(bit<32> cm_ip_src_ip_dst_flag, bit<32> cm_ip_dst_port_dst_flag,
+                         bit<32> cm_ip_dst_tcp_flags_flag, bit<32> cm_ip_dst_proto_flag, bit<32> bm_ip_src_flag,
+                         bit<32> bm_ip_dst_flag, bit<32> bm_ip_src_port_src_flag, bit<32> bm_ip_src_port_dst_flag,
+                         bit<32> bm_ip_dst_port_src_flag, bit<32> bm_ip_dst_port_dst_flag, bit<32> ams_flag,
+                         bit<32> mv_flag, bit<32> virtual_register_num, bit<32> hash_size) {
 		
-        meta.reg.cm = cm_flag;
+        meta.reg.cm_ip_src_ip_dst = cm_ip_src_ip_dst_flag;
+        meta.reg.cm_ip_dst_port_dst = cm_ip_dst_port_dst_flag;
+        meta.reg.cm_ip_dst_tcp_flags = cm_ip_dst_tcp_flags_flag;
+        meta.reg.cm_ip_dst_proto = cm_ip_dst_proto_flag;
         meta.reg.bm_ip_src = bm_ip_src_flag;
         meta.reg.bm_ip_dst = bm_ip_dst_flag;
         meta.reg.bm_ip_src_port_src = bm_ip_src_port_src_flag;
@@ -147,8 +158,21 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
                     // Execute the active sketching algorithms.
                     // Defined by the operator through the t_sketches table rules.
 
-                    if (meta.reg.cm == 0) {
-                        cm.apply(hdr, meta, standard_metadata);
+                    if (meta.reg.cm_ip_src_ip_dst == 0) {
+                        cm_ip_src_ip_dst.apply(hdr, meta, standard_metadata);
+                    }
+
+                    if ((meta.reg.cm_ip_dst_port_dst == 0) &&
+                        ((hdr.tcp.dst_port == 21) || (hdr.tcp.dst_port == 22) || (hdr.tcp.dst_port == 80))) {
+                        cm_ip_dst_port_dst.apply(hdr, meta, standard_metadata);
+                    }
+
+                    if ((meta.reg.cm_ip_dst_tcp_flags == 0) && (hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl) == 2) {
+                        cm_ip_dst_tcp_flags.apply(hdr, meta, standard_metadata);
+                    }
+
+                    if ((meta.reg.cm_ip_dst_proto == 0) && (hdr.ipv4.protocol == 1)) {
+                        cm_ip_dst_proto.apply(hdr, meta, standard_metadata);
                     }
 
                     if (meta.reg.bm_ip_src == 0) {

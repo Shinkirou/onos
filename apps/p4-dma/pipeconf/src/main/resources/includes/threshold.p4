@@ -10,15 +10,6 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
     // Store the timestamp corresponding to the beginning of the current stage (for each flow).
     register<bit<48>>(32768) reg_thres_time_flow;
 
-    bit<32> cm_final;
-    bit<32> bm_ip_src_final;
-    bit<32> bm_ip_dst_final;
-    bit<32> bm_ip_src_port_src_final;
-    bit<32> bm_ip_src_port_dst_final;
-    bit<32> bm_ip_dst_port_src_final;
-    bit<32> bm_ip_dst_port_dst_final;
-    bit<32> ams_final;
-
     // Increase the global traffic counter.
     action global_traffic_counter_incr() {
 
@@ -64,20 +55,20 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
         hdr.packet_in.timestamp             = (bit<64>)standard_metadata.ingress_global_timestamp;
         hdr.packet_in.ip_src                = hdr.ipv4.src_addr;
         hdr.packet_in.ip_dst                = hdr.ipv4.dst_addr;
-        hdr.packet_in.ip_proto              = (bit<9>)hdr.ipv4.protocol;
-        hdr.packet_in.port_src              = meta.meta.l4_src_port;
-        hdr.packet_in.port_dst              = meta.meta.l4_dst_port;
-        hdr.packet_in.tcp_flags             = hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl;
-        hdr.packet_in.icmp_type             = (bit<9>)hdr.icmp.type;
-        hdr.packet_in.icmp_code             = (bit<9>)hdr.icmp.code;
-        hdr.packet_in.cm                    = cm_final;
-        hdr.packet_in.bm_ip_src             = bm_ip_src_final;
-        hdr.packet_in.bm_ip_dst             = bm_ip_dst_final;
-        hdr.packet_in.bm_ip_src_port_src    = bm_ip_src_port_src_final;
-        hdr.packet_in.bm_ip_src_port_dst    = bm_ip_src_port_dst_final;
-        hdr.packet_in.bm_ip_dst_port_src    = bm_ip_dst_port_src_final;
-        hdr.packet_in.bm_ip_dst_port_dst    = bm_ip_src_port_dst_final;
-        hdr.packet_in.ams                   = ams_final;
+        hdr.packet_in.cm_ip_src_ip_dst      = meta.cm_ip_src_ip_dst.sketch_final;
+        hdr.packet_in.bm_ip_src             = meta.bm_ip_src.sketch_1;
+        hdr.packet_in.bm_ip_dst             = meta.bm_ip_dst.sketch_1;
+        hdr.packet_in.bm_ip_src_port_src    = meta.bm_ip_src_port_src.sketch_1;
+        hdr.packet_in.bm_ip_src_port_dst    = meta.bm_ip_src_port_dst.sketch_1;
+        hdr.packet_in.bm_ip_dst_port_src    = meta.bm_ip_dst_port_src.sketch_1;
+        hdr.packet_in.bm_ip_dst_port_dst    = meta.bm_ip_dst_port_dst.sketch_1;
+        hdr.packet_in.ams                   = meta.ams.sketch_final;
+
+        if (hdr.tcp.dst_port == 21) hdr.packet_in.cm_ip_dst_port_21 = meta.cm_ip_dst_port_dst.sketch_final;
+        if (hdr.tcp.dst_port == 22) hdr.packet_in.cm_ip_dst_port_22 = meta.cm_ip_dst_port_dst.sketch_final;
+        if (hdr.tcp.dst_port == 80) hdr.packet_in.cm_ip_dst_port_80 = meta.cm_ip_dst_port_dst.sketch_final;
+        if ((hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl) == 2) hdr.packet_in.cm_ip_dst_tcp_syn = meta.cm_ip_dst_tcp_flags.sketch_final;
+        if (hdr.ipv4.protocol == 1) hdr.packet_in.cm_ip_dst_icmp = meta.cm_ip_dst_proto.sketch_final;
 
         // Check if the current MV sketch key (strongest candidate) matches the current flow key.
         if (hdr.ipv4.src_addr ++ hdr.ipv4.dst_addr == meta.mv.key_temp) {
@@ -90,7 +81,7 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
     apply {
 
         // The current threshold hash has already been calculated for the cm sketch.
-        meta.threshold.hash_flow = meta.cm.hash_0;
+        meta.threshold.hash_flow = meta.cm_ip_src_ip_dst.hash_0;
 
         global_traffic_counter_incr();
         flow_traffic_counter_incr();
@@ -112,29 +103,7 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
 
             // Check if the flow traffic at the current stage corresponds to more than 10% of the total traffic.
             // If so, we send the current flow stats to the controller.
-            if ((meta.threshold.flow_traffic * 10) >
-                (meta.threshold.global_traffic - meta.threshold.flow_global_traffic)) {
-
-                cm_final = meta.cm.sketch_final;
-                bm_ip_src_final = meta.bm_ip_src.sketch_1;
-                bm_ip_dst_final = meta.bm_ip_dst.sketch_1;
-                bm_ip_src_port_src_final = meta.bm_ip_src_port_src.sketch_1;
-                bm_ip_src_port_dst_final = meta.bm_ip_src_port_dst.sketch_1;
-                bm_ip_dst_port_src_final = meta.bm_ip_dst_port_src.sketch_1;
-                bm_ip_dst_port_dst_final = meta.bm_ip_dst_port_dst.sketch_1;
-                ams_final = meta.ams.sketch_final;
-
-                if (meta.epoch.current_epoch == 1) {
-
-                    cm_final[31:31]                 = (bit<1>)0;
-                    bm_ip_src_final[31:31]          = (bit<1>)0;
-                    bm_ip_dst_final[31:31]          = (bit<1>)0;
-                    bm_ip_src_port_src_final[31:31] = (bit<1>)0;
-                    bm_ip_src_port_dst_final[31:31] = (bit<1>)0;
-                    bm_ip_dst_port_src_final[31:31] = (bit<1>)0;
-                    bm_ip_dst_port_dst_final[31:31] = (bit<1>)0;
-                    ams_final[31:31]                = (bit<1>)0;
-                }
+            if ((meta.threshold.flow_traffic * 10) > (meta.threshold.global_traffic - meta.threshold.flow_global_traffic)) {
 
                 // Specify a packet_in header containing all flow stats.
                 send_to_cpu_threshold();
