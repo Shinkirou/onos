@@ -52,7 +52,6 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
         standard_metadata.egress_spec = CPU_PORT;
         hdr.packet_in.setValid();
         hdr.packet_in.ingress_port          = standard_metadata.ingress_port;
-        hdr.packet_in.timestamp             = (bit<64>)standard_metadata.ingress_global_timestamp;
         hdr.packet_in.ip_src                = hdr.ipv4.src_addr;
         hdr.packet_in.ip_dst                = hdr.ipv4.dst_addr;
         hdr.packet_in.cm_ip_src_ip_dst      = meta.cm_ip_src_ip_dst.sketch_final;

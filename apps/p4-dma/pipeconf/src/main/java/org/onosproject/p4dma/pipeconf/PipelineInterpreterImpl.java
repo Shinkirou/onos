@@ -45,6 +45,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -240,99 +241,139 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
         if (packetMetadataIpDst.isPresent() && packetMetadataIpSrc.isPresent()) {
 
-            ByteBuffer[] packetMetadataArray = new ByteBuffer[18];
-
             ByteBuffer ipSrcBB = packetMetadataIpSrc.get().value().asReadOnlyBuffer();
             ByteBuffer ipDstBB = packetMetadataIpDst.get().value().asReadOnlyBuffer();
 
-            packetMetadataArray[0] = ipSrcBB;
-            packetMetadataArray[1] = ipDstBB;
+            String ipSrcHex = decToHex(ipSrcBB.getInt());
+            String ipDstHex = decToHex(ipDstBB.getInt());
+            String ipSrcStr = null;
+            String ipDstStr = null;
+            try {
+                ipSrcStr = InetAddress.getByAddress(hexStringToByteArray(ipSrcHex)).toString().split("/")[1];
+                ipDstStr = InetAddress.getByAddress(hexStringToByteArray(ipDstHex)).toString().split("/")[1];
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
 
-            Optional<PiPacketMetadata> packetMetadataCmIpSrcIpDst = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(CM_IP_SRC_IP_DST))
-                    .findFirst();
+            assert ipSrcStr != null;
+            if (!ipSrcStr.equals("0.0.0.0")) {
 
-            packetMetadataCmIpSrcIpDst.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[2] = piPacketMetadata.value().asReadOnlyBuffer());
+                String[] packetMetadataArray = new String[14];
 
-            Optional<PiPacketMetadata> packetMetadataCmIpDstPort21 = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(CM_IP_DST_PORT_21))
-                    .findFirst();
+                packetMetadataArray[0] = ipSrcStr;
+                packetMetadataArray[1] = ipDstStr;
 
-            packetMetadataCmIpDstPort21.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[3] = piPacketMetadata.value().asReadOnlyBuffer());
+                Optional<PiPacketMetadata> packetMetadataCmIpSrcIpDst = packetIn.metadatas().stream()
+                        .filter(metadata -> metadata.id().toString().equals(CM_IP_SRC_IP_DST))
+                        .findFirst();
 
-            Optional<PiPacketMetadata> packetMetadataCmIpDstPort22 = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(CM_IP_DST_PORT_22))
-                    .findFirst();
+                packetMetadataCmIpSrcIpDst.ifPresent(
+                        piPacketMetadata -> packetMetadataArray[2] =
+                                Integer.toString(piPacketMetadata.value().asReadOnlyBuffer().getInt())
+                );
 
-            packetMetadataCmIpDstPort22.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[4] = piPacketMetadata.value().asReadOnlyBuffer());
+                Optional<PiPacketMetadata> packetMetadataCmIpDstPort21 = packetIn.metadatas().stream()
+                        .filter(metadata -> metadata.id().toString().equals(CM_IP_DST_PORT_21))
+                        .findFirst();
 
-            Optional<PiPacketMetadata> packetMetadataCmIpDstPort80 = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(CM_IP_DST_PORT_80))
-                    .findFirst();
 
-            packetMetadataCmIpDstPort80.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[5] = piPacketMetadata.value().asReadOnlyBuffer());
+                packetMetadataCmIpDstPort21.ifPresent(
+                        piPacketMetadata -> packetMetadataArray[3] =
+                                Integer.toString(piPacketMetadata.value().asReadOnlyBuffer().getInt())
+                );
 
-            Optional<PiPacketMetadata> packetMetadataCmIpDstTcpSyn = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(CM_IP_DST_TCP_SYN))
-                    .findFirst();
+                Optional<PiPacketMetadata> packetMetadataCmIpDstPort22 = packetIn.metadatas().stream()
+                        .filter(metadata -> metadata.id().toString().equals(CM_IP_DST_PORT_22))
+                        .findFirst();
 
-            packetMetadataCmIpDstTcpSyn.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[6] = piPacketMetadata.value().asReadOnlyBuffer());
+                packetMetadataCmIpDstPort22.ifPresent(
+                        piPacketMetadata -> packetMetadataArray[4] =
+                                Integer.toString(piPacketMetadata.value().asReadOnlyBuffer().getInt())
+                );
 
-            Optional<PiPacketMetadata> packetMetadataCmIpDstIcmp = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(CM_IP_DST_ICMP))
-                    .findFirst();
+                Optional<PiPacketMetadata> packetMetadataCmIpDstPort80 = packetIn.metadatas().stream()
+                        .filter(metadata -> metadata.id().toString().equals(CM_IP_DST_PORT_80))
+                        .findFirst();
 
-            packetMetadataCmIpDstIcmp.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[7] = piPacketMetadata.value().asReadOnlyBuffer());
+                packetMetadataCmIpDstPort80.ifPresent(
+                        piPacketMetadata -> packetMetadataArray[5] =
+                                Integer.toString(piPacketMetadata.value().asReadOnlyBuffer().getInt())
+                );
 
-            Optional<PiPacketMetadata> packetMetadataBmIpSrc = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(BM_IP_SRC))
-                    .findFirst();
+                Optional<PiPacketMetadata> packetMetadataCmIpDstTcpSyn = packetIn.metadatas().stream()
+                        .filter(metadata -> metadata.id().toString().equals(CM_IP_DST_TCP_SYN))
+                        .findFirst();
 
-            packetMetadataBmIpSrc.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[8] = piPacketMetadata.value().asReadOnlyBuffer());
+                packetMetadataCmIpDstTcpSyn.ifPresent(
+                        piPacketMetadata -> packetMetadataArray[6] =
+                                Integer.toString(piPacketMetadata.value().asReadOnlyBuffer().getInt())
+                );
 
-            Optional<PiPacketMetadata> packetMetadataBmIpDst = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(BM_IP_DST))
-                    .findFirst();
+                Optional<PiPacketMetadata> packetMetadataCmIpDstIcmp = packetIn.metadatas().stream()
+                        .filter(metadata -> metadata.id().toString().equals(CM_IP_DST_ICMP))
+                        .findFirst();
 
-            packetMetadataBmIpDst.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[9] = piPacketMetadata.value().asReadOnlyBuffer());
+                packetMetadataCmIpDstIcmp.ifPresent(
+                        piPacketMetadata -> packetMetadataArray[7] =
+                                Integer.toString(piPacketMetadata.value().asReadOnlyBuffer().getInt())
+                );
 
-            Optional<PiPacketMetadata> packetMetadataBmIpSrcPortSrc = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(BM_IP_SRC_PORT_SRC))
-                    .findFirst();
+                Optional<PiPacketMetadata> packetMetadataBmIpSrc = packetIn.metadatas().stream()
+                        .filter(metadata -> metadata.id().toString().equals(BM_IP_SRC))
+                        .findFirst();
 
-            packetMetadataBmIpSrcPortSrc.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[10] = piPacketMetadata.value().asReadOnlyBuffer());
+                packetMetadataBmIpSrc.ifPresent(
+                        piPacketMetadata -> packetMetadataArray[8] =
+                                Integer.toString(piPacketMetadata.value().asReadOnlyBuffer().getInt())
+                );
 
-            Optional<PiPacketMetadata> packetMetadataBmIpSrcPortDst = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(BM_IP_SRC_PORT_DST))
-                    .findFirst();
+                Optional<PiPacketMetadata> packetMetadataBmIpDst = packetIn.metadatas().stream()
+                        .filter(metadata -> metadata.id().toString().equals(BM_IP_DST))
+                        .findFirst();
 
-            packetMetadataBmIpSrcPortDst.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[11] = piPacketMetadata.value().asReadOnlyBuffer());
+                packetMetadataBmIpDst.ifPresent(
+                        piPacketMetadata -> packetMetadataArray[9] =
+                                Integer.toString(piPacketMetadata.value().asReadOnlyBuffer().getInt())
+                );
 
-            Optional<PiPacketMetadata> packetMetadataBmIpDstPortSrc = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(BM_IP_DST_PORT_SRC))
-                    .findFirst();
+                Optional<PiPacketMetadata> packetMetadataBmIpSrcPortSrc = packetIn.metadatas().stream()
+                        .filter(metadata -> metadata.id().toString().equals(BM_IP_SRC_PORT_SRC))
+                        .findFirst();
 
-            packetMetadataBmIpDstPortSrc.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[12] = piPacketMetadata.value().asReadOnlyBuffer());
+                packetMetadataBmIpSrcPortSrc.ifPresent(
+                        piPacketMetadata -> packetMetadataArray[10] =
+                                Integer.toString(piPacketMetadata.value().asReadOnlyBuffer().getInt())
+                );
 
-            Optional<PiPacketMetadata> packetMetadataBmIpDstPortDst = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(BM_IP_DST_PORT_DST))
-                    .findFirst();
+                Optional<PiPacketMetadata> packetMetadataBmIpSrcPortDst = packetIn.metadatas().stream()
+                        .filter(metadata -> metadata.id().toString().equals(BM_IP_SRC_PORT_DST))
+                        .findFirst();
 
-            packetMetadataBmIpDstPortDst.ifPresent(
-                    piPacketMetadata -> packetMetadataArray[13] = piPacketMetadata.value().asReadOnlyBuffer());
+                packetMetadataBmIpSrcPortDst.ifPresent(
+                        piPacketMetadata -> packetMetadataArray[11] =
+                                Integer.toString(piPacketMetadata.value().asReadOnlyBuffer().getInt())
+                );
 
-            retrievePacketMetadata(packetMetadataArray);
+                Optional<PiPacketMetadata> packetMetadataBmIpDstPortSrc = packetIn.metadatas().stream()
+                        .filter(metadata -> metadata.id().toString().equals(BM_IP_DST_PORT_SRC))
+                        .findFirst();
+
+                packetMetadataBmIpDstPortSrc.ifPresent(
+                        piPacketMetadata -> packetMetadataArray[12] =
+                                Integer.toString(piPacketMetadata.value().asReadOnlyBuffer().getInt())
+                );
+
+                Optional<PiPacketMetadata> packetMetadataBmIpDstPortDst = packetIn.metadatas().stream()
+                        .filter(metadata -> metadata.id().toString().equals(BM_IP_DST_PORT_DST))
+                        .findFirst();
+
+                packetMetadataBmIpDstPortDst.ifPresent(
+                        piPacketMetadata -> packetMetadataArray[13] =
+                                Integer.toString(piPacketMetadata.value().asReadOnlyBuffer().getInt())
+                );
+
+                retrievePacketMetadata(packetMetadataArray);
+            }
         }
 
         if (packetMetadataIngress.isPresent()) {
@@ -391,54 +432,30 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
         return data;
     }
 
-    public void retrievePacketMetadata(ByteBuffer[] packetMetadataArray) {
+    public void retrievePacketMetadata(String[] packetMetadataArray) {
 
-        try {
+        if ((!packetMetadataArray[0].equals("0")) &&
+            (!packetMetadataArray[1].equals("0")) &&
+            (!packetMetadataArray[0].equals("10.0.0.1")) &&
+            (!packetMetadataArray[1].equals("10.0.0.2"))) {
 
-            String ipSrcHex = decToHex(packetMetadataArray[0].getInt());
-            String ipSrcStr = InetAddress.getByAddress(hexStringToByteArray(ipSrcHex)).toString().split("/")[1];
+            String dma =
+                    "{\"ip_src\": \"" + packetMetadataArray[0] + "\" , " +
+                            "\"ip_dst\": \"" + packetMetadataArray[1] + "\" , " +
+                            "\"cm_ip_src_ip_dst\": \"" + packetMetadataArray[2] + "\" , " +
+                            "\"cm_ip_dst_port_21\": \"" + packetMetadataArray[3] + "\" , " +
+                            "\"cm_ip_dst_port_22\": \"" + packetMetadataArray[4] + "\" , " +
+                            "\"cm_ip_dst_port_80\": \"" + packetMetadataArray[5] + "\" , " +
+                            "\"cm_ip_dst_tcp_syn\": \"" + packetMetadataArray[6] + "\" , " +
+                            "\"cm_ip_dst_icmp\": \"" + packetMetadataArray[7] + "\" , " +
+                            "\"bm_ip_src\": \"" + packetMetadataArray[8] + "\" , " +
+                            "\"bm_ip_dst\": \"" + packetMetadataArray[9] + "\" , " +
+                            "\"bm_ip_src_port_src\": \"" + packetMetadataArray[10] + "\" , " +
+                            "\"bm_ip_src_port_dst\": \"" + packetMetadataArray[11] + "\" , " +
+                            "\"bm_ip_dst_port_src\": \"" + packetMetadataArray[12] + "\" , " +
+                            "\"bm_ip_dst_port_dst\": \"" + packetMetadataArray[13] + "\"}";
 
-            String ipDstHex = decToHex(packetMetadataArray[1].getInt());
-            String ipDstStr = InetAddress.getByAddress(hexStringToByteArray(ipDstHex)).toString().split("/")[1];
-
-            String cmIpSrcIpDstStr = Integer.toString(packetMetadataArray[2].getInt());
-            String cmIpDstPort21Str = Integer.toString(packetMetadataArray[3].getInt());
-            String cmIpDstPort22Str = Integer.toString(packetMetadataArray[4].getInt());
-            String cmIpDstPort80Str = Integer.toString(packetMetadataArray[5].getInt());
-            String cmIpDstTcpSynStr = Integer.toString(packetMetadataArray[6].getInt());
-            String cmIpDstIcmpStr = Integer.toString(packetMetadataArray[7].getInt());
-            String bmIpSrcStr = Integer.toString(packetMetadataArray[8].getInt());
-            String bmIpDstStr = Integer.toString(packetMetadataArray[9].getInt());
-            String bmIpSrcPortSrcStr = Integer.toString(packetMetadataArray[10].getInt());
-            String bmIpSrcPortDstStr = Integer.toString(packetMetadataArray[11].getInt());
-            String bmIpDstPortSrcStr = Integer.toString(packetMetadataArray[12].getInt());
-            String bmIpDstPortDstStr = Integer.toString(packetMetadataArray[13].getInt());
-
-            if ((!ipSrcStr.equals("0")) &&
-                (!ipDstStr.equals("0")) &&
-                (!ipSrcStr.equals("10.0.0.1")) &&
-                (!ipSrcStr.equals("10.0.0.2"))) {
-
-                String dma =
-                        "{\"ip_src\": \"" + ipSrcStr + "\" , " +
-                        "\"ip_dst\": \"" + ipDstStr + "\" , " +
-                        "\"cm_ip_src_ip_dst\": \"" + cmIpSrcIpDstStr + "\" , " +
-                        "\"cm_ip_dst_port_21\": \"" + cmIpDstPort21Str + "\" , " +
-                        "\"cm_ip_dst_port_22\": \"" + cmIpDstPort22Str + "\" , " +
-                        "\"cm_ip_dst_port_80\": \"" + cmIpDstPort80Str + "\" , " +
-                        "\"cm_ip_dst_tcp_syn\": \"" + cmIpDstTcpSynStr + "\" , " +
-                        "\"cm_ip_dst_icmp\": \"" + cmIpDstIcmpStr + "\" , " +
-                        "\"bm_ip_src\": \"" + bmIpSrcStr + "\" , " +
-                        "\"bm_ip_dst\": \"" + bmIpDstStr + "\" , " +
-                        "\"bm_ip_src_port_src\": \"" + bmIpSrcPortSrcStr + "\" , " +
-                        "\"bm_ip_src_port_dst\": \"" + bmIpSrcPortDstStr + "\" , " +
-                        "\"bm_ip_dst_port_src\": \"" + bmIpDstPortSrcStr + "\" , " +
-                        "\"bm_ip_dst_port_dst\": \"" + bmIpDstPortDstStr + "\"}";
-
-                dmaPost(dma);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+            dmaPost(dma);
         }
     }
 

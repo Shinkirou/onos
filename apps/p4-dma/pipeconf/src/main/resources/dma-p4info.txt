@@ -31200,108 +31200,78 @@ controller_packet_metadata {
   }
   metadata {
     id: 5
-    name: "ip_proto"
-    bitwidth: 9
-  }
-  metadata {
-    id: 6
-    name: "port_src"
-    bitwidth: 16
-  }
-  metadata {
-    id: 7
-    name: "port_dst"
-    bitwidth: 16
-  }
-  metadata {
-    id: 8
-    name: "tcp_flags"
-    bitwidth: 12
-  }
-  metadata {
-    id: 9
-    name: "icmp_type"
-    bitwidth: 9
-  }
-  metadata {
-    id: 10
-    name: "icmp_code"
-    bitwidth: 9
-  }
-  metadata {
-    id: 11
     name: "cm_ip_src_ip_dst"
     bitwidth: 32
   }
   metadata {
-    id: 12
+    id: 6
     name: "cm_ip_dst_port_21"
     bitwidth: 32
   }
   metadata {
-    id: 13
+    id: 7
     name: "cm_ip_dst_port_22"
     bitwidth: 32
   }
   metadata {
-    id: 14
+    id: 8
     name: "cm_ip_dst_port_80"
     bitwidth: 32
   }
   metadata {
-    id: 15
+    id: 9
     name: "cm_ip_dst_tcp_syn"
     bitwidth: 32
   }
   metadata {
-    id: 16
+    id: 10
     name: "cm_ip_dst_icmp"
     bitwidth: 32
   }
   metadata {
-    id: 17
+    id: 11
     name: "bm_ip_src"
     bitwidth: 32
   }
   metadata {
-    id: 18
+    id: 12
     name: "bm_ip_dst"
     bitwidth: 32
   }
   metadata {
-    id: 19
+    id: 13
     name: "bm_ip_src_port_src"
     bitwidth: 32
   }
   metadata {
-    id: 20
+    id: 14
     name: "bm_ip_src_port_dst"
     bitwidth: 32
   }
   metadata {
-    id: 21
+    id: 15
     name: "bm_ip_dst_port_src"
     bitwidth: 32
   }
   metadata {
-    id: 22
+    id: 16
     name: "bm_ip_dst_port_dst"
     bitwidth: 32
   }
   metadata {
-    id: 23
+    id: 17
     name: "ams"
     bitwidth: 32
   }
   metadata {
-    id: 24
+    id: 18
     name: "mv"
     bitwidth: 9
   }
   metadata {
-    id: 25
+    id: 19
     name: "_padding"
-    bitwidth: 7
+    bitwidth: 6
   }
 }
 controller_packet_metadata {
@@ -31335,7 +31305,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31350,7 +31320,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31365,7 +31335,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31380,7 +31350,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31395,7 +31365,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31410,7 +31380,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31425,7 +31395,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31440,7 +31410,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31455,7 +31425,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31470,7 +31440,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31485,7 +31455,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31500,7 +31470,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31515,7 +31485,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31530,7 +31500,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31545,7 +31515,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31560,7 +31530,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31575,7 +31545,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31590,7 +31560,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31605,7 +31575,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31620,7 +31590,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31635,7 +31605,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31650,7 +31620,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31665,7 +31635,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31680,7 +31650,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31695,7 +31665,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31710,7 +31680,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31725,7 +31695,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31740,7 +31710,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31755,7 +31725,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31770,7 +31740,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31785,7 +31755,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31800,7 +31770,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31815,7 +31785,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31830,7 +31800,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31845,7 +31815,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {
@@ -31860,7 +31830,7 @@ registers {
       }
     }
   }
-  size: 32
+  size: 32768
 }
 registers {
   preamble {

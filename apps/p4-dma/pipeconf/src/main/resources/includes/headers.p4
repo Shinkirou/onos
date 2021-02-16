@@ -54,12 +54,6 @@ header packet_in_header_t {
     bit<64> timestamp;
     bit<32> ip_src;
     bit<32> ip_dst;
-    bit<9>  ip_proto;
-    bit<16> port_src;
-    bit<16> port_dst;
-    bit<12> tcp_flags;
-    bit<9>  icmp_type;
-    bit<9>  icmp_code;
     bit<32> cm_ip_src_ip_dst;
     bit<32> cm_ip_dst_port_21;
     bit<32> cm_ip_dst_port_22;
@@ -74,7 +68,7 @@ header packet_in_header_t {
     bit<32> bm_ip_dst_port_dst;
     bit<32> ams;
     bit<9>  mv;
-    bit<7>  _padding;
+    bit<6>  _padding;
 }
 
 // Packet-out header. Prepended to packets received by the controller and used
