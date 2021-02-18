@@ -85,27 +85,24 @@ header meta_t {
 }
 
 header reg_meta_t {
-    // Number of active virtual registers, related to the current active sketches and their required registers.
-    bit<32> virtual_register_num;
     bit<32> hash_size;
     bit<32> current_register;
     bit<32> current_index;
     bit<32> current_sketch_hash;
     bit<32> index_remaining;
-    bit<32> cm_ip_src_ip_dst;
-    bit<32> cm_ip_dst_port_dst;
-    bit<32> cm_ip_dst_tcp_flags;
-    bit<32> cm_ip_dst_proto;
-    bit<32> bm_ip_src;
-    bit<32> bm_ip_dst;
-    bit<32> bm_ip_src_port_src;
-    bit<32> bm_ip_src_port_dst;
-    bit<32> bm_ip_dst_port_src;
-    bit<32> bm_ip_dst_port_dst;
-    bit<32> ams;
-    bit<32> mv;
-    bit<32> sketches;
-    // bit <4> padding;
+    bit<1> cm_ip_src_ip_dst;
+    bit<1> cm_ip_dst_port_dst;
+    bit<1> cm_ip_dst_tcp_flags;
+    bit<1> cm_ip_dst_proto;
+    bit<1> bm_ip_src;
+    bit<1> bm_ip_dst;
+    bit<1> bm_ip_src_port_src;
+    bit<1> bm_ip_src_port_dst;
+    bit<1> bm_ip_dst_port_src;
+    bit<1> bm_ip_dst_port_dst;
+    bit<1> ams;
+    bit<1> mv;
+    bit<4> padding;
 }
 
 header epoch_meta_t {

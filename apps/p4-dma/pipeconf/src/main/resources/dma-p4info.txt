@@ -31063,70 +31063,65 @@ actions {
   params {
     id: 1
     name: "cm_ip_src_ip_dst_flag"
-    bitwidth: 32
+    bitwidth: 1
   }
   params {
     id: 2
     name: "cm_ip_dst_port_dst_flag"
-    bitwidth: 32
+    bitwidth: 1
   }
   params {
     id: 3
     name: "cm_ip_dst_tcp_flags_flag"
-    bitwidth: 32
+    bitwidth: 1
   }
   params {
     id: 4
     name: "cm_ip_dst_proto_flag"
-    bitwidth: 32
+    bitwidth: 1
   }
   params {
     id: 5
     name: "bm_ip_src_flag"
-    bitwidth: 32
+    bitwidth: 1
   }
   params {
     id: 6
     name: "bm_ip_dst_flag"
-    bitwidth: 32
+    bitwidth: 1
   }
   params {
     id: 7
     name: "bm_ip_src_port_src_flag"
-    bitwidth: 32
+    bitwidth: 1
   }
   params {
     id: 8
     name: "bm_ip_src_port_dst_flag"
-    bitwidth: 32
+    bitwidth: 1
   }
   params {
     id: 9
     name: "bm_ip_dst_port_src_flag"
-    bitwidth: 32
+    bitwidth: 1
   }
   params {
     id: 10
     name: "bm_ip_dst_port_dst_flag"
-    bitwidth: 32
+    bitwidth: 1
   }
   params {
     id: 11
     name: "ams_flag"
-    bitwidth: 32
+    bitwidth: 1
   }
   params {
     id: 12
     name: "mv_flag"
-    bitwidth: 32
+    bitwidth: 1
   }
   params {
     id: 13
-    name: "virtual_register_num"
-    bitwidth: 32
-  }
-  params {
-    id: 14
     name: "hash_size"
     bitwidth: 32
   }

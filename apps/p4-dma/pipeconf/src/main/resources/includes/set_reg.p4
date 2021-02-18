@@ -3,12 +3,14 @@
 
 control c_set_reg(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
 
+    // Calculate the remaining space in the physical register, to determine if the current hash value fits.
     action register_setup() {
-
-        // Check if the current hash fits in the remaining space in the physical register.
         meta.reg.index_remaining = PHYSICAL_REG_SIZE - meta.reg.current_index;
     }
 
+    // Calculate the physical register and index corresponding to the current sketch.
+    // If this action is executed, the physical register will surely advance, as the current hash value
+    // (which corresponds to a virtual reg index) exceeds the remaining space in the register.
     action calculate_register_index(bit<32> sketch_hash) {
 
         bit<32> advance;
@@ -25,6 +27,9 @@ control c_set_reg(inout headers_t hdr, inout metadata_t meta, inout standard_met
         meta.reg.current_register = meta.reg.current_register + advance + 1;
     }
 
+    // Given the total number of virtual registers and the current virtual register,
+    // set its corresponding physical register and starting index.
+    // Defined by the operator through table rules.
     action set_reg(bit<32> current_register, bit<32> current_index) {
         meta.reg.current_register   = current_register;
         meta.reg.current_index 	    = current_index;
@@ -38,11 +43,9 @@ control c_set_reg(inout headers_t hdr, inout metadata_t meta, inout standard_met
 
     apply {
 
-        // Given the total number of virtual registers and the current virtual register,
-        // set its corresponding physical register and starting index.
+        // Obtain the current physical register and starting index.
+        // Calculate the remaining space available in the register, relative to the current hash value.
         t_set_reg.apply();
-
-        // Calculate the remaining space in the physical register, to determine if the current hash value fits.
         register_setup();
 
         // If (hash < remaining space in the register), we do not increment the current register value.

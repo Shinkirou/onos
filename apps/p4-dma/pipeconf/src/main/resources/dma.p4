@@ -64,11 +64,14 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         standard_metadata.egress_spec = port;
     }
 
-    action sketch_config(bit<32> cm_ip_src_ip_dst_flag, bit<32> cm_ip_dst_port_dst_flag,
-                         bit<32> cm_ip_dst_tcp_flags_flag, bit<32> cm_ip_dst_proto_flag, bit<32> bm_ip_src_flag,
-                         bit<32> bm_ip_dst_flag, bit<32> bm_ip_src_port_src_flag, bit<32> bm_ip_src_port_dst_flag,
-                         bit<32> bm_ip_dst_port_src_flag, bit<32> bm_ip_dst_port_dst_flag, bit<32> ams_flag,
-                         bit<32> mv_flag, bit<32> virtual_register_num, bit<32> hash_size) {
+    // Values defined by the operator through the t_sketches table rules.
+    // The sketch flags define which sketches are to be executed.
+    // The hash size is used in the various sketch hash functions.
+    action sketch_config(bit<1> cm_ip_src_ip_dst_flag, bit<1> cm_ip_dst_port_dst_flag,
+                         bit<1> cm_ip_dst_tcp_flags_flag, bit<1> cm_ip_dst_proto_flag, bit<1> bm_ip_src_flag,
+                         bit<1> bm_ip_dst_flag, bit<1> bm_ip_src_port_src_flag, bit<1> bm_ip_src_port_dst_flag,
+                         bit<1> bm_ip_dst_port_src_flag, bit<1> bm_ip_dst_port_dst_flag, bit<1> ams_flag,
+                         bit<1> mv_flag, bit<32> hash_size) {
 		
         meta.reg.cm_ip_src_ip_dst = cm_ip_src_ip_dst_flag;
         meta.reg.cm_ip_dst_port_dst = cm_ip_dst_port_dst_flag;
@@ -82,11 +85,11 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         meta.reg.bm_ip_dst_port_dst = bm_ip_dst_port_dst_flag;
         meta.reg.ams = ams_flag;
         meta.reg.mv = mv_flag;
-
-        meta.reg.virtual_register_num = virtual_register_num;
         meta.reg.hash_size = hash_size;
     }
 
+    // Read the epoch value bit defined by the operator in register_epoch.
+    // This value will be used to check against the epoch values stored in the sketch registers.
     action epoch_read() {
         register_epoch.read(meta.epoch.current_epoch, 0);
     }
@@ -115,6 +118,8 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         counters = fwd_counter;
     }
 
+    // Table defining which sketches are active and the correspondent hash size.
+    // Configuring the sketches through a table allows the operator to easily modify them during runtime.
     table t_sketches {
         key = {
             hdr.ethernet.ether_type : exact;
@@ -144,15 +149,12 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
             // Applies table t_fwd to the packet. 				
             if (t_fwd.apply().hit) {
 
-                // Check which sketches are active.
+                // Check which sketches are active (flag value == 0).
                 // Update the number of required virtual registers accordingly.
 
                 if (hdr.ipv4.isValid()) {
 					
                     t_sketches.apply();
-
-                    // Read the epoch value bit defined by the operator in register_epoch.
-                    // This value will be used to check against the epoch values stored in the sketch registers.
                     epoch_read();
 
                     // Execute the active sketching algorithms.
@@ -162,15 +164,21 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
                         cm_ip_src_ip_dst.apply(hdr, meta, standard_metadata);
                     }
 
+                    // The count-min sketch with inputs (ip dst, port dst) is only calculated
+                    // if the current dst port is 21, 22, or 80.
                     if ((meta.reg.cm_ip_dst_port_dst == 0) &&
                         ((hdr.tcp.dst_port == 21) || (hdr.tcp.dst_port == 22) || (hdr.tcp.dst_port == 80))) {
                         cm_ip_dst_port_dst.apply(hdr, meta, standard_metadata);
                     }
 
+                    // The count-min sketch with inputs (ip dst, tcp flags) is only calculated
+                    // if the current tcp flags values is 2.
                     if ((meta.reg.cm_ip_dst_tcp_flags == 0) && (hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl) == 2) {
                         cm_ip_dst_tcp_flags.apply(hdr, meta, standard_metadata);
                     }
 
+                    // The count-min sketch with inputs (ip dst, ip proto) is only calculated
+                    // if the current ip proto value is 1.
                     if ((meta.reg.cm_ip_dst_proto == 0) && (hdr.ipv4.protocol == 1)) {
                         cm_ip_dst_proto.apply(hdr, meta, standard_metadata);
                     }
@@ -207,6 +215,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
                     }
                 }
 
+                // Apply the threshold control block, to check if the current flow exceeds the defined threshold.
                 threshold.apply(hdr, meta, standard_metadata);
 				
                 return;

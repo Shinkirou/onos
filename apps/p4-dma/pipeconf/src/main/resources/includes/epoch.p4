@@ -208,7 +208,6 @@ control c_epoch(inout headers_t hdr, inout metadata_t meta, inout standard_metad
     apply {
 
         // Check the current value stored in the register position, in order to retrieve its epoch value.
-			
         current_register();
         t_epoch_check.apply();
 

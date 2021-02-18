@@ -12,7 +12,6 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
 
     // Increase the global traffic counter.
     action global_traffic_counter_incr() {
-
         reg_thres_traffic_global.read(meta.threshold.global_traffic, (bit<32>)0);
         meta.threshold.global_traffic = meta.threshold.global_traffic + 1;
         reg_thres_traffic_global.write((bit<32>)0, meta.threshold.global_traffic);
@@ -20,7 +19,6 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
 
     // Increase the traffic counter for a specific flow.
     action flow_traffic_counter_incr() {
-
         reg_thres_traffic_flow.read(meta.threshold.flow_traffic, (bit<32>)meta.threshold.hash_flow);
         meta.threshold.flow_traffic = meta.threshold.flow_traffic + 1;
         reg_thres_traffic_flow.write((bit<32>)meta.threshold.hash_flow, meta.threshold.flow_traffic);
@@ -37,14 +35,17 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
         reg_thres_traffic_global_flow.write((bit<32>)meta.threshold.hash_flow, meta.threshold.global_traffic);
     }
 
+    // Obtain the last time value stored for the current flow.
     action check_flow_time() {
         reg_thres_time_flow.read(meta.threshold.flow_time, (bit<32>)meta.threshold.hash_flow);
     }
 
+    // Obtain the global traffic value corresponding to the last stage for the current flow.
     action check_flow_global_traffic() {
         reg_thres_traffic_global_flow.read(meta.threshold.flow_global_traffic, (bit<32>)meta.threshold.hash_flow);
     }
 
+    // Specify a packet_in header containing all flow stats.
     action send_to_cpu_threshold() {
 
         // Packets sent to the controller needs to be prepended with the packet-in header.
@@ -79,13 +80,12 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
 
     apply {
 
-        // The current threshold hash has already been calculated for the cm sketch.
+        // The current threshold hash has already been calculated for the cm_ip_src_ip_dst sketch.
         meta.threshold.hash_flow = meta.cm_ip_src_ip_dst.hash_0;
 
+        // Increase the global and flow-specific traffic counters and check the last flow time value stored.
         global_traffic_counter_incr();
         flow_traffic_counter_incr();
-
-        // Obtain the last time value stored for the current flow.
         check_flow_time();
 
         // If the last time value stored is 0, the current flow is considered new.
@@ -95,16 +95,15 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
 
         // Verify if more than x microseconds have elapsed since the last threshold check for the current flow.
-        if ((standard_metadata.ingress_global_timestamp - meta.threshold.flow_time) > (bit<48>)5000000) {
-
-            // Obtain the global traffic value corresponding to the last stage for the current flow.
-            check_flow_global_traffic();
+        if ((standard_metadata.ingress_global_timestamp - meta.threshold.flow_time) > (bit<48>)1000000) {
 
             // Check if the flow traffic at the current stage corresponds to more than 10% of the total traffic.
             // If so, we send the current flow stats to the controller.
-            if ((meta.threshold.flow_traffic * 10) > (meta.threshold.global_traffic - meta.threshold.flow_global_traffic)) {
 
-                // Specify a packet_in header containing all flow stats.
+            check_flow_global_traffic();
+
+            if ((meta.threshold.flow_traffic * 5) > (meta.threshold.global_traffic - meta.threshold.flow_global_traffic)) {
+
                 send_to_cpu_threshold();
 
                 // As the threshold has been exceeded, a new phase will start for the current flow.
