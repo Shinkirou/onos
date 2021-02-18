@@ -16,14 +16,26 @@
 package org.onosproject.kubevirtnetworking.api;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
+import org.onlab.osgi.DefaultServiceDirectory;
 import org.onlab.packet.IpAddress;
+import org.onosproject.net.DeviceId;
+import org.onosproject.net.Port;
+import org.onosproject.net.PortNumber;
+import org.onosproject.net.device.DeviceService;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.onosproject.kubevirtnetworking.api.Constants.TUNNEL_TO_TENANT_PREFIX;
 import static org.onosproject.kubevirtnetworking.api.KubevirtNetwork.Type.FLAT;
+import static org.onosproject.kubevirtnetworking.api.KubevirtNetwork.Type.GENEVE;
+import static org.onosproject.kubevirtnetworking.api.KubevirtNetwork.Type.GRE;
+import static org.onosproject.kubevirtnetworking.api.KubevirtNetwork.Type.VXLAN;
+import static org.onosproject.net.AnnotationKeys.PORT_NAME;
 
 /**
  * Default implementation class of kubevirt network.
@@ -31,6 +43,8 @@ import static org.onosproject.kubevirtnetworking.api.KubevirtNetwork.Type.FLAT;
 public final class DefaultKubevirtNetwork implements KubevirtNetwork {
 
     private static final String NOT_NULL_MSG = "Network % cannot be null";
+    private static final String TENANT_BRIDGE_PREFIX = "br-int-";
+    private static final String OF_PREFIX = "of:";
 
     private final String networkId;
     private final Type type;
@@ -41,6 +55,7 @@ public final class DefaultKubevirtNetwork implements KubevirtNetwork {
     private final String cidr;
     private final Set<KubevirtHostRoute> hostRoutes;
     private final KubevirtIpPool ipPool;
+    private final Set<IpAddress> dnses;
 
     /**
      * Default constructor.
@@ -54,11 +69,12 @@ public final class DefaultKubevirtNetwork implements KubevirtNetwork {
      * @param cidr              CIDR of network
      * @param hostRoutes        a set of host routes
      * @param ipPool            IP pool
+     * @param dnses             a set of DNSes
      */
     public DefaultKubevirtNetwork(String networkId, Type type, String name,
                                   Integer mtu, String segmentId, IpAddress gatewayIp,
                                   String cidr, Set<KubevirtHostRoute> hostRoutes,
-                                  KubevirtIpPool ipPool) {
+                                  KubevirtIpPool ipPool, Set<IpAddress> dnses) {
         this.networkId = networkId;
         this.type = type;
         this.name = name;
@@ -68,6 +84,7 @@ public final class DefaultKubevirtNetwork implements KubevirtNetwork {
         this.cidr = cidr;
         this.hostRoutes = hostRoutes;
         this.ipPool = ipPool;
+        this.dnses = dnses;
     }
 
     @Override
@@ -120,6 +137,45 @@ public final class DefaultKubevirtNetwork implements KubevirtNetwork {
     }
 
     @Override
+    public Set<IpAddress> dnses() {
+        if (dnses == null || dnses.size() == 0) {
+            return ImmutableSet.of();
+        } else {
+            return ImmutableSet.copyOf(dnses);
+        }
+    }
+
+    @Override
+    public String tenantBridgeName() {
+        if (type == VXLAN || type == GRE || type == GENEVE) {
+            return TENANT_BRIDGE_PREFIX + segmentIdHex(segmentId);
+        }
+        return null;
+    }
+
+    @Override
+    public DeviceId tenantDeviceId(String hostname) {
+        if (type == VXLAN || type == GRE || type == GENEVE) {
+            String dpid = genDpidFromName(tenantBridgeName() + "-" + hostname);
+            if (dpid != null) {
+                return DeviceId.deviceId(dpid);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public PortNumber tunnelToTenantPort(DeviceId deviceId) {
+        String portName = TUNNEL_TO_TENANT_PREFIX + segmentIdHex(segmentId);
+        Port port = port(deviceId, portName);
+        if (port == null) {
+            return null;
+        } else {
+            return port.number();
+        }
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -132,13 +188,14 @@ public final class DefaultKubevirtNetwork implements KubevirtNetwork {
                 name.equals(that.name) && mtu.equals(that.mtu) &&
                 gatewayIp.equals(that.gatewayIp) &&
                 cidr.equals(that.cidr) && hostRoutes.equals(that.hostRoutes) &&
-                ipPool.equals(that.ipPool);
+                ipPool.equals(that.ipPool) &&
+                dnses.equals(that.dnses);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(networkId, type, name, mtu, segmentId, gatewayIp,
-                cidr, hostRoutes, ipPool);
+                cidr, hostRoutes, ipPool, dnses);
     }
 
     @Override
@@ -153,7 +210,30 @@ public final class DefaultKubevirtNetwork implements KubevirtNetwork {
                 .add("cidr", cidr)
                 .add("hostRouts", hostRoutes)
                 .add("ipPool", ipPool)
+                .add("dnses", dnses)
                 .toString();
+    }
+
+    private Port port(DeviceId deviceId, String portName) {
+        DeviceService deviceService = DefaultServiceDirectory.getService(DeviceService.class);
+        return deviceService.getPorts(deviceId).stream()
+                .filter(p -> p.isEnabled() &&
+                        Objects.equals(p.annotations().value(PORT_NAME), portName))
+                .findAny().orElse(null);
+    }
+
+    private String segmentIdHex(String segIdStr) {
+        int segId = Integer.parseInt(segIdStr);
+        return String.format("%06x", segId).toLowerCase();
+    }
+
+    private String genDpidFromName(String name) {
+        if (name != null) {
+            String hexString = Integer.toHexString(name.hashCode());
+            return OF_PREFIX + Strings.padStart(hexString, 16, '0');
+        }
+
+        return null;
     }
 
     /**
@@ -176,6 +256,7 @@ public final class DefaultKubevirtNetwork implements KubevirtNetwork {
         private String cidr;
         private Set<KubevirtHostRoute> hostRouts;
         private KubevirtIpPool ipPool;
+        private Set<IpAddress> dnses;
 
         @Override
         public KubevirtNetwork build() {
@@ -191,8 +272,12 @@ public final class DefaultKubevirtNetwork implements KubevirtNetwork {
                 checkArgument(segmentId != null, NOT_NULL_MSG, "segmentId");
             }
 
+            if (dnses == null) {
+                dnses = new HashSet<>();
+            }
+
             return new DefaultKubevirtNetwork(networkId, type, name, mtu, segmentId,
-                    gatewayIp, cidr, hostRouts, ipPool);
+                    gatewayIp, cidr, hostRouts, ipPool, dnses);
         }
 
         @Override
@@ -246,6 +331,12 @@ public final class DefaultKubevirtNetwork implements KubevirtNetwork {
         @Override
         public Builder hostRoutes(Set<KubevirtHostRoute> hostRoutes) {
             this.hostRouts = hostRoutes;
+            return this;
+        }
+
+        @Override
+        public KubevirtNetwork.Builder dnses(Set<IpAddress> dnses) {
+            this.dnses = dnses;
             return this;
         }
     }

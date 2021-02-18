@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-present Open Networking Foundation
+ * Copyright 2021-present Open Networking Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package org.onosproject.kubevirtnode.impl;
+package org.onosproject.provider.p4runtime.packet.impl;
 
 /**
- * Name/Value constants for properties.
+ * Constants for default values of configurable properties.
  */
 public final class OsgiPropertyConstants {
-    private OsgiPropertyConstants() {
-    }
 
-    static final String OVSDB_PORT = "ovsdbPortNum";
-    static final int OVSDB_PORT_NUM_DEFAULT = 6650;
+    private OsgiPropertyConstants() {}
 
-    static final String AUTO_RECOVERY = "autoRecovery";
-    static final boolean AUTO_RECOVERY_DEFAULT = true;
+    public static final String P4RUNTIME_PACKET_PROVIDER_WORKERS = "workers";
+
+    public static final int P4RUNTIME_PACKET_PROVIDER_WORKERS_DEFAULT = 4;
+
 }

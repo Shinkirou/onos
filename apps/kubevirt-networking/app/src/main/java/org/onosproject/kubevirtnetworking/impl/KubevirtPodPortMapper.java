@@ -142,20 +142,61 @@ public class KubevirtPodPortMapper {
                     eventExecutor.execute(() -> processPodDeletion(event.subject()));
                     break;
                 case KUBEVIRT_POD_CREATED:
+                    eventExecutor.execute(() -> processPodCreation(event.subject()));
+                    break;
                 default:
                     // do nothing
                     break;
             }
         }
 
-        private void processPodUpdate(Pod pod) {
+        private void processPodCreation(Pod pod) {
             if (!isRelevantHelper()) {
                 return;
             }
 
-            KubernetesClient client = k8sClient(kubevirtApiConfigService);
+            Map<String, String> annots = pod.getMetadata().getAnnotations();
+            if (annots == null) {
+                return;
+            }
 
-            if (client == null) {
+            if (!annots.containsKey(NETWORK_STATUS_KEY)) {
+                return;
+            }
+
+            try {
+                String networkStatusStr = pod.getMetadata().getAnnotations().get(NETWORK_STATUS_KEY);
+                JSONArray networkStatus = new JSONArray(networkStatusStr);
+                for (int i = 0; i < networkStatus.length(); i++) {
+                    JSONObject object = networkStatus.getJSONObject(i);
+                    String name = object.getString(NAME);
+                    KubevirtNetwork jsonNetwork = kubevirtNetworkAdminService.networks().stream()
+                            .filter(n -> (NETWORK_PREFIX + n.name()).equals(name))
+                            .findAny().orElse(null);
+                    if (jsonNetwork != null) {
+                        JSONArray ips = object.getJSONArray(IPS);
+                        if (ips != null && ips.length() > 0) {
+                            IpAddress ip = IpAddress.valueOf(ips.getString(0));
+                            kubevirtNetworkAdminService.reserveIp(jsonNetwork.networkId(), ip);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Failed to reserve IP address", e);
+            }
+
+            KubevirtPort port = getPort(kubevirtNetworkAdminService.networks(), pod);
+            if (port == null) {
+                return;
+            }
+
+            if (kubevirtPortAdminService.port(port.macAddress()) == null) {
+                kubevirtPortAdminService.createPort(port);
+            }
+        }
+
+        private void processPodUpdate(Pod pod) {
+            if (!isRelevantHelper()) {
                 return;
             }
 
@@ -191,6 +232,12 @@ public class KubevirtPodPortMapper {
                     Map<String, String> annots = pod.getMetadata().getAnnotations();
                     annots.put(NETWORK_STATUS_KEY, networkStatus.toString(4));
 
+                    KubernetesClient client = k8sClient(kubevirtApiConfigService);
+
+                    if (client == null) {
+                        return;
+                    }
+
                     client.pods().inNamespace(pod.getMetadata().getNamespace())
                             .withName(pod.getMetadata().getName())
                             .edit(r -> new PodBuilder(r)
@@ -207,12 +254,6 @@ public class KubevirtPodPortMapper {
 
         private void processPodDeletion(Pod pod) {
             if (!isRelevantHelper()) {
-                return;
-            }
-
-            KubernetesClient client = k8sClient(kubevirtApiConfigService);
-
-            if (client == null) {
                 return;
             }
 
