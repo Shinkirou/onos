@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onosproject.kubevirtnetworking.impl;
+package org.onosproject.kubevirtnode.impl;
 
-import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Node;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.WatcherException;
@@ -24,10 +24,12 @@ import org.onosproject.cluster.LeadershipService;
 import org.onosproject.cluster.NodeId;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.core.CoreService;
-import org.onosproject.kubevirtnetworking.api.KubevirtPodAdminService;
+import org.onosproject.kubevirtnode.api.KubevirtApiConfig;
 import org.onosproject.kubevirtnode.api.KubevirtApiConfigEvent;
 import org.onosproject.kubevirtnode.api.KubevirtApiConfigListener;
 import org.onosproject.kubevirtnode.api.KubevirtApiConfigService;
+import org.onosproject.kubevirtnode.api.KubevirtNode;
+import org.onosproject.kubevirtnode.api.KubevirtNodeAdminService;
 import org.onosproject.mastership.MastershipService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -41,15 +43,19 @@ import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.onlab.util.Tools.groupedThreads;
-import static org.onosproject.kubevirtnetworking.api.Constants.KUBEVIRT_NETWORKING_APP_ID;
-import static org.onosproject.kubevirtnetworking.util.KubevirtNetworkingUtil.k8sClient;
+import static org.onosproject.kubevirtnode.api.KubevirtNode.Type.GATEWAY;
+import static org.onosproject.kubevirtnode.api.KubevirtNode.Type.WORKER;
+import static org.onosproject.kubevirtnode.api.KubevirtNodeService.APP_ID;
+import static org.onosproject.kubevirtnode.api.KubevirtNodeState.INIT;
+import static org.onosproject.kubevirtnode.util.KubevirtNodeUtil.buildKubevirtNode;
+import static org.onosproject.kubevirtnode.util.KubevirtNodeUtil.k8sClient;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * Kubernetes pod watcher used for feeding pod information.
+ * Kubernetes node watcher used for feeding node information.
  */
 @Component(immediate = true)
-public class KubevirtPodWatcher {
+public class KubevirtNodeWatcher {
 
     private final Logger log = getLogger(getClass());
 
@@ -66,14 +72,14 @@ public class KubevirtPodWatcher {
     protected LeadershipService leadershipService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected KubevirtPodAdminService kubevirtPodAdminService;
+    protected KubevirtNodeAdminService kubevirtNodeAdminService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected KubevirtApiConfigService kubevirtApiConfigService;
 
     private final ExecutorService eventExecutor = newSingleThreadExecutor(
             groupedThreads(this.getClass().getSimpleName(), "event-handler"));
-    private final Watcher<Pod> internalKubevirtPodWatcher = new InternalKubevirtPodWatcher();
+    private final Watcher<Node> internalKubevirtNodeWatcher = new InternalKubevirtNodeWatcher();
     private final InternalKubevirtApiConfigListener
             internalKubevirtApiConfigListener = new InternalKubevirtApiConfigListener();
 
@@ -82,7 +88,7 @@ public class KubevirtPodWatcher {
 
     @Activate
     protected void activate() {
-        appId = coreService.registerApplication(KUBEVIRT_NETWORKING_APP_ID);
+        appId = coreService.registerApplication(APP_ID);
         localNodeId = clusterService.getLocalNode().id();
         leadershipService.runForLeadership(appId.name());
         kubevirtApiConfigService.addListener(internalKubevirtApiConfigListener);
@@ -99,11 +105,15 @@ public class KubevirtPodWatcher {
         log.info("Stopped");
     }
 
-    private void instantiatePodWatcher() {
-        KubernetesClient client = k8sClient(kubevirtApiConfigService);
+    private void instantiateNodeWatcher() {
+        KubevirtApiConfig config = kubevirtApiConfigService.apiConfig();
+        if (config == null) {
+            return;
+        }
+        KubernetesClient client = k8sClient(config);
 
         if (client != null) {
-            client.pods().inAnyNamespace().watch(internalKubevirtPodWatcher);
+            client.nodes().watch(internalKubevirtNodeWatcher);
         }
     }
 
@@ -133,76 +143,95 @@ public class KubevirtPodWatcher {
                 return;
             }
 
-            instantiatePodWatcher();
+            instantiateNodeWatcher();
         }
     }
 
-    private class InternalKubevirtPodWatcher implements Watcher<Pod> {
+    private class InternalKubevirtNodeWatcher implements Watcher<Node> {
 
         @Override
-        public void eventReceived(Action action, Pod pod) {
+        public void eventReceived(Action action, Node node) {
             switch (action) {
                 case ADDED:
-                    eventExecutor.execute(() -> processAddition(pod));
+                    eventExecutor.execute(() -> processAddition(node));
                     break;
                 case MODIFIED:
-                    eventExecutor.execute(() -> processModification(pod));
+                    eventExecutor.execute(() -> processModification(node));
                     break;
                 case DELETED:
-                    eventExecutor.execute(() -> processDeletion(pod));
+                    eventExecutor.execute(() -> processDeletion(node));
                     break;
                 case ERROR:
-                    log.warn("Failures processing pod manipulation.");
+                    log.warn("Failures processing node manipulation.");
                     break;
                 default:
+                    // do nothing
                     break;
             }
         }
 
         @Override
         public void onClose(WatcherException e) {
-            // due to the bugs in fabric8, pod watcher might be closed,
-            // we will re-instantiate the pod watcher in this case
+            // due to the bugs in fabric8, node watcher might be closed,
+            // we will re-instantiate the node watcher in this case
             // FIXME: https://github.com/fabric8io/kubernetes-client/issues/2135
-            log.warn("Pod watcher OnClose, re-instantiate the POD watcher...");
-            instantiatePodWatcher();
+            log.warn("Node watcher OnClose, re-instantiate the node watcher...");
+            instantiateNodeWatcher();
         }
 
-        private void processAddition(Pod pod) {
+        private void processAddition(Node node) {
             if (!isMaster()) {
                 return;
             }
 
-            log.trace("Process pod {} creating event from API server.",
-                    pod.getMetadata().getName());
+            log.trace("Process node {} creating event from API server.",
+                    node.getMetadata().getName());
 
-            if (kubevirtPodAdminService.pod(pod.getMetadata().getUid()) == null) {
-                kubevirtPodAdminService.createPod(pod);
+            KubevirtNode kubevirtNode = buildKubevirtNode(node);
+            if (kubevirtNode.type() == WORKER || kubevirtNode.type() == GATEWAY) {
+                if (!kubevirtNodeAdminService.hasNode(kubevirtNode.hostname())) {
+                    kubevirtNodeAdminService.createNode(kubevirtNode);
+                }
             }
         }
 
-        private void processModification(Pod pod) {
+        private void processModification(Node node) {
             if (!isMaster()) {
                 return;
             }
 
-            log.trace("Process pod {} updating event from API server.",
-                    pod.getMetadata().getName());
+            log.trace("Process node {} updating event from API server.",
+                    node.getMetadata().getName());
 
-            if (kubevirtPodAdminService.pod(pod.getMetadata().getUid()) != null) {
-                kubevirtPodAdminService.updatePod(pod);
+            KubevirtNode existing = kubevirtNodeAdminService.node(node.getMetadata().getName());
+
+            if (existing != null) {
+                KubevirtNode kubevirtNode = buildKubevirtNode(node);
+
+                // we update the kubevirt node and re-run bootstrapping,
+                // only if the updated node has different phyInts and data IP
+                // this means we assume that the node's hostname, type and mgmt IP
+                // are immutable
+                if (!kubevirtNode.phyIntfs().equals(existing.phyIntfs()) ||
+                        !kubevirtNode.dataIp().equals(existing.dataIp())) {
+                    kubevirtNodeAdminService.updateNode(kubevirtNode.updateState(INIT));
+                }
             }
         }
 
-        private void processDeletion(Pod pod) {
+        private void processDeletion(Node node) {
             if (!isMaster()) {
                 return;
             }
 
-            log.trace("Process pod {} removal event from API server.",
-                    pod.getMetadata().getName());
+            log.trace("Process node {} removal event from API server.",
+                    node.getMetadata().getName());
 
-            kubevirtPodAdminService.removePod(pod.getMetadata().getUid());
+            KubevirtNode existing = kubevirtNodeAdminService.node(node.getMetadata().getName());
+
+            if (existing != null) {
+                kubevirtNodeAdminService.removeNode(node.getMetadata().getName());
+            }
         }
 
         private boolean isMaster() {
