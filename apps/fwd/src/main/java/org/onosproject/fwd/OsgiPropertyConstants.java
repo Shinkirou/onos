@@ -36,6 +36,9 @@ public final class OsgiPropertyConstants {
     static final String IPV6_FORWARDING = "ipv6Forwarding";
     static final boolean IPV6_FORWARDING_DEFAULT = false;
 
+    static final String MATCH_IN_PORT_ONLY = "matchInPortOnly";
+    static final boolean MATCH_IN_PORT_ONLY_DEFAULT = true;
+
     static final String MATCH_DST_MAC_ONLY = "matchDstMacOnly";
     static final boolean MATCH_DST_MAC_ONLY_DEFAULT = false;
 
@@ -43,7 +46,7 @@ public final class OsgiPropertyConstants {
     static final boolean MATCH_VLAN_ID_DEFAULT = false;
 
     static final String MATCH_IPV4_ADDRESS = "matchIpv4Address";
-    static final boolean MATCH_IPV4_ADDRESS_DEFAULT = true;
+    static final boolean MATCH_IPV4_ADDRESS_DEFAULT = false;
 
     static final String MATCH_IPV4_DSCP = "matchIpv4Dscp";
     static final boolean MATCH_IPV4_DSCP_DEFAULT = false;

@@ -89,36 +89,7 @@ import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.onlab.util.Tools.groupedThreads;
-import static org.onosproject.fwd.OsgiPropertyConstants.FLOW_PRIORITY;
-import static org.onosproject.fwd.OsgiPropertyConstants.FLOW_PRIORITY_DEFAULT;
-import static org.onosproject.fwd.OsgiPropertyConstants.FLOW_TIMEOUT;
-import static org.onosproject.fwd.OsgiPropertyConstants.FLOW_TIMEOUT_DEFAULT;
-import static org.onosproject.fwd.OsgiPropertyConstants.IGNORE_IPV4_MCAST_PACKETS;
-import static org.onosproject.fwd.OsgiPropertyConstants.IGNORE_IPV4_MCAST_PACKETS_DEFAULT;
-import static org.onosproject.fwd.OsgiPropertyConstants.IPV6_FORWARDING;
-import static org.onosproject.fwd.OsgiPropertyConstants.IPV6_FORWARDING_DEFAULT;
-import static org.onosproject.fwd.OsgiPropertyConstants.MATCH_DST_MAC_ONLY;
-import static org.onosproject.fwd.OsgiPropertyConstants.MATCH_DST_MAC_ONLY_DEFAULT;
-import static org.onosproject.fwd.OsgiPropertyConstants.MATCH_ICMP_FIELDS;
-import static org.onosproject.fwd.OsgiPropertyConstants.MATCH_ICMP_FIELDS_DEFAULT;
-import static org.onosproject.fwd.OsgiPropertyConstants.MATCH_IPV4_ADDRESS;
-import static org.onosproject.fwd.OsgiPropertyConstants.MATCH_IPV4_ADDRESS_DEFAULT;
-import static org.onosproject.fwd.OsgiPropertyConstants.MATCH_IPV4_DSCP;
-import static org.onosproject.fwd.OsgiPropertyConstants.MATCH_IPV4_DSCP_DEFAULT;
-import static org.onosproject.fwd.OsgiPropertyConstants.MATCH_IPV6_ADDRESS;
-import static org.onosproject.fwd.OsgiPropertyConstants.MATCH_IPV6_ADDRESS_DEFAULT;
-import static org.onosproject.fwd.OsgiPropertyConstants.MATCH_IPV6_FLOW_LABEL;
-import static org.onosproject.fwd.OsgiPropertyConstants.MATCH_IPV6_FLOW_LABEL_DEFAULT;
-import static org.onosproject.fwd.OsgiPropertyConstants.MATCH_TCP_UDP_PORTS;
-import static org.onosproject.fwd.OsgiPropertyConstants.MATCH_TCP_UDP_PORTS_DEFAULT;
-import static org.onosproject.fwd.OsgiPropertyConstants.MATCH_VLAN_ID;
-import static org.onosproject.fwd.OsgiPropertyConstants.MATCH_VLAN_ID_DEFAULT;
-import static org.onosproject.fwd.OsgiPropertyConstants.PACKET_OUT_OFPP_TABLE;
-import static org.onosproject.fwd.OsgiPropertyConstants.PACKET_OUT_OFPP_TABLE_DEFAULT;
-import static org.onosproject.fwd.OsgiPropertyConstants.PACKET_OUT_ONLY;
-import static org.onosproject.fwd.OsgiPropertyConstants.PACKET_OUT_ONLY_DEFAULT;
-import static org.onosproject.fwd.OsgiPropertyConstants.RECORD_METRICS;
-import static org.onosproject.fwd.OsgiPropertyConstants.RECORD_METRICS_DEFAULT;
+import static org.onosproject.fwd.OsgiPropertyConstants.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -133,6 +104,7 @@ import static org.slf4j.LoggerFactory.getLogger;
         FLOW_TIMEOUT + ":Integer=" + FLOW_TIMEOUT_DEFAULT,
         FLOW_PRIORITY  + ":Integer=" + FLOW_PRIORITY_DEFAULT,
         IPV6_FORWARDING + ":Boolean=" + IPV6_FORWARDING_DEFAULT,
+        MATCH_IN_PORT_ONLY + ":Boolean=" + MATCH_IN_PORT_ONLY_DEFAULT,
         MATCH_DST_MAC_ONLY + ":Boolean=" + MATCH_DST_MAC_ONLY_DEFAULT,
         MATCH_VLAN_ID + ":Boolean=" + MATCH_VLAN_ID_DEFAULT,
         MATCH_IPV4_ADDRESS + ":Boolean=" + MATCH_IPV4_ADDRESS_DEFAULT,
@@ -193,6 +165,9 @@ public class ReactiveForwarding {
 
     /** Enable IPv6 forwarding; default is false. */
     private boolean ipv6Forwarding = IPV6_FORWARDING_DEFAULT;
+
+    /** Enable matching In Port Only; default is false. */
+    private boolean matchInPortOnly = MATCH_IN_PORT_ONLY_DEFAULT;
 
     /** Enable matching Dst Mac Only; default is false. */
     private boolean matchDstMacOnly = MATCH_DST_MAC_ONLY_DEFAULT;
@@ -344,6 +319,17 @@ public class ReactiveForwarding {
                     ipv6Forwarding ? "enabled" : "disabled");
         }
 
+        Boolean matchInPortOnlyEnabled =
+                Tools.isPropertyEnabled(properties, MATCH_IN_PORT_ONLY);
+        if (matchInPortOnlyEnabled == null) {
+            log.info("Match In Port is not configured, " +
+                    "using current value of {}", matchInPortOnly);
+        } else {
+            matchInPortOnly = matchInPortOnlyEnabled;
+            log.info("Configured. Match In Port Only is {}",
+                    matchInPortOnly ? "enabled" : "disabled");
+        }
+
         Boolean matchDstMacOnlyEnabled =
                 Tools.isPropertyEnabled(properties, MATCH_DST_MAC_ONLY);
         if (matchDstMacOnlyEnabled == null) {
@@ -445,7 +431,7 @@ public class ReactiveForwarding {
         Boolean recordMetricsEnabled =
                 Tools.isPropertyEnabled(properties, RECORD_METRICS);
         if (recordMetricsEnabled == null) {
-            log.info("IConfigured. Ignore record metrics  is {} ," +
+            log.info("Configured. Ignore record metrics  is {} ," +
                     "using current value of {}", recordMetrics);
         } else {
             recordMetrics = recordMetricsEnabled;
@@ -617,7 +603,10 @@ public class ReactiveForwarding {
         // Else
         //    Create flows with default matching and include configured fields
         //
-        if (matchDstMacOnly) {
+        if (matchInPortOnly) {
+            selectorBuilder.matchInPort(context.inPacket().receivedFrom().port());
+        }
+        else if (matchDstMacOnly) {
             selectorBuilder.matchEthDst(inPkt.getDestinationMAC());
         } else {
             selectorBuilder.matchInPort(context.inPacket().receivedFrom().port())

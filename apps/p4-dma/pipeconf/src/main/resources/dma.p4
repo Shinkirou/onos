@@ -97,15 +97,17 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
     // Table counter used to count packets and bytes matched by each entry of t_fwd table.
     direct_counter(CounterType.packets_and_bytes) fwd_counter;	
 
+    // ONOS requires ether_type as part of the forwarding table rules.
+    // By using only these two features, we avoid filling the ONOS flow table during evaluation tests.
     table t_fwd {
         key = {
             standard_metadata.ingress_port  : ternary;
-            hdr.ethernet.dst_addr           : ternary;
-            hdr.ethernet.src_addr           : ternary;
             hdr.ethernet.ether_type         : ternary;
-            hdr.ipv4.protocol               : ternary;
-            hdr.ipv4.src_addr               : ternary;
-            hdr.ipv4.dst_addr               : ternary;
+            // hdr.ethernet.dst_addr           : ternary;
+            // hdr.ethernet.src_addr           : ternary;
+            // hdr.ipv4.protocol               : ternary;
+            // hdr.ipv4.src_addr               : ternary;
+            // hdr.ipv4.dst_addr               : ternary;
         }
         actions = {
             set_out_port;

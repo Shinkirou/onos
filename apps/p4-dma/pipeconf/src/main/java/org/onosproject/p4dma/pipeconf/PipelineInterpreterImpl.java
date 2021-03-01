@@ -365,7 +365,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
             throw new PiInterpreterException(format(
                     "Missing metadata '%s' in packet-in received from '%s': %s",
                     INGRESS_PORT, deviceId, packetIn));
-        }                 
+        }
     }
 
     private PiPacketOperation createPiPacketOp(ByteBuffer data, long portNumber)

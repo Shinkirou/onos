@@ -95,7 +95,7 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
 
         // Verify if more than x microseconds have elapsed since the last threshold check for the current flow.
-        if ((standard_metadata.ingress_global_timestamp - meta.threshold.flow_time) > (bit<48>)1000000) {
+        if ((standard_metadata.ingress_global_timestamp - meta.threshold.flow_time) > (bit<48>)5000000) {
 
             // Check if the flow traffic at the current stage corresponds to more than 10% of the total traffic.
             // If so, we send the current flow stats to the controller.
