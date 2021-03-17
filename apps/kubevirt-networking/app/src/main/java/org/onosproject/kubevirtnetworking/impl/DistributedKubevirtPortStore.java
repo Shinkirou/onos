@@ -172,8 +172,9 @@ public class DistributedKubevirtPortStore
                     // if the event object has invalid port value, we do not
                     // propagate KUBEVIRT_PORT_REMOVED event.
                     if (event.oldValue() != null && event.oldValue().value() != null) {
-                        notifyDelegate(new KubevirtPortEvent(
-                                KUBEVIRT_PORT_REMOVED, event.oldValue().value()));
+                        eventExecutor.execute(() ->
+                                notifyDelegate(new KubevirtPortEvent(
+                                        KUBEVIRT_PORT_REMOVED, event.oldValue().value())));
                     }
                     break;
                 default:

@@ -58,6 +58,7 @@ import static org.onlab.util.Tools.groupedThreads;
 import static org.onosproject.kubevirtnetworking.api.Constants.KUBEVIRT_NETWORKING_APP_ID;
 import static org.onosproject.kubevirtnetworking.api.KubevirtNetwork.Type.FLAT;
 import static org.onosproject.kubevirtnetworking.util.KubevirtNetworkingUtil.k8sClient;
+import static org.onosproject.kubevirtnetworking.util.KubevirtNetworkingUtil.parseResourceName;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -218,7 +219,7 @@ public class NetworkAttachmentDefinitionWatcher {
                 return;
             }
 
-            String name = parseName(resource);
+            String name = parseResourceName(resource);
 
             log.trace("Process NetworkAttachmentDefinition {} creating event from API server.",
                     name);
@@ -236,7 +237,7 @@ public class NetworkAttachmentDefinitionWatcher {
                 return;
             }
 
-            String name = parseName(resource);
+            String name = parseResourceName(resource);
 
             log.trace("Process NetworkAttachmentDefinition {} updating event from API server.",
                     name);
@@ -252,7 +253,7 @@ public class NetworkAttachmentDefinitionWatcher {
                 return;
             }
 
-            String name = parseName(resource);
+            String name = parseResourceName(resource);
 
             log.trace("Process NetworkAttachmentDefinition {} removal event from API server.",
                     name);
@@ -264,20 +265,10 @@ public class NetworkAttachmentDefinitionWatcher {
             return Objects.equals(localNodeId, leadershipService.getLeader(appId.name()));
         }
 
-        private String parseName(String resource) {
-            try {
-                JSONObject json = new JSONObject(resource);
-                return json.getJSONObject("metadata").getString("name");
-            } catch (JSONException e) {
-                log.error("");
-            }
-            return "";
-        }
-
         private KubevirtNetwork parseKubevirtNetwork(String resource) {
             try {
                 JSONObject json = new JSONObject(resource);
-                String name = parseName(resource);
+                String name = parseResourceName(resource);
                 JSONObject annots = json.getJSONObject("metadata").getJSONObject("annotations");
                 String networkConfig = annots.getString(NETWORK_CONFIG);
                 if (networkConfig != null) {
