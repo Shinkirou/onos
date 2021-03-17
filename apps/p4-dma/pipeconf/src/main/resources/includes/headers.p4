@@ -59,6 +59,8 @@ header packet_in_header_t {
     bit<32> cm_ip_dst_port_22;
     bit<32> cm_ip_dst_port_80;
     bit<32> cm_ip_dst_tcp_syn;
+    bit<32> cm_ip_dst_tcp_ack;
+    bit<32> cm_ip_dst_tcp_rst;
     bit<32> cm_ip_dst_icmp;
     bit<32> bm_ip_src;
     bit<32> bm_ip_dst;

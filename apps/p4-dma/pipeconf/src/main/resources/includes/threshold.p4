@@ -68,6 +68,8 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
         if (hdr.tcp.dst_port == 22) hdr.packet_in.cm_ip_dst_port_22 = meta.cm_ip_dst_port_dst.sketch_final;
         if (hdr.tcp.dst_port == 80) hdr.packet_in.cm_ip_dst_port_80 = meta.cm_ip_dst_port_dst.sketch_final;
         if ((hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl) == 2) hdr.packet_in.cm_ip_dst_tcp_syn = meta.cm_ip_dst_tcp_flags.sketch_final;
+        if ((hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl) == 16) hdr.packet_in.cm_ip_dst_tcp_ack = meta.cm_ip_dst_tcp_flags.sketch_final;
+        if ((hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl) == 4) hdr.packet_in.cm_ip_dst_tcp_rst = meta.cm_ip_dst_tcp_flags.sketch_final;
         if (hdr.ipv4.protocol == 1) hdr.packet_in.cm_ip_dst_icmp = meta.cm_ip_dst_proto.sketch_final;
 
         // Check if the current MV sketch key (strongest candidate) matches the current flow key.
@@ -102,9 +104,15 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
 
             check_flow_global_traffic();
 
-            if ((meta.threshold.flow_traffic * 5) > (meta.threshold.global_traffic - meta.threshold.flow_global_traffic)) {
+            if ((meta.threshold.flow_traffic * 40) > (meta.threshold.global_traffic - meta.threshold.flow_global_traffic)) {
 
                 send_to_cpu_threshold();
+
+                // As the threshold has been exceeded, a new phase will start for the current flow.
+                // As such, we update the time value and reset the traffic counters.
+                time_flow_update();
+                flow_traffic_counter_reset();
+            } else {
 
                 // As the threshold has been exceeded, a new phase will start for the current flow.
                 // As such, we update the time value and reset the traffic counters.

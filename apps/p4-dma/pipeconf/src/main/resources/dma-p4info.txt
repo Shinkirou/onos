@@ -31190,51 +31190,61 @@ controller_packet_metadata {
   }
   metadata {
     id: 10
-    name: "cm_ip_dst_icmp"
+    name: "cm_ip_dst_tcp_ack"
     bitwidth: 32
   }
   metadata {
     id: 11
-    name: "bm_ip_src"
+    name: "cm_ip_dst_tcp_rst"
     bitwidth: 32
   }
   metadata {
     id: 12
-    name: "bm_ip_dst"
+    name: "cm_ip_dst_icmp"
     bitwidth: 32
   }
   metadata {
     id: 13
-    name: "bm_ip_src_port_src"
+    name: "bm_ip_src"
     bitwidth: 32
   }
   metadata {
     id: 14
-    name: "bm_ip_src_port_dst"
+    name: "bm_ip_dst"
     bitwidth: 32
   }
   metadata {
     id: 15
-    name: "bm_ip_dst_port_src"
+    name: "bm_ip_src_port_src"
     bitwidth: 32
   }
   metadata {
     id: 16
-    name: "bm_ip_dst_port_dst"
+    name: "bm_ip_src_port_dst"
     bitwidth: 32
   }
   metadata {
     id: 17
-    name: "ams"
+    name: "bm_ip_dst_port_src"
     bitwidth: 32
   }
   metadata {
     id: 18
+    name: "bm_ip_dst_port_dst"
+    bitwidth: 32
+  }
+  metadata {
+    id: 19
+    name: "ams"
+    bitwidth: 32
+  }
+  metadata {
+    id: 20
     name: "mv"
     bitwidth: 9
   }
   metadata {
-    id: 19
+    id: 21
     name: "_padding"
     bitwidth: 6
   }

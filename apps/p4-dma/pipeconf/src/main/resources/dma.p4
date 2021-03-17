@@ -174,8 +174,11 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
                     }
 
                     // The count-min sketch with inputs (ip dst, tcp flags) is only calculated
-                    // if the current tcp flags values is 2.
-                    if ((meta.reg.cm_ip_dst_tcp_flags == 0) && (hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl) == 2) {
+                    // if the current tcp flags values is 2, 4, or 16 .
+                    if ((meta.reg.cm_ip_dst_tcp_flags == 0) &&
+                        (((hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl) == 2) ||
+                         ((hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl) == 4) ||
+                         ((hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl) == 16))) {
                         cm_ip_dst_tcp_flags.apply(hdr, meta, standard_metadata);
                     }
 
