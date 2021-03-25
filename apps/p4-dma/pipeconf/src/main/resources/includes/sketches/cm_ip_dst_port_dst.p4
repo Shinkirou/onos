@@ -20,7 +20,7 @@ control c_cm_ip_dst_port_dst(inout headers_t hdr, inout metadata_t meta, inout s
         hash(meta.cm_ip_dst_port_dst.hash_0,
             HashAlgorithm.crc32_custom,
             (bit<32>)0,
-            {hdr.ipv4.dst_addr, hdr.tcp.dst_port},
+            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, hdr.tcp.dst_port},
             (bit<32>)meta.reg.hash_size);
     }
 
@@ -28,7 +28,7 @@ control c_cm_ip_dst_port_dst(inout headers_t hdr, inout metadata_t meta, inout s
         hash(meta.cm_ip_dst_port_dst.hash_1,
             HashAlgorithm.crc32_custom,
             (bit<32>)0,
-            {hdr.ipv4.dst_addr, hdr.tcp.dst_port},
+            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, hdr.tcp.dst_port},
             (bit<32>)meta.reg.hash_size);
     }
 
@@ -36,7 +36,7 @@ control c_cm_ip_dst_port_dst(inout headers_t hdr, inout metadata_t meta, inout s
         hash(meta.cm_ip_dst_port_dst.hash_2,
             HashAlgorithm.crc32_custom,
             (bit<32>)0,
-            {hdr.ipv4.dst_addr, hdr.tcp.dst_port},
+            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr, hdr.tcp.dst_port},
             (bit<32>)meta.reg.hash_size);
     }
 
