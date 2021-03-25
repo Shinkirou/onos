@@ -270,7 +270,8 @@ public class DistributedKubevirtRouterStore
                             notifyDelegate(new KubevirtRouterEvent(
                             KUBEVIRT_ROUTER_EXTERNAL_NETWORK_ATTACHED,
                             router, entry.getKey(), entry.getValue(),
-                            newValue.peerRouter().ipAddress().toString())));
+                            newValue.peerRouter().ipAddress().toString(),
+                                    newValue.peerRouter().macAddress())));
             }
 
             if (oldValue.external().size() > 0 && newValue.external().size() == 0) {
@@ -279,7 +280,8 @@ public class DistributedKubevirtRouterStore
                             notifyDelegate(new KubevirtRouterEvent(
                             KUBEVIRT_ROUTER_EXTERNAL_NETWORK_DETACHED,
                             router, entry.getKey(), entry.getValue(),
-                            oldValue.peerRouter().ipAddress().toString())));
+                            oldValue.peerRouter().ipAddress().toString(),
+                                    oldValue.peerRouter().macAddress())));
             }
 
             Set<String> added = new HashSet<>(newValue.internal());
@@ -399,7 +401,7 @@ public class DistributedKubevirtRouterStore
                 notifyDelegate(new KubevirtRouterEvent(
                         KUBEVIRT_FLOATING_IP_DISASSOCIATED,
                         router,
-                        event.newValue().value(), oldPodName));
+                        event.oldValue().value(), oldPodName));
                 log.info(String.format(MSG_FLOATING_IP,
                         event.newValue().value().floatingIp(), MSG_DISASSOCIATED, oldPodName));
             }
