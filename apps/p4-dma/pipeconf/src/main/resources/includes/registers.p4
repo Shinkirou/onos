@@ -10,19 +10,19 @@ register<bit<32>>(32768) register_1;
 register<bit<32>>(32768) register_2;
 register<bit<32>>(32768) register_3;
 
-// Count-min sketch (IP dst, port dst)
+// Count-min sketch (IP src, IP dst, port dst)
 register<bit<32>>(32768) register_4;
 register<bit<32>>(32768) register_5;
 register<bit<32>>(32768) register_6;
 register<bit<32>>(32768) register_7;
 
-// Count-min sketch (IP Dst, TCP flags)
+// Count-min sketch (IP src, IP Dst, TCP flags)
 register<bit<32>>(32768) register_8;
 register<bit<32>>(32768) register_9;
 register<bit<32>>(32768) register_10;
 register<bit<32>>(32768) register_11;
 
-// Count-min sketch (IP dst, proto)
+// Count-min sketch (IP src, IP dst, proto)
 register<bit<32>>(32768) register_12;
 register<bit<32>>(32768) register_13;
 register<bit<32>>(32768) register_14;

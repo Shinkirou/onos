@@ -54,14 +54,14 @@ header packet_in_header_t {
     bit<64> timestamp;
     bit<32> ip_src;
     bit<32> ip_dst;
-    bit<32> cm_ip_src_ip_dst;
-    bit<32> cm_ip_dst_port_21;
-    bit<32> cm_ip_dst_port_22;
-    bit<32> cm_ip_dst_port_80;
-    bit<32> cm_ip_dst_tcp_syn;
-    bit<32> cm_ip_dst_tcp_ack;
-    bit<32> cm_ip_dst_tcp_rst;
-    bit<32> cm_ip_dst_icmp;
+    bit<32> cm_ip;
+    bit<32> cm_ip_port_21;
+    bit<32> cm_ip_port_22;
+    bit<32> cm_ip_port_80;
+    bit<32> cm_ip_tcp_syn;
+    bit<32> cm_ip_tcp_ack;
+    bit<32> cm_ip_tcp_rst;
+    bit<32> cm_ip_icmp;
     bit<32> bm_ip_src;
     bit<32> bm_ip_dst;
     bit<32> bm_ip_src_port_src;
@@ -92,10 +92,10 @@ header reg_meta_t {
     bit<32> current_index;
     bit<32> current_sketch_hash;
     bit<32> index_remaining;
-    bit<1> cm_ip_src_ip_dst;
-    bit<1> cm_ip_dst_port_dst;
-    bit<1> cm_ip_dst_tcp_flags;
-    bit<1> cm_ip_dst_proto;
+    bit<1> cm_ip;
+    bit<1> cm_ip_port_dst;
+    bit<1> cm_ip_tcp_flags;
+    bit<1> cm_ip_proto;
     bit<1> bm_ip_src;
     bit<1> bm_ip_dst;
     bit<1> bm_ip_src_port_src;
@@ -114,7 +114,7 @@ header epoch_meta_t {
     bit<6>  padding;
 }
 
-header cm_ip_src_ip_dst_meta_t {
+header cm_ip_meta_t {
     bit<32> hash_0;
     bit<32> hash_1;
     bit<32> hash_2;
@@ -125,7 +125,7 @@ header cm_ip_src_ip_dst_meta_t {
     bit<32> sketch_temp;
 }
 
-header cm_ip_dst_port_dst_meta_t {
+header cm_ip_port_dst_meta_t {
     bit<32> hash_0;
     bit<32> hash_1;
     bit<32> hash_2;
@@ -136,7 +136,7 @@ header cm_ip_dst_port_dst_meta_t {
     bit<32> sketch_temp;
 }
 
-header cm_ip_dst_tcp_flags_meta_t {
+header cm_ip_tcp_flags_meta_t {
     bit<32> hash_0;
     bit<32> hash_1;
     bit<32> hash_2;
@@ -147,7 +147,7 @@ header cm_ip_dst_tcp_flags_meta_t {
     bit<32> sketch_temp;
 }
 
-header cm_ip_dst_proto_meta_t {
+header cm_ip_proto_meta_t {
     bit<32> hash_0;
     bit<32> hash_1;
     bit<32> hash_2;
@@ -226,7 +226,7 @@ header threshold_meta_t {
     bit<32> flow_traffic;
     bit<32> flow_global_traffic;
     bit<32> global_traffic;
-    bit<48> flow_time;
+    bit<48> flow_ts;
 
 }
 
@@ -234,10 +234,10 @@ struct metadata_t {
     meta_t 	                meta;
     reg_meta_t	                reg;
     epoch_meta_t                epoch;
-    cm_ip_src_ip_dst_meta_t	cm_ip_src_ip_dst;
-    cm_ip_dst_port_dst_meta_t   cm_ip_dst_port_dst;
-    cm_ip_dst_tcp_flags_meta_t  cm_ip_dst_tcp_flags;
-    cm_ip_dst_proto_meta_t      cm_ip_dst_proto;
+    cm_ip_meta_t	        cm_ip;
+    cm_ip_port_dst_meta_t       cm_ip_port_dst;
+    cm_ip_tcp_flags_meta_t      cm_ip_tcp_flags;
+    cm_ip_proto_meta_t          cm_ip_proto;
     bm_ip_src_meta_t            bm_ip_src;
     bm_ip_dst_meta_t 	        bm_ip_dst;
     bm_ip_src_port_src_meta_t 	bm_ip_src_port_src;
