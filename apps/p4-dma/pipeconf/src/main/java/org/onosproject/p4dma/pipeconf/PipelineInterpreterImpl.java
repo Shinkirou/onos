@@ -439,7 +439,7 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
         try {
 
-            URL url = new URL("http://127.0.0.1:5000/add/"); //important to add the trailing slash after add
+            URL url = new URL("http://127.0.0.1:5000/task/"); //important to add the trailing slash after add
 
             byte[] postData = dma.getBytes(StandardCharsets.UTF_8);
             

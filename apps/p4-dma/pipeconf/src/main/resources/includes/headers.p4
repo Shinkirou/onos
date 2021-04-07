@@ -227,7 +227,6 @@ header threshold_meta_t {
     bit<32> flow_global_traffic;
     bit<32> global_traffic;
     bit<48> flow_ts;
-
 }
 
 struct metadata_t {

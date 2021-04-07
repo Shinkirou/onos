@@ -23,7 +23,7 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
 
     // Update the global traffic counter for the current flow with the global traffic counter.
     action flow_global_traffic_update() {
-        reg_thres_flow_traffic.write((bit<32>)meta.threshold.hash_flow, meta.threshold.global_traffic);
+        reg_thres_flow_global_traffic.write((bit<32>)meta.threshold.hash_flow, meta.threshold.global_traffic);
     }
 
     // Reset the counters for a specific flow.
@@ -82,18 +82,18 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
         flow_traffic_incr();
         check_flow_global_traffic();
 
-        // If the last time value stored is 0, the current flow is considered new.
-        // We then update its time value with the current global timestamp.
+        // If the last flow global traffic value stored is 0, the current flow is considered new.
+        // We then update its value with the current global traffic counter.
         if (meta.threshold.flow_global_traffic == 0) {
             flow_global_traffic_update();
         }
 
         // Verify if more than x packets have traversed the switch since the last threshold check for the current flow.
-        if ((meta.threshold.global_traffic - meta.threshold.flow_global_traffic) > 10000) {
+        if ((meta.threshold.global_traffic - meta.threshold.flow_global_traffic) > 5000) {
 
             // Check if the flow traffic at the current stage corresponds to more than 5% of the total traffic.
             // If so, we send the current flow stats to the controller.
-            if ((meta.threshold.flow_traffic * 20) > (meta.threshold.global_traffic - meta.threshold.flow_global_traffic)) {
+            if ((meta.threshold.flow_traffic * 40) > (meta.threshold.global_traffic - meta.threshold.flow_global_traffic)) {
                 send_to_cpu_threshold();
             }
 
