@@ -82,8 +82,24 @@ header packet_out_header_t {
 }
 
 header meta_t {
+    bit<32> length;
     bit<16> l4_src_port;
     bit<16> l4_dst_port;
+}
+
+header hash_meta_t {
+    bit<32> ip_src_ip_dst_0;
+    bit<32> ip_src_ip_dst_1;
+    bit<32> ip_src_ip_dst_2;
+    bit<32> ip_src;
+    bit<32> ip_dst;
+    bit<32> ip_src_port_src;
+    bit<32> ip_src_port_dst;
+    bit<32> ip_dst_port_src;
+    bit<32> ip_dst_port_dst;
+    bit<32> ams_g_0;
+    bit<32> ams_g_1;
+    bit<32> ams_g_2;
 }
 
 header reg_meta_t {
@@ -115,9 +131,6 @@ header epoch_meta_t {
 }
 
 header cm_ip_meta_t {
-    bit<32> hash_0;
-    bit<32> hash_1;
-    bit<32> hash_2;
     bit<32> sketch_0;
     bit<32> sketch_1;
     bit<32> sketch_2;
@@ -126,9 +139,6 @@ header cm_ip_meta_t {
 }
 
 header cm_ip_port_dst_meta_t {
-    bit<32> hash_0;
-    bit<32> hash_1;
-    bit<32> hash_2;
     bit<32> sketch_0;
     bit<32> sketch_1;
     bit<32> sketch_2;
@@ -137,9 +147,6 @@ header cm_ip_port_dst_meta_t {
 }
 
 header cm_ip_tcp_flags_meta_t {
-    bit<32> hash_0;
-    bit<32> hash_1;
-    bit<32> hash_2;
     bit<32> sketch_0;
     bit<32> sketch_1;
     bit<32> sketch_2;
@@ -148,9 +155,6 @@ header cm_ip_tcp_flags_meta_t {
 }
 
 header cm_ip_proto_meta_t {
-    bit<32> hash_0;
-    bit<32> hash_1;
-    bit<32> hash_2;
     bit<32> sketch_0;
     bit<32> sketch_1;
     bit<32> sketch_2;
@@ -159,54 +163,36 @@ header cm_ip_proto_meta_t {
 }
 
 header bm_ip_src_meta_t {
-    bit<32> hash_0;
-    bit<32> hash_1;
     bit<32> sketch_0;
     bit<32> sketch_1;
 }
 
 header bm_ip_dst_meta_t {
-    bit<32> hash_0;
-    bit<32> hash_1;
     bit<32> sketch_0;
     bit<32> sketch_1;
 }
 
 header bm_ip_src_port_src_meta_t {
-    bit<32> hash_0;
-    bit<32> hash_1;
     bit<32> sketch_0;
     bit<32> sketch_1;
 }
 
 header bm_ip_src_port_dst_meta_t {
-    bit<32> hash_0;
-    bit<32> hash_1;
     bit<32> sketch_0;
     bit<32> sketch_1;
 }
 
 header bm_ip_dst_port_src_meta_t {
-    bit<32> hash_0;
-    bit<32> hash_1;
     bit<32> sketch_0;
     bit<32> sketch_1;
 }
 
 header bm_ip_dst_port_dst_meta_t {
-    bit<32> hash_0;
-    bit<32> hash_1;
     bit<32> sketch_0;
     bit<32> sketch_1;
 }
 
 header ams_meta_t {
-    bit<32> hash_0;
-    bit<32> hash_1;
-    bit<32> hash_2;
-    bit<32> hash_g_0;
-    bit<32> hash_g_1;
-    bit<32> hash_g_2;
     bit<32> sum_0;
     bit<32> sum_1;
     bit<32> sum_2;
@@ -214,7 +200,6 @@ header ams_meta_t {
 }
 
 header mv_meta_t {
-    bit<32> hash_mv_0;
     bit<64> key_temp;
     bit<32> count_temp;
     bit<32> sum_temp;
@@ -231,6 +216,7 @@ header threshold_meta_t {
 
 struct metadata_t {
     meta_t 	                meta;
+    hash_meta_t                 hash;
     reg_meta_t	                reg;
     epoch_meta_t                epoch;
     cm_ip_meta_t	        cm_ip;

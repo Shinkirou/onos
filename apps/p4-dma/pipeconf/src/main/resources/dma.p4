@@ -9,6 +9,7 @@
 #include "includes/set_reg.p4"
 #include "includes/epoch.p4"
 #include "includes/threshold.p4"
+#include "includes/hash_calc.p4"
 #include "includes/sketch_write.p4"
 #include "includes/sketches/cm_ip.p4"
 #include "includes/sketches/cm_ip_port_dst.p4"
@@ -36,6 +37,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 
     // Control block instantiations.
     c_threshold()           threshold;
+    c_hash_calc()           hash_calc;
     c_cm_ip()               cm_ip;
     c_cm_ip_port_dst()      cm_ip_port_dst;
     c_cm_ip_tcp_flags()     cm_ip_tcp_flags;
@@ -102,11 +104,6 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         key = {
             standard_metadata.ingress_port  : ternary;
             hdr.ethernet.ether_type         : ternary;
-            // hdr.ethernet.dst_addr           : ternary;
-            // hdr.ethernet.src_addr           : ternary;
-            // hdr.ipv4.protocol               : ternary;
-            // hdr.ipv4.src_addr               : ternary;
-            // hdr.ipv4.dst_addr               : ternary;
         }
         actions = {
             set_out_port;
@@ -157,6 +154,10 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
 					
                     t_sketches.apply();
                     epoch_read();
+
+                    // Hash calculations.
+
+                    hash_calc.apply(hdr, meta, standard_metadata);
 
                     // Execute the active sketching algorithms.
                     // Defined by the operator through the t_sketches table rules.

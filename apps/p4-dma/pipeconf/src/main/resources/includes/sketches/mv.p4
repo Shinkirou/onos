@@ -22,14 +22,6 @@ control c_mv(inout headers_t hdr, inout metadata_t meta, inout standard_metadata
 
     bit<32> current_register_temp;
 
-    action hash_mv_0() {
-        hash(meta.mv.hash_mv_0,
-            HashAlgorithm.crc32_custom,
-            (bit<32>)0,
-            {hdr.ipv4.src_addr, hdr.ipv4.dst_addr},
-            (bit<32>)meta.reg.hash_size);
-    }
-
     action current_register() {
         current_register_temp = meta.reg.current_register;
     }
@@ -44,9 +36,7 @@ control c_mv(inout headers_t hdr, inout metadata_t meta, inout standard_metadata
         // Obtain the next hash value to be used.
         // This value will be translated by set_virtual_reg into the actual physical register and index.
 
-        hash_mv_0();
-
-        meta.reg.current_sketch_hash = meta.mv.hash_mv_0;
+        meta.reg.current_sketch_hash = meta.hash.ip_src_ip_dst_0;
 
         mv_set_reg_0.apply(hdr, meta, standard_metadata);
 

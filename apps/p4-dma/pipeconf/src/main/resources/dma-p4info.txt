@@ -3448,7 +3448,7 @@ tables {
     id: 16803024
   }
   action_refs {
-    id: 16833290
+    id: 16833289
   }
   action_refs {
     id: 16793533
@@ -10096,6 +10096,90 @@ actions {
 }
 actions {
   preamble {
+    id: 16786217
+    name: "c_ingress.hash_calc.hash_ip_src_ip_dst_0"
+    alias: "hash_ip_src_ip_dst_0"
+  }
+}
+actions {
+  preamble {
+    id: 16827996
+    name: "c_ingress.hash_calc.hash_ip_src_ip_dst_1"
+    alias: "hash_ip_src_ip_dst_1"
+  }
+}
+actions {
+  preamble {
+    id: 16778015
+    name: "c_ingress.hash_calc.hash_ip_src_ip_dst_2"
+    alias: "hash_ip_src_ip_dst_2"
+  }
+}
+actions {
+  preamble {
+    id: 16796358
+    name: "c_ingress.hash_calc.hash_ip_src"
+    alias: "hash_ip_src"
+  }
+}
+actions {
+  preamble {
+    id: 16806300
+    name: "c_ingress.hash_calc.hash_ip_dst"
+    alias: "hash_ip_dst"
+  }
+}
+actions {
+  preamble {
+    id: 16841288
+    name: "c_ingress.hash_calc.hash_ip_src_port_src"
+    alias: "hash_ip_src_port_src"
+  }
+}
+actions {
+  preamble {
+    id: 16793231
+    name: "c_ingress.hash_calc.hash_ip_src_port_dst"
+    alias: "hash_ip_src_port_dst"
+  }
+}
+actions {
+  preamble {
+    id: 16797058
+    name: "c_ingress.hash_calc.hash_ip_dst_port_src"
+    alias: "hash_ip_dst_port_src"
+  }
+}
+actions {
+  preamble {
+    id: 16791843
+    name: "c_ingress.hash_calc.hash_ip_dst_port_dst"
+    alias: "hash_ip_dst_port_dst"
+  }
+}
+actions {
+  preamble {
+    id: 16796218
+    name: "c_ingress.hash_calc.hash_ams_g_0"
+    alias: "hash_ams_g_0"
+  }
+}
+actions {
+  preamble {
+    id: 16821935
+    name: "c_ingress.hash_calc.hash_ams_g_1"
+    alias: "hash_ams_g_1"
+  }
+}
+actions {
+  preamble {
+    id: 16807331
+    name: "c_ingress.hash_calc.hash_ams_g_2"
+    alias: "hash_ams_g_2"
+  }
+}
+actions {
+  preamble {
     id: 16823497
     name: "c_ingress.cm_ip.cm_ip_set_reg_0.register_setup"
     alias: "cm_ip_set_reg_0.register_setup"
@@ -12050,27 +12134,6 @@ actions {
     id: 16802964
     name: "c_ingress.cm_ip.cm_ip_write_final.current_register"
     alias: "cm_ip_write_final.current_register"
-  }
-}
-actions {
-  preamble {
-    id: 16797345
-    name: "c_ingress.cm_ip.hash_0"
-    alias: "cm_ip.hash_0"
-  }
-}
-actions {
-  preamble {
-    id: 16788020
-    name: "c_ingress.cm_ip.hash_1"
-    alias: "cm_ip.hash_1"
-  }
-}
-actions {
-  preamble {
-    id: 16781896
-    name: "c_ingress.cm_ip.hash_2"
-    alias: "cm_ip.hash_2"
   }
 }
 actions {
@@ -14047,27 +14110,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16817527
-    name: "c_ingress.cm_ip_port_dst.hash_0"
-    alias: "cm_ip_port_dst.hash_0"
-  }
-}
-actions {
-  preamble {
-    id: 16842519
-    name: "c_ingress.cm_ip_port_dst.hash_1"
-    alias: "cm_ip_port_dst.hash_1"
-  }
-}
-actions {
-  preamble {
-    id: 16830699
-    name: "c_ingress.cm_ip_port_dst.hash_2"
-    alias: "cm_ip_port_dst.hash_2"
-  }
-}
-actions {
-  preamble {
     id: 16803326
     name: "c_ingress.cm_ip_port_dst.current_register"
     alias: "cm_ip_port_dst.current_register"
@@ -16040,27 +16082,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16790505
-    name: "c_ingress.cm_ip_tcp_flags.hash_0"
-    alias: "cm_ip_tcp_flags.hash_0"
-  }
-}
-actions {
-  preamble {
-    id: 16799855
-    name: "c_ingress.cm_ip_tcp_flags.hash_1"
-    alias: "cm_ip_tcp_flags.hash_1"
-  }
-}
-actions {
-  preamble {
-    id: 16841394
-    name: "c_ingress.cm_ip_tcp_flags.hash_2"
-    alias: "cm_ip_tcp_flags.hash_2"
-  }
-}
-actions {
-  preamble {
     id: 16800880
     name: "c_ingress.cm_ip_tcp_flags.current_register"
     alias: "cm_ip_tcp_flags.current_register"
@@ -17263,7 +17284,7 @@ actions {
 }
 actions {
   preamble {
-    id: 16833290
+    id: 16833289
     name: "c_ingress.cm_ip_proto.cm_ip_proto_write_1.sketch_write_1"
     alias: "cm_ip_proto_write_1.sketch_write_1"
   }
@@ -18029,27 +18050,6 @@ actions {
     id: 16820814
     name: "c_ingress.cm_ip_proto.cm_ip_proto_write_final.current_register"
     alias: "cm_ip_proto_write_final.current_register"
-  }
-}
-actions {
-  preamble {
-    id: 16792676
-    name: "c_ingress.cm_ip_proto.hash_0"
-    alias: "cm_ip_proto.hash_0"
-  }
-}
-actions {
-  preamble {
-    id: 16819952
-    name: "c_ingress.cm_ip_proto.hash_1"
-    alias: "cm_ip_proto.hash_1"
-  }
-}
-actions {
-  preamble {
-    id: 16826965
-    name: "c_ingress.cm_ip_proto.hash_2"
-    alias: "cm_ip_proto.hash_2"
   }
 }
 actions {
@@ -19477,20 +19477,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16815927
-    name: "c_ingress.bm_ip_src.hash_0"
-    alias: "bm_ip_src.hash_0"
-  }
-}
-actions {
-  preamble {
-    id: 16804001
-    name: "c_ingress.bm_ip_src.hash_1"
-    alias: "bm_ip_src.hash_1"
-  }
-}
-actions {
-  preamble {
     id: 16821185
     name: "c_ingress.bm_ip_src.current_register"
     alias: "bm_ip_src.current_register"
@@ -20903,20 +20889,6 @@ actions {
     id: 16813623
     name: "c_ingress.bm_ip_dst.bm_ip_dst_write_1.current_register"
     alias: "bm_ip_dst_write_1.current_register"
-  }
-}
-actions {
-  preamble {
-    id: 16834165
-    name: "c_ingress.bm_ip_dst.hash_0"
-    alias: "bm_ip_dst.hash_0"
-  }
-}
-actions {
-  preamble {
-    id: 16833100
-    name: "c_ingress.bm_ip_dst.hash_1"
-    alias: "bm_ip_dst.hash_1"
   }
 }
 actions {
@@ -22337,20 +22309,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16778464
-    name: "c_ingress.bm_ip_src_port_src.hash_0"
-    alias: "bm_ip_src_port_src.hash_0"
-  }
-}
-actions {
-  preamble {
-    id: 16820077
-    name: "c_ingress.bm_ip_src_port_src.hash_1"
-    alias: "bm_ip_src_port_src.hash_1"
-  }
-}
-actions {
-  preamble {
     id: 16840491
     name: "c_ingress.bm_ip_src_port_src.current_register"
     alias: "bm_ip_src_port_src.current_register"
@@ -23763,20 +23721,6 @@ actions {
     id: 16805257
     name: "c_ingress.bm_ip_src_port_dst.bm_ip_src_port_dst_write_1.current_register"
     alias: "bm_ip_src_port_dst_write_1.current_register"
-  }
-}
-actions {
-  preamble {
-    id: 16833289
-    name: "c_ingress.bm_ip_src_port_dst.hash_0"
-    alias: "bm_ip_src_port_dst.hash_0"
-  }
-}
-actions {
-  preamble {
-    id: 16811915
-    name: "c_ingress.bm_ip_src_port_dst.hash_1"
-    alias: "bm_ip_src_port_dst.hash_1"
   }
 }
 actions {
@@ -25197,20 +25141,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16815093
-    name: "c_ingress.bm_ip_dst_port_src.hash_0"
-    alias: "bm_ip_dst_port_src.hash_0"
-  }
-}
-actions {
-  preamble {
-    id: 16807782
-    name: "c_ingress.bm_ip_dst_port_src.hash_1"
-    alias: "bm_ip_dst_port_src.hash_1"
-  }
-}
-actions {
-  preamble {
     id: 16828122
     name: "c_ingress.bm_ip_dst_port_src.current_register"
     alias: "bm_ip_dst_port_src.current_register"
@@ -26623,20 +26553,6 @@ actions {
     id: 16806255
     name: "c_ingress.bm_ip_dst_port_dst.bm_ip_dst_port_dst_write_1.current_register"
     alias: "bm_ip_dst_port_dst_write_1.current_register"
-  }
-}
-actions {
-  preamble {
-    id: 16798332
-    name: "c_ingress.bm_ip_dst_port_dst.hash_0"
-    alias: "bm_ip_dst_port_dst.hash_0"
-  }
-}
-actions {
-  preamble {
-    id: 16781294
-    name: "c_ingress.bm_ip_dst_port_dst.hash_1"
-    alias: "bm_ip_dst_port_dst.hash_1"
   }
 }
 actions {
@@ -28602,48 +28518,6 @@ actions {
     id: 16800455
     name: "c_ingress.ams.ams_write_final.current_register"
     alias: "ams_write_final.current_register"
-  }
-}
-actions {
-  preamble {
-    id: 16817572
-    name: "c_ingress.ams.hash_ams_0"
-    alias: "hash_ams_0"
-  }
-}
-actions {
-  preamble {
-    id: 16822602
-    name: "c_ingress.ams.hash_ams_1"
-    alias: "hash_ams_1"
-  }
-}
-actions {
-  preamble {
-    id: 16837272
-    name: "c_ingress.ams.hash_ams_2"
-    alias: "hash_ams_2"
-  }
-}
-actions {
-  preamble {
-    id: 16785724
-    name: "c_ingress.ams.hash_ams_g_0"
-    alias: "hash_ams_g_0"
-  }
-}
-actions {
-  preamble {
-    id: 16796794
-    name: "c_ingress.ams.hash_ams_g_1"
-    alias: "hash_ams_g_1"
-  }
-}
-actions {
-  preamble {
-    id: 16818462
-    name: "c_ingress.ams.hash_ams_g_2"
-    alias: "hash_ams_g_2"
   }
 }
 actions {
@@ -30975,13 +30849,6 @@ actions {
     id: 16782670
     name: "c_ingress.mv.mv_write_3.current_register"
     alias: "mv_write_3.current_register"
-  }
-}
-actions {
-  preamble {
-    id: 16825728
-    name: "c_ingress.mv.hash_mv_0"
-    alias: "hash_mv_0"
   }
 }
 actions {

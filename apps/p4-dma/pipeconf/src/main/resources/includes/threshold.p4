@@ -74,8 +74,8 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
 
     apply {
 
-        // The current threshold hash has already been calculated for the cm_ip_src_ip_dst sketch.
-        meta.threshold.hash_flow = meta.cm_ip.hash_0;
+        // The current threshold hash has already been calculated.
+        meta.threshold.hash_flow = meta.hash.ip_src_ip_dst_0;
 
         // Increase the global and flow-specific traffic counters and check the last flow global traffic counter stored.
         global_traffic_incr();

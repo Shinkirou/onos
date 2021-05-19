@@ -13,37 +13,18 @@ control c_bm_ip_src_port_dst(inout headers_t hdr, inout metadata_t meta, inout s
 
     bit<32> current_register_temp;
 
-    action hash_0() {
-        hash(meta.bm_ip_src_port_dst.hash_0,
-            HashAlgorithm.crc32_custom,
-            (bit<32>)0,
-            {hdr.ipv4.src_addr, meta.meta.l4_dst_port},
-            (bit<32>)meta.reg.hash_size);
-    }
-
-    action hash_1() {
-        hash(meta.bm_ip_src_port_dst.hash_1,
-            HashAlgorithm.crc32_custom,
-            (bit<32>)0,
-            {hdr.ipv4.src_addr},
-            (bit<32>)meta.reg.hash_size);
-    }
-
     action current_register() {
             current_register_temp = meta.reg.current_register;
     }
 
     apply {
 
-        hash_0();
-        hash_1();
-
         // BM IP Src Port Dst - Bitmap value.
 
         // Obtain the next hash value to be used.
         // This value will be translated by set_virtual_reg into the actual physical register and index.
 
-        meta.reg.current_sketch_hash = meta.bm_ip_src_port_dst.hash_0;
+        meta.reg.current_sketch_hash = meta.hash.ip_src_port_dst;
 
         bm_ip_src_port_dst_set_reg_0.apply(hdr, meta, standard_metadata);
 
@@ -65,7 +46,7 @@ control c_bm_ip_src_port_dst(inout headers_t hdr, inout metadata_t meta, inout s
 
             bm_ip_src_port_dst_write_0.apply(hdr, meta, standard_metadata);
 
-            meta.reg.current_sketch_hash = meta.bm_ip_src_port_dst.hash_1;
+            meta.reg.current_sketch_hash = meta.hash.ip_src;
 
             bm_ip_src_port_dst_set_reg_1.apply(hdr, meta, standard_metadata);
             bm_ip_src_port_dst_epoch_1.apply(hdr, meta, standard_metadata);
@@ -79,7 +60,7 @@ control c_bm_ip_src_port_dst(inout headers_t hdr, inout metadata_t meta, inout s
         
         }  else {
               
-            meta.reg.current_sketch_hash = meta.bm_ip_src_port_dst.hash_1;
+            meta.reg.current_sketch_hash = meta.hash.ip_src;
 
             bm_ip_src_port_dst_set_reg_2.apply(hdr, meta, standard_metadata);
             bm_ip_src_port_dst_epoch_2.apply(hdr, meta, standard_metadata);
