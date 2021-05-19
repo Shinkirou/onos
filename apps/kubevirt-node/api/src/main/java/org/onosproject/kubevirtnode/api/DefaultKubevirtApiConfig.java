@@ -38,6 +38,8 @@ public final class DefaultKubevirtApiConfig implements KubevirtApiConfig {
     private final String caCertData;
     private final String clientCertData;
     private final String clientKeyData;
+    private final String serviceFqdn;
+    private final String apiServerFqdn;
 
     /**
      * Default constructor for Kubevirt API config.
@@ -50,11 +52,14 @@ public final class DefaultKubevirtApiConfig implements KubevirtApiConfig {
      * @param caCertData        CA certificate data
      * @param clientCertData    client certificate data
      * @param clientKeyData     client key data
+     * @param serviceFqdn       service FQDN
+     * @param apiServerFqdn     API server FQDN
      */
     private DefaultKubevirtApiConfig(Scheme scheme, IpAddress ipAddress,
                                     int port, State state,
                                     String token, String caCertData,
-                                    String clientCertData, String clientKeyData) {
+                                    String clientCertData, String clientKeyData,
+                                    String serviceFqdn, String apiServerFqdn) {
         this.scheme = scheme;
         this.ipAddress = ipAddress;
         this.port = port;
@@ -63,6 +68,8 @@ public final class DefaultKubevirtApiConfig implements KubevirtApiConfig {
         this.caCertData = caCertData;
         this.clientCertData = clientCertData;
         this.clientKeyData = clientKeyData;
+        this.serviceFqdn = serviceFqdn;
+        this.apiServerFqdn = apiServerFqdn;
     }
 
     @Override
@@ -96,6 +103,40 @@ public final class DefaultKubevirtApiConfig implements KubevirtApiConfig {
                 .caCertData(caCertData)
                 .clientCertData(clientCertData)
                 .clientKeyData(clientKeyData)
+                .serviceFqdn(serviceFqdn)
+                .apiServerFqdn(apiServerFqdn)
+                .build();
+    }
+
+    @Override
+    public KubevirtApiConfig updateIpAddress(IpAddress newIpAddress) {
+        return new Builder()
+                .scheme(scheme)
+                .ipAddress(newIpAddress)
+                .port(port)
+                .state(state)
+                .token(token)
+                .caCertData(caCertData)
+                .clientCertData(clientCertData)
+                .clientKeyData(clientKeyData)
+                .serviceFqdn(serviceFqdn)
+                .apiServerFqdn(apiServerFqdn)
+                .build();
+    }
+
+    @Override
+    public KubevirtApiConfig updatePort(int newPort) {
+        return new Builder()
+                .scheme(scheme)
+                .ipAddress(ipAddress)
+                .port(newPort)
+                .state(state)
+                .token(token)
+                .caCertData(caCertData)
+                .clientCertData(clientCertData)
+                .clientKeyData(clientKeyData)
+                .serviceFqdn(serviceFqdn)
+                .apiServerFqdn(apiServerFqdn)
                 .build();
     }
 
@@ -120,6 +161,16 @@ public final class DefaultKubevirtApiConfig implements KubevirtApiConfig {
     }
 
     @Override
+    public String serviceFqdn() {
+        return serviceFqdn;
+    }
+
+    @Override
+    public String apiServerFqdn() {
+        return apiServerFqdn;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -132,13 +183,15 @@ public final class DefaultKubevirtApiConfig implements KubevirtApiConfig {
                 ipAddress.equals(that.ipAddress) && state == that.state &&
                 token.equals(that.token) && caCertData.equals(that.caCertData) &&
                 clientCertData.equals(that.clientCertData) &&
-                clientKeyData.equals(that.clientKeyData);
+                clientKeyData.equals(that.clientKeyData) &&
+                Objects.equals(serviceFqdn, that.serviceFqdn) &&
+                Objects.equals(apiServerFqdn, that.apiServerFqdn);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(scheme, ipAddress, port, state, token,
-                caCertData, clientCertData, clientKeyData);
+                caCertData, clientCertData, clientKeyData, serviceFqdn, apiServerFqdn);
     }
 
     @Override
@@ -152,6 +205,8 @@ public final class DefaultKubevirtApiConfig implements KubevirtApiConfig {
                 .add("caCertData", caCertData)
                 .add("clientCertData", clientCertData)
                 .add("clientKeyData", clientKeyData)
+                .add("serviceFqdn", serviceFqdn)
+                .add("apiServerFqdn", apiServerFqdn)
                 .toString();
     }
 
@@ -174,6 +229,8 @@ public final class DefaultKubevirtApiConfig implements KubevirtApiConfig {
         private String caCertData;
         private String clientCertData;
         private String clientKeyData;
+        private String serviceFqdn;
+        private String apiServerFqdn;
 
         @Override
         public KubevirtApiConfig build() {
@@ -188,54 +245,66 @@ public final class DefaultKubevirtApiConfig implements KubevirtApiConfig {
             }
 
             return new DefaultKubevirtApiConfig(scheme, ipAddress, port, state,
-                    token, caCertData, clientCertData, clientKeyData);
+                    token, caCertData, clientCertData, clientKeyData, serviceFqdn, apiServerFqdn);
         }
 
         @Override
-        public KubevirtApiConfig.Builder scheme(Scheme scheme) {
+        public Builder scheme(Scheme scheme) {
             this.scheme = scheme;
             return this;
         }
 
         @Override
-        public KubevirtApiConfig.Builder ipAddress(IpAddress ipAddress) {
+        public Builder ipAddress(IpAddress ipAddress) {
             this.ipAddress = ipAddress;
             return this;
         }
 
         @Override
-        public KubevirtApiConfig.Builder port(int port) {
+        public Builder port(int port) {
             this.port = port;
             return this;
         }
 
         @Override
-        public KubevirtApiConfig.Builder state(State state) {
+        public Builder state(State state) {
             this.state = state;
             return this;
         }
 
         @Override
-        public KubevirtApiConfig.Builder token(String token) {
+        public Builder token(String token) {
             this.token = token;
             return this;
         }
 
         @Override
-        public KubevirtApiConfig.Builder caCertData(String caCertData) {
+        public Builder caCertData(String caCertData) {
             this.caCertData = caCertData;
             return this;
         }
 
         @Override
-        public KubevirtApiConfig.Builder clientCertData(String clientCertData) {
+        public Builder clientCertData(String clientCertData) {
             this.clientCertData = clientCertData;
             return this;
         }
 
         @Override
-        public KubevirtApiConfig.Builder clientKeyData(String clientKeyData) {
+        public Builder clientKeyData(String clientKeyData) {
             this.clientKeyData = clientKeyData;
+            return this;
+        }
+
+        @Override
+        public Builder serviceFqdn(String serviceFqdn) {
+            this.serviceFqdn = serviceFqdn;
+            return this;
+        }
+
+        @Override
+        public Builder apiServerFqdn(String apiServerFqdn) {
+            this.apiServerFqdn = apiServerFqdn;
             return this;
         }
     }

@@ -42,8 +42,6 @@ import org.onosproject.kubevirtnetworking.api.KubevirtRouterListener;
 import org.onosproject.kubevirtnetworking.api.KubevirtRouterService;
 import org.onosproject.kubevirtnetworking.util.RulePopulatorUtil;
 import org.onosproject.kubevirtnode.api.KubevirtNode;
-import org.onosproject.kubevirtnode.api.KubevirtNodeEvent;
-import org.onosproject.kubevirtnode.api.KubevirtNodeListener;
 import org.onosproject.kubevirtnode.api.KubevirtNodeService;
 import org.onosproject.net.Device;
 import org.onosproject.net.PortNumber;
@@ -54,6 +52,8 @@ import org.onosproject.net.flow.DefaultTrafficTreatment;
 import org.onosproject.net.flow.TrafficSelector;
 import org.onosproject.net.flow.TrafficTreatment;
 import org.onosproject.net.flow.instructions.ExtensionTreatment;
+import org.onosproject.net.packet.DefaultOutboundPacket;
+import org.onosproject.net.packet.PacketService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -61,6 +61,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
 
+import java.nio.ByteBuffer;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -68,10 +69,10 @@ import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.onlab.util.Tools.groupedThreads;
 import static org.onosproject.kubevirtnetworking.api.Constants.DEFAULT_GATEWAY_MAC;
-import static org.onosproject.kubevirtnetworking.api.Constants.FLAT_TABLE;
 import static org.onosproject.kubevirtnetworking.api.Constants.FORWARDING_TABLE;
+import static org.onosproject.kubevirtnetworking.api.Constants.GW_DROP_TABLE;
+import static org.onosproject.kubevirtnetworking.api.Constants.GW_ENTRY_TABLE;
 import static org.onosproject.kubevirtnetworking.api.Constants.KUBEVIRT_NETWORKING_APP_ID;
-import static org.onosproject.kubevirtnetworking.api.Constants.PRE_FLAT_TABLE;
 import static org.onosproject.kubevirtnetworking.api.Constants.PRIORITY_ARP_GATEWAY_RULE;
 import static org.onosproject.kubevirtnetworking.api.Constants.PRIORITY_FORWARDING_RULE;
 import static org.onosproject.kubevirtnetworking.api.Constants.PRIORITY_STATEFUL_SNAT_RULE;
@@ -80,6 +81,7 @@ import static org.onosproject.kubevirtnetworking.api.KubevirtNetwork.Type.GENEVE
 import static org.onosproject.kubevirtnetworking.api.KubevirtNetwork.Type.GRE;
 import static org.onosproject.kubevirtnetworking.api.KubevirtNetwork.Type.VLAN;
 import static org.onosproject.kubevirtnetworking.api.KubevirtNetwork.Type.VXLAN;
+import static org.onosproject.kubevirtnetworking.util.KubevirtNetworkingUtil.buildGarpPacket;
 import static org.onosproject.kubevirtnetworking.util.KubevirtNetworkingUtil.externalPatchPortNum;
 import static org.onosproject.kubevirtnetworking.util.KubevirtNetworkingUtil.gatewayNodeForSpecifiedRouter;
 import static org.onosproject.kubevirtnetworking.util.KubevirtNetworkingUtil.getRouterForKubevirtPort;
@@ -130,6 +132,9 @@ public class KubevirtRoutingSnatHandler {
     protected DriverService driverService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    protected PacketService packetService;
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected KubevirtRouterService kubevirtRouterService;
 
     private final ExecutorService eventExecutor = newSingleThreadExecutor(
@@ -140,9 +145,6 @@ public class KubevirtRoutingSnatHandler {
 
     private final InternalRouterEventListener kubevirtRouterlistener =
             new InternalRouterEventListener();
-
-    private final InternalNodeEventListener kubevirtNodeListener =
-            new InternalNodeEventListener();
 
     private ApplicationId appId;
     private NodeId localNodeId;
@@ -155,7 +157,6 @@ public class KubevirtRoutingSnatHandler {
 
         kubevirtPortService.addListener(kubevirtPortListener);
         kubevirtRouterService.addListener(kubevirtRouterlistener);
-        kubevirtNodeService.addListener(kubevirtNodeListener);
 
         log.info("Started");
     }
@@ -163,7 +164,6 @@ public class KubevirtRoutingSnatHandler {
     @Deactivate
     protected void deactivate() {
         leadershipService.withdraw(appId.name());
-        kubevirtNodeService.removeListener(kubevirtNodeListener);
         kubevirtPortService.removeListener(kubevirtPortListener);
         kubevirtRouterService.removeListener(kubevirtRouterlistener);
 
@@ -172,12 +172,17 @@ public class KubevirtRoutingSnatHandler {
         log.info("Stopped");
     }
 
-    private void initGatewayNodeSnatForRouter(KubevirtRouter router, boolean install) {
-        KubevirtNode electedGw = gatewayNodeForSpecifiedRouter(kubevirtNodeService, router);
+    private void initGatewayNodeSnatForRouter(KubevirtRouter router, String gateway, boolean install) {
+        if (router.electedGateway() == null) {
+            log.warn("Fail to initialize gateway node snat for router {} " +
+                    "because there's no gateway assigned to it", router.name());
+            return;
+        }
 
+        KubevirtNode electedGw = kubevirtNodeService.node(gateway);
         if (electedGw == null) {
             log.warn("Fail to initialize gateway node snat for router {} " +
-                    "there's no gateway assigned to it", router.name());
+                    "because there's no gateway assigned to it", router.name());
             return;
         }
 
@@ -185,7 +190,7 @@ public class KubevirtRoutingSnatHandler {
 
         if (routerSnatIp == null) {
             log.warn("Fail to initialize gateway node snat for router {} " +
-                    "there's no gateway snat ip assigned to it", router.name());
+                    "because there's no gateway snat ip assigned to it", router.name());
             return;
         }
 
@@ -232,7 +237,7 @@ public class KubevirtRoutingSnatHandler {
                 selector,
                 treatment,
                 PRIORITY_ARP_GATEWAY_RULE,
-                PRE_FLAT_TABLE,
+                GW_ENTRY_TABLE,
                 install);
     }
 
@@ -277,7 +282,7 @@ public class KubevirtRoutingSnatHandler {
                 selector.build(),
                 tBuilder.build(),
                 PRIORITY_STATEFUL_SNAT_RULE,
-                PRE_FLAT_TABLE,
+                GW_ENTRY_TABLE,
                 install);
     }
 
@@ -310,7 +315,7 @@ public class KubevirtRoutingSnatHandler {
                 sBuilder.build(),
                 tBuilder.build(),
                 PRIORITY_STATEFUL_SNAT_RULE,
-                FLAT_TABLE,
+                GW_DROP_TABLE,
                 install);
 
         if (network.type() == VXLAN || network.type() == GENEVE || network.type() == GRE) {
@@ -398,7 +403,7 @@ public class KubevirtRoutingSnatHandler {
                 .niciraConnTrackTreatmentBuilder(driverService, gatewayNode.intgBridge())
                 .commit(false)
                 .natAction(true)
-                .table((short) FLAT_TABLE)
+                .table((short) GW_DROP_TABLE)
                 .build();
 
         tBuilder.setEthSrc(routerMacAddress)
@@ -410,7 +415,7 @@ public class KubevirtRoutingSnatHandler {
                 sBuilder.build(),
                 tBuilder.build(),
                 PRIORITY_STATEFUL_SNAT_RULE,
-                PRE_FLAT_TABLE,
+                GW_ENTRY_TABLE,
                 install);
     }
 
@@ -425,6 +430,7 @@ public class KubevirtRoutingSnatHandler {
                 case KUBEVIRT_ROUTER_CREATED:
                     eventExecutor.execute(() -> processRouterCreation(event.subject()));
                     break;
+                case KUBEVIRT_SNAT_STATUS_DISABLED:
                 case KUBEVIRT_ROUTER_REMOVED:
                     eventExecutor.execute(() -> processRouterDeletion(event.subject()));
                     break;
@@ -445,6 +451,10 @@ public class KubevirtRoutingSnatHandler {
                     break;
                 case KUBEVIRT_GATEWAY_NODE_DETACHED:
                     eventExecutor.execute(() -> processRouterGatewayNodeDetached(event.subject(),
+                            event.gateway()));
+                    break;
+                case KUBEVIRT_GATEWAY_NODE_CHANGED:
+                    eventExecutor.execute(() -> processRouterGatewayNodeChanged(event.subject(),
                             event.gateway()));
                     break;
                 case KUBEVIRT_ROUTER_EXTERNAL_NETWORK_ATTACHED:
@@ -544,6 +554,10 @@ public class KubevirtRoutingSnatHandler {
                 return;
             }
 
+            if (!router.enableSnat()) {
+                return;
+            }
+
             router.internal()
                     .stream()
                     .filter(networkId -> kubevirtNetworkService.network(networkId) != null)
@@ -567,6 +581,10 @@ public class KubevirtRoutingSnatHandler {
 
             KubevirtNode detachedGateway = kubevirtNodeService.node(detachedGatewayId);
             if (detachedGateway == null) {
+                return;
+            }
+
+            if (!router.enableSnat()) {
                 return;
             }
 
@@ -598,6 +616,10 @@ public class KubevirtRoutingSnatHandler {
                 return;
             }
 
+            if (!router.enableSnat()) {
+                return;
+            }
+
             attachedInternalNetworks.forEach(networkId -> {
                 String routerSnatIp = router.external().keySet().stream().findAny().orElse(null);
                 if (routerSnatIp == null) {
@@ -621,6 +643,10 @@ public class KubevirtRoutingSnatHandler {
                 return;
             }
 
+            if (!router.enableSnat()) {
+                return;
+            }
+
             detachedInternalNetworks.forEach(networkId -> {
                 String routerSnatIp = router.external().keySet().stream().findAny().orElse(null);
                 if (routerSnatIp == null) {
@@ -638,7 +664,7 @@ public class KubevirtRoutingSnatHandler {
                 return;
             }
             if (router.enableSnat() && !router.external().isEmpty() && router.peerRouter() != null) {
-                initGatewayNodeSnatForRouter(router, true);
+                initGatewayNodeSnatForRouter(router, router.electedGateway(), true);
             }
         }
 
@@ -646,8 +672,8 @@ public class KubevirtRoutingSnatHandler {
             if (!isRelevantHelper()) {
                 return;
             }
-            if (router.enableSnat() && !router.external().isEmpty() && router.peerRouter() != null) {
-                initGatewayNodeSnatForRouter(router, false);
+            if (!router.external().isEmpty() && router.peerRouter() != null) {
+                initGatewayNodeSnatForRouter(router, router.electedGateway(), false);
             }
         }
 
@@ -656,8 +682,53 @@ public class KubevirtRoutingSnatHandler {
                 return;
             }
             if (router.enableSnat() && !router.external().isEmpty() && router.peerRouter() != null) {
-                initGatewayNodeSnatForRouter(router, true);
+                initGatewayNodeSnatForRouter(router, router.electedGateway(), true);
             }
+        }
+
+        private void processRouterGatewayNodeChanged(KubevirtRouter router,
+                                                     String disAssociatedGateway) {
+            if (!isRelevantHelper()) {
+                return;
+            }
+
+            if (router.enableSnat() && !router.external().isEmpty() && router.peerRouter() != null) {
+                initGatewayNodeSnatForRouter(router, disAssociatedGateway, false);
+                initGatewayNodeSnatForRouter(router, router.electedGateway(), true);
+
+                processRouterGatewayNodeDetached(router, disAssociatedGateway);
+                processRouterGatewayNodeAttached(router, router.electedGateway());
+
+                sendGarpPacketForSnatIp(router);
+            }
+        }
+
+        private void sendGarpPacketForSnatIp(KubevirtRouter router) {
+            if (router == null || router.electedGateway() == null) {
+                return;
+            }
+
+            String routerSnatIp = router.external().keySet().stream().findAny().orElse(null);
+
+            if (routerSnatIp == null) {
+                log.warn("Fail to initialize gateway node snat for router {} " +
+                        "because there's no gateway snat ip assigned to it", router.name());
+                return;
+            }
+
+            Ethernet ethernet = buildGarpPacket(DEFAULT_GATEWAY_MAC, IpAddress.valueOf(routerSnatIp));
+
+            if (ethernet == null) {
+                return;
+            }
+
+            KubevirtNode gatewayNode = kubevirtNodeService.node(router.electedGateway());
+
+            TrafficTreatment treatment = DefaultTrafficTreatment.builder()
+                    .setOutput(externalPatchPortNum(deviceService, gatewayNode)).build();
+
+            packetService.emit(new DefaultOutboundPacket(gatewayNode.intgBridge(), treatment,
+                    ByteBuffer.wrap(ethernet.serialize())));
         }
     }
 
@@ -738,14 +809,6 @@ public class KubevirtRoutingSnatHandler {
             if (gwNode != null) {
                 setStatefulSnatDownStreamRuleForKubevirtPort(router, gwNode, kubevirtPort, false);
             }
-        }
-    }
-
-    private class InternalNodeEventListener implements KubevirtNodeListener {
-
-        @Override
-        public void event(KubevirtNodeEvent event) {
-
         }
     }
 }

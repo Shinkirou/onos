@@ -37,8 +37,6 @@ import org.onosproject.kubevirtnetworking.api.KubevirtRouterListener;
 import org.onosproject.kubevirtnetworking.api.KubevirtRouterService;
 import org.onosproject.kubevirtnetworking.util.RulePopulatorUtil;
 import org.onosproject.kubevirtnode.api.KubevirtNode;
-import org.onosproject.kubevirtnode.api.KubevirtNodeEvent;
-import org.onosproject.kubevirtnode.api.KubevirtNodeListener;
 import org.onosproject.kubevirtnode.api.KubevirtNodeService;
 import org.onosproject.net.Device;
 import org.onosproject.net.PortNumber;
@@ -48,6 +46,8 @@ import org.onosproject.net.flow.DefaultTrafficSelector;
 import org.onosproject.net.flow.DefaultTrafficTreatment;
 import org.onosproject.net.flow.TrafficSelector;
 import org.onosproject.net.flow.TrafficTreatment;
+import org.onosproject.net.packet.DefaultOutboundPacket;
+import org.onosproject.net.packet.PacketService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -55,14 +55,15 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
 
+import java.nio.ByteBuffer;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.onlab.util.Tools.groupedThreads;
 import static org.onosproject.kubevirtnetworking.api.Constants.FORWARDING_TABLE;
+import static org.onosproject.kubevirtnetworking.api.Constants.GW_ENTRY_TABLE;
 import static org.onosproject.kubevirtnetworking.api.Constants.KUBEVIRT_NETWORKING_APP_ID;
-import static org.onosproject.kubevirtnetworking.api.Constants.PRE_FLAT_TABLE;
 import static org.onosproject.kubevirtnetworking.api.Constants.PRIORITY_ARP_GATEWAY_RULE;
 import static org.onosproject.kubevirtnetworking.api.Constants.PRIORITY_FLOATING_IP_RULE;
 import static org.onosproject.kubevirtnetworking.api.Constants.PRIORITY_FORWARDING_RULE;
@@ -70,6 +71,7 @@ import static org.onosproject.kubevirtnetworking.api.Constants.TUNNEL_DEFAULT_TA
 import static org.onosproject.kubevirtnetworking.api.KubevirtNetwork.Type.GENEVE;
 import static org.onosproject.kubevirtnetworking.api.KubevirtNetwork.Type.GRE;
 import static org.onosproject.kubevirtnetworking.api.KubevirtNetwork.Type.VXLAN;
+import static org.onosproject.kubevirtnetworking.util.KubevirtNetworkingUtil.buildGarpPacket;
 import static org.onosproject.kubevirtnetworking.util.KubevirtNetworkingUtil.externalPatchPortNum;
 import static org.onosproject.kubevirtnetworking.util.KubevirtNetworkingUtil.gatewayNodeForSpecifiedRouter;
 import static org.onosproject.kubevirtnetworking.util.KubevirtNetworkingUtil.getRouterMacAddress;
@@ -95,6 +97,9 @@ public class KubevirtFloatingIpHandler {
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected DeviceAdminService deviceService;
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    protected PacketService packetService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected KubevirtPortService kubevirtPortService;
@@ -123,16 +128,12 @@ public class KubevirtFloatingIpHandler {
     private final InternalRouterEventListener kubevirtRouterListener =
             new InternalRouterEventListener();
 
-    private final InternalNodeEventListener kubevirtNodeListener =
-            new InternalNodeEventListener();
-
     @Activate
     protected void activate() {
         appId = coreService.registerApplication(KUBEVIRT_NETWORKING_APP_ID);
         localNodeId = clusterService.getLocalNode().id();
         leadershipService.runForLeadership(appId.name());
         kubevirtRouterService.addListener(kubevirtRouterListener);
-        kubevirtNodeService.addListener(kubevirtNodeListener);
 
         log.info("Started");
     }
@@ -141,21 +142,19 @@ public class KubevirtFloatingIpHandler {
     protected void deactivate() {
         leadershipService.withdraw(appId.name());
         kubevirtRouterService.removeListener(kubevirtRouterListener);
-        kubevirtNodeService.removeListener(kubevirtNodeListener);
 
         eventExecutor.shutdown();
 
         log.info("Stopped");
     }
 
-    private void setFloatingIpRules(KubevirtRouter router,
-                                    KubevirtFloatingIp floatingIp,
-                                    boolean install) {
+    private void setFloatingIpRulesForFip(KubevirtRouter router,
+                                          KubevirtFloatingIp floatingIp,
+                                          KubevirtNode electedGw,
+                                          boolean install) {
 
         KubevirtPort kubevirtPort = getKubevirtPort(floatingIp);
         if (kubevirtPort == null) {
-            log.warn("Failed to install floating Ip rules for floating ip {} " +
-                    "because there's no kubevirt port associated to it", floatingIp.floatingIp());
             return;
         }
 
@@ -164,24 +163,16 @@ public class KubevirtFloatingIpHandler {
             setFloatingIpDownstreamRulesToGatewayTunBridge(router, floatingIp, kubevirtNetwork, kubevirtPort, install);
         }
 
-        setFloatingIpArpResponseRules(router, floatingIp, kubevirtPort, install);
-        setFloatingIpUpstreamRules(router, floatingIp, kubevirtPort, install);
-        setFloatingIpDownstreamRules(router, floatingIp, kubevirtPort, install);
+        setFloatingIpArpResponseRules(router, floatingIp, kubevirtPort, electedGw, install);
+        setFloatingIpUpstreamRules(router, floatingIp, kubevirtPort, electedGw, install);
+        setFloatingIpDownstreamRules(router, floatingIp, kubevirtPort, electedGw, install);
     }
 
     private void setFloatingIpArpResponseRules(KubevirtRouter router,
                                                KubevirtFloatingIp floatingIp,
                                                KubevirtPort port,
+                                               KubevirtNode electedGw,
                                                boolean install) {
-
-        KubevirtNode electedGw = gatewayNodeForSpecifiedRouter(kubevirtNodeService, router);
-
-        if (electedGw == null) {
-            log.warn("Failed to install floating Ip rules for floating ip {} " +
-                    "because there's no gateway assigned to it", floatingIp.floatingIp());
-            return;
-        }
-
         TrafficSelector selector = DefaultTrafficSelector.builder()
                 .matchInPort(externalPatchPortNum(deviceService, electedGw))
                 .matchEthType(EthType.EtherType.ARP.ethType().toShort())
@@ -208,7 +199,7 @@ public class KubevirtFloatingIpHandler {
                 selector,
                 treatment,
                 PRIORITY_ARP_GATEWAY_RULE,
-                PRE_FLAT_TABLE,
+                GW_ENTRY_TABLE,
                 install);
     }
 
@@ -222,15 +213,8 @@ public class KubevirtFloatingIpHandler {
     private void setFloatingIpUpstreamRules(KubevirtRouter router,
                                             KubevirtFloatingIp floatingIp,
                                             KubevirtPort port,
+                                            KubevirtNode electedGw,
                                             boolean install) {
-
-        KubevirtNode electedGw = gatewayNodeForSpecifiedRouter(kubevirtNodeService, router);
-
-        if (electedGw == null) {
-            log.warn("Failed to install floating Ip rules for floating ip {} " +
-                    "because there's no gateway assigned to it", floatingIp.floatingIp());
-            return;
-        }
 
         MacAddress peerMacAddress = router.peerRouter().macAddress();
 
@@ -264,22 +248,15 @@ public class KubevirtFloatingIpHandler {
                 selector,
                 treatment,
                 PRIORITY_FLOATING_IP_RULE,
-                PRE_FLAT_TABLE,
+                GW_ENTRY_TABLE,
                 install);
     }
 
     private void setFloatingIpDownstreamRules(KubevirtRouter router,
                                               KubevirtFloatingIp floatingIp,
                                               KubevirtPort port,
+                                              KubevirtNode electedGw,
                                               boolean install) {
-        KubevirtNode electedGw = gatewayNodeForSpecifiedRouter(kubevirtNodeService, router);
-
-        if (electedGw == null) {
-            log.warn("Failed to install floating Ip rules for floating ip {} " +
-                    "because there's no gateway assigned to it", floatingIp.floatingIp());
-            return;
-        }
-
         MacAddress routerMacAddress = getRouterMacAddress(router);
 
         TrafficSelector selector = DefaultTrafficSelector.builder()
@@ -301,7 +278,7 @@ public class KubevirtFloatingIpHandler {
                 selector,
                 treatment,
                 PRIORITY_FLOATING_IP_RULE,
-                PRE_FLAT_TABLE,
+                GW_ENTRY_TABLE,
                 install);
     }
 
@@ -355,6 +332,31 @@ public class KubevirtFloatingIpHandler {
                 install);
     }
 
+    private void processGarpPacketForFloatingIp(KubevirtFloatingIp floatingIp, KubevirtNode electedGw) {
+
+        if (floatingIp == null) {
+            return;
+        }
+
+        KubevirtPort kubevirtPort = getKubevirtPort(floatingIp);
+        if (kubevirtPort == null) {
+            log.warn("Failed to install floating Ip rules for floating ip {} " +
+                    "because there's no kubevirt port associated to it", floatingIp.floatingIp());
+            return;
+        }
+
+        Ethernet ethernet = buildGarpPacket(kubevirtPort.macAddress(), floatingIp.floatingIp());
+        if (ethernet == null) {
+            return;
+        }
+
+        TrafficTreatment treatment = DefaultTrafficTreatment.builder()
+                .setOutput(externalPatchPortNum(deviceService, electedGw)).build();
+
+        packetService.emit(new DefaultOutboundPacket(electedGw.intgBridge(), treatment,
+                ByteBuffer.wrap(ethernet.serialize())));
+    }
+
     private class InternalRouterEventListener implements KubevirtRouterListener {
         private boolean isRelevantHelper() {
             return Objects.equals(localNodeId, leadershipService.getLeader(appId.name()));
@@ -371,65 +373,95 @@ public class KubevirtFloatingIpHandler {
                     eventExecutor.execute(() -> processFloatingIpDisassociation(event.subject(),
                             event.floatingIp()));
                     break;
-
+                case KUBEVIRT_GATEWAY_NODE_CHANGED:
+                    eventExecutor.execute(() -> processRouterGatewayNodeChanged(event.subject(),
+                            event.gateway()));
+                    break;
+                case KUBEVIRT_GATEWAY_NODE_ATTACHED:
+                    eventExecutor.execute(() -> processGatewayNodeAttachment(event.subject(),
+                            event.gateway()));
+                    break;
+                case KUBEVIRT_GATEWAY_NODE_DETACHED:
+                    eventExecutor.execute(() -> processGatewayNodeDetachment(event.subject(),
+                            event.gateway()));
+                    break;
                 default:
                     //do nothing
                     break;
             }
         }
 
-        private void processFloatingIpAssociation(KubevirtRouter router, KubevirtFloatingIp floatingIp) {
-            if (!isRelevantHelper()) {
-                return;
-            }
-            setFloatingIpRules(router, floatingIp, true);
+        private void processRouterGatewayNodeChanged(KubevirtRouter router, String disAssociatedGateway) {
+
+            kubevirtRouterService.floatingIps()
+                    .stream()
+                    .filter(fip -> fip.routerName().equals(router.name())).forEach(fip -> {
+                        KubevirtNode oldGw = kubevirtNodeService.node(disAssociatedGateway);
+                        if (oldGw == null) {
+                            return;
+                        }
+
+                        KubevirtNode newGw = kubevirtNodeService.node(router.electedGateway());
+                        if (newGw == null) {
+                            return;
+                        }
+
+                        setFloatingIpRulesForFip(router, fip, oldGw, false);
+
+                        setFloatingIpRulesForFip(router, fip, newGw, true);
+                        processGarpPacketForFloatingIp(fip, newGw);
+
+            });
         }
 
-        private void processFloatingIpDisassociation(KubevirtRouter router, KubevirtFloatingIp floatingIp) {
-            if (!isRelevantHelper()) {
-                return;
-            }
-            setFloatingIpRules(router, floatingIp, false);
-        }
-    }
-
-    private class InternalNodeEventListener implements KubevirtNodeListener {
-
-        private boolean isRelevantHelper() {
-            return Objects.equals(localNodeId, leadershipService.getLeader(appId.name()));
-        }
-
-        @Override
-        public void event(KubevirtNodeEvent event) {
-            switch (event.type()) {
-                case KUBEVIRT_NODE_COMPLETE:
-                    eventExecutor.execute(() -> processNodeCompletion(event.subject()));
-                    break;
-                case KUBEVIRT_NODE_REMOVED:
-                case KUBEVIRT_NODE_INCOMPLETE:
-                default:
-                    break;
-            }
-        }
-
-        private void processNodeCompletion(KubevirtNode node) {
-            if (!isRelevantHelper()) {
-                return;
-            }
-
+        private void processGatewayNodeAttachment(KubevirtRouter router, String gatewayName) {
             kubevirtRouterService.floatingIps().forEach(fip -> {
-                KubevirtRouter router = kubevirtRouterService.router(fip.routerName());
-                if (router != null) {
-                    KubevirtNode electedGw = gatewayNodeForSpecifiedRouter(kubevirtNodeService, router);
-                    if (electedGw == null) {
-                        return;
-                    }
-
-                    if (electedGw.hostname().equals(node.hostname())) {
-                        setFloatingIpRules(router, fip, true);
+                if (fip.routerName().equals(router.name())) {
+                    KubevirtNode gw = kubevirtNodeService.node(gatewayName);
+                    if (gw != null) {
+                        setFloatingIpRulesForFip(router, fip, gw, true);
                     }
                 }
             });
+        }
+
+        private void processGatewayNodeDetachment(KubevirtRouter router, String gatewayName) {
+            kubevirtRouterService.floatingIps().forEach(fip -> {
+                if (fip.routerName().equals(router.name())) {
+                    KubevirtNode gw = kubevirtNodeService.node(gatewayName);
+                    if (gw != null) {
+                        setFloatingIpRulesForFip(router, fip, gw, false);
+                    }
+                }
+            });
+        }
+
+        private void processFloatingIpAssociation(KubevirtRouter router, KubevirtFloatingIp floatingIp) {
+            if (!isRelevantHelper() || router.electedGateway() == null) {
+                return;
+            }
+
+            KubevirtNode electedGw = kubevirtNodeService.node(router.electedGateway());
+
+            if (electedGw == null) {
+                return;
+            }
+
+            processGarpPacketForFloatingIp(floatingIp, electedGw);
+            setFloatingIpRulesForFip(router, floatingIp, electedGw, true);
+        }
+
+        private void processFloatingIpDisassociation(KubevirtRouter router, KubevirtFloatingIp floatingIp) {
+            if (!isRelevantHelper() || router.electedGateway() == null) {
+                return;
+            }
+
+            KubevirtNode electedGw = kubevirtNodeService.node(router.electedGateway());
+
+            if (electedGw == null) {
+                return;
+            }
+            setFloatingIpRulesForFip(router, floatingIp, electedGw, false);
         }
     }
 }
