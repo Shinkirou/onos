@@ -76,14 +76,22 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     private static final String STANDARD_METADATA   = "standard_metadata";
     private static final String IP_SRC              = "ip_src";
     private static final String IP_DST              = "ip_dst";
-    private static final String cm_ip               = "cm_ip";
-    private static final String cm_ip_port_21       = "cm_ip_port_21";
-    private static final String cm_ip_port_22       = "cm_ip_port_22";
-    private static final String cm_ip_port_80       = "cm_ip_port_80";
-    private static final String cm_ip_tcp_syn       = "cm_ip_tcp_syn";
-    private static final String cm_ip_tcp_ack       = "cm_ip_tcp_ack";
-    private static final String cm_ip_tcp_rst       = "cm_ip_tcp_rst";
-    private static final String cm_ip_icmp          = "cm_ip_icmp";
+    private static final String cm_ip_cnt           = "cm_ip_cnt";
+    private static final String cm_ip_len           = "cm_ip_len";
+    private static final String cm_ip_port_21_cnt   = "cm_ip_port_21_cnt";
+    private static final String cm_ip_port_21_len   = "cm_ip_port_21_len";
+    private static final String cm_ip_port_22_cnt   = "cm_ip_port_22_cnt";
+    private static final String cm_ip_port_22_len   = "cm_ip_port_22_len";
+    private static final String cm_ip_port_80_cnt   = "cm_ip_port_80_cnt";
+    private static final String cm_ip_port_80_len   = "cm_ip_port_80_len";
+    private static final String cm_ip_tcp_syn_cnt   = "cm_ip_tcp_syn_cnt";
+    private static final String cm_ip_tcp_syn_len   = "cm_ip_tcp_syn_len";
+    private static final String cm_ip_tcp_ack_cnt   = "cm_ip_tcp_ack_cnt";
+    private static final String cm_ip_tcp_ack_len   = "cm_ip_tcp_ack_len";
+    private static final String cm_ip_tcp_rst_cnt   = "cm_ip_tcp_rst_cnt";
+    private static final String cm_ip_tcp_rst_len   = "cm_ip_tcp_rst_len";
+    private static final String cm_ip_icmp_cnt      = "cm_ip_icmp_cnt";
+    private static final String cm_ip_icmp_len      = "cm_ip_icmp_len";
     private static final String BM_IP_SRC           = "bm_ip_src";
     private static final String BM_IP_DST           = "bm_ip_dst";
     private static final String BM_IP_SRC_PORT_SRC  = "bm_ip_src_port_src";
@@ -268,53 +276,101 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
             (!ipSrcStr.equals("0.0.0.0")) &&
             (!ipSrcStr.equals("10.0.0.1"))) {
 
-            Optional<PiPacketMetadata> packetMetadataCmIp = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(cm_ip))
+            Optional<PiPacketMetadata> packetMetadataCmIpCnt = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(cm_ip_cnt))
                     .findFirst();
 
-            String cmIpStr = Integer.toString(packetMetadataCmIp.get().value().asReadOnlyBuffer().getInt());
+            String cmIpCntStr = Integer.toString(packetMetadataCmIpCnt.get().value().asReadOnlyBuffer().getInt());
 
-            Optional<PiPacketMetadata> packetMetadataCmIpPort21 = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(cm_ip_port_21))
+            Optional<PiPacketMetadata> packetMetadataCmIpLen = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(cm_ip_len))
                     .findFirst();
 
-            String cmIpPort21Str = Integer.toString(packetMetadataCmIpPort21.get().value().asReadOnlyBuffer().getInt());
+            String cmIpLenStr = Integer.toString(packetMetadataCmIpLen.get().value().asReadOnlyBuffer().getInt());
 
-            Optional<PiPacketMetadata> packetMetadataCmIpPort22 = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(cm_ip_port_22))
+            Optional<PiPacketMetadata> packetMetadataCmIpPort21Cnt = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(cm_ip_port_21_cnt))
                     .findFirst();
 
-            String cmIpPort22Str = Integer.toString(packetMetadataCmIpPort22.get().value().asReadOnlyBuffer().getInt());
+            String cmIpPort21CntStr = Integer.toString(packetMetadataCmIpPort21Cnt.get().value().asReadOnlyBuffer().getInt());
 
-            Optional<PiPacketMetadata> packetMetadataCmIpPort80 = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(cm_ip_port_80))
+            Optional<PiPacketMetadata> packetMetadataCmIpPort21Len = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(cm_ip_port_21_len))
                     .findFirst();
 
-            String cmIpPort80Str = Integer.toString(packetMetadataCmIpPort80.get().value().asReadOnlyBuffer().getInt());
+            String cmIpPort21LenStr = Integer.toString(packetMetadataCmIpPort21Len.get().value().asReadOnlyBuffer().getInt());
 
-            Optional<PiPacketMetadata> packetMetadataCmIpTcpSyn = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(cm_ip_tcp_syn))
+            Optional<PiPacketMetadata> packetMetadataCmIpPort22Cnt = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(cm_ip_port_22_cnt))
                     .findFirst();
 
-            String cmIpTcpSynStr = Integer.toString(packetMetadataCmIpTcpSyn.get().value().asReadOnlyBuffer().getInt());
+            String cmIpPort22CntStr = Integer.toString(packetMetadataCmIpPort22Cnt.get().value().asReadOnlyBuffer().getInt());
 
-            Optional<PiPacketMetadata> packetMetadataCmIpTcpAck = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(cm_ip_tcp_ack))
+            Optional<PiPacketMetadata> packetMetadataCmIpPort22Len = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(cm_ip_port_22_len))
                     .findFirst();
 
-            String cmIpTcpAckStr = Integer.toString(packetMetadataCmIpTcpAck.get().value().asReadOnlyBuffer().getInt());
+            String cmIpPort22LenStr = Integer.toString(packetMetadataCmIpPort22Len.get().value().asReadOnlyBuffer().getInt());
 
-            Optional<PiPacketMetadata> packetMetadataCmIpTcpRst = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(cm_ip_tcp_rst))
+            Optional<PiPacketMetadata> packetMetadataCmIpPort80Cnt = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(cm_ip_port_80_cnt))
                     .findFirst();
 
-            String cmIpTcpRstStr = Integer.toString(packetMetadataCmIpTcpRst.get().value().asReadOnlyBuffer().getInt());
+            String cmIpPort80CntStr = Integer.toString(packetMetadataCmIpPort80Cnt.get().value().asReadOnlyBuffer().getInt());
 
-            Optional<PiPacketMetadata> packetMetadataCmIpIcmp = packetIn.metadatas().stream()
-                    .filter(metadata -> metadata.id().toString().equals(cm_ip_icmp))
+            Optional<PiPacketMetadata> packetMetadataCmIpPort80Len = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(cm_ip_port_80_len))
                     .findFirst();
 
-            String cmIpIcmpStr = Integer.toString(packetMetadataCmIpIcmp.get().value().asReadOnlyBuffer().getInt());
+            String cmIpPort80LenStr = Integer.toString(packetMetadataCmIpPort80Len.get().value().asReadOnlyBuffer().getInt());
+
+            Optional<PiPacketMetadata> packetMetadataCmIpTcpSynCnt = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(cm_ip_tcp_syn_cnt))
+                    .findFirst();
+
+            String cmIpTcpSynCntStr = Integer.toString(packetMetadataCmIpTcpSynCnt.get().value().asReadOnlyBuffer().getInt());
+
+            Optional<PiPacketMetadata> packetMetadataCmIpTcpSynLen = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(cm_ip_tcp_syn_len))
+                    .findFirst();
+
+            String cmIpTcpSynLenStr = Integer.toString(packetMetadataCmIpTcpSynLen.get().value().asReadOnlyBuffer().getInt());
+
+            Optional<PiPacketMetadata> packetMetadataCmIpTcpAckCnt = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(cm_ip_tcp_ack_cnt))
+                    .findFirst();
+
+            String cmIpTcpAckCntStr = Integer.toString(packetMetadataCmIpTcpAckCnt.get().value().asReadOnlyBuffer().getInt());
+
+            Optional<PiPacketMetadata> packetMetadataCmIpTcpAckLen = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(cm_ip_tcp_ack_len))
+                    .findFirst();
+
+            String cmIpTcpAckLenStr = Integer.toString(packetMetadataCmIpTcpAckLen.get().value().asReadOnlyBuffer().getInt());
+
+            Optional<PiPacketMetadata> packetMetadataCmIpTcpRstCnt = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(cm_ip_tcp_rst_cnt))
+                    .findFirst();
+
+            String cmIpTcpRstCntStr = Integer.toString(packetMetadataCmIpTcpRstCnt.get().value().asReadOnlyBuffer().getInt());
+
+            Optional<PiPacketMetadata> packetMetadataCmIpTcpRstLen = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(cm_ip_tcp_rst_len))
+                    .findFirst();
+
+            String cmIpTcpRstLenStr = Integer.toString(packetMetadataCmIpTcpRstLen.get().value().asReadOnlyBuffer().getInt());
+
+            Optional<PiPacketMetadata> packetMetadataCmIpIcmpCnt = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(cm_ip_icmp_cnt))
+                    .findFirst();
+
+            String cmIpIcmpCntStr = Integer.toString(packetMetadataCmIpIcmpCnt.get().value().asReadOnlyBuffer().getInt());
+
+            Optional<PiPacketMetadata> packetMetadataCmIpIcmpLen = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(cm_ip_icmp_len))
+                    .findFirst();
+
+            String cmIpIcmpLenStr = Integer.toString(packetMetadataCmIpIcmpLen.get().value().asReadOnlyBuffer().getInt());
 
             Optional<PiPacketMetadata> packetMetadataBmIpSrc = packetIn.metadatas().stream()
                     .filter(metadata -> metadata.id().toString().equals(BM_IP_SRC))
@@ -355,14 +411,22 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
             String dma =
                     "{\"ip_src\": \"" + ipSrcStr + "\" , " +
                     "\"ip_dst\": \"" + ipDstStr + "\" , " +
-                    "\"cm_ip\": \"" + cmIpStr + "\" , " +
-                    "\"cm_ip_port_21\": \"" + cmIpPort21Str + "\" , " +
-                    "\"cm_ip_port_22\": \"" + cmIpPort22Str + "\" , " +
-                    "\"cm_ip_port_80\": \"" + cmIpPort80Str + "\" , " +
-                    "\"cm_ip_tcp_syn\": \"" + cmIpTcpSynStr + "\" , " +
-                    "\"cm_ip_tcp_ack\": \"" + cmIpTcpAckStr + "\" , " +
-                    "\"cm_ip_tcp_rst\": \"" + cmIpTcpRstStr + "\" , " +
-                    "\"cm_ip_icmp\": \"" + cmIpIcmpStr + "\" , " +
+                    "\"cm_ip_cnt\": \"" + cmIpCntStr + "\" , " +
+                    "\"cm_ip_len\": \"" + cmIpLenStr + "\" , " +
+                    "\"cm_ip_port_21_cnt\": \"" + cmIpPort21CntStr + "\" , " +
+                    "\"cm_ip_port_21_len\": \"" + cmIpPort21LenStr + "\" , " +
+                    "\"cm_ip_port_22_cnt\": \"" + cmIpPort22CntStr + "\" , " +
+                    "\"cm_ip_port_22_len\": \"" + cmIpPort22LenStr + "\" , " +
+                    "\"cm_ip_port_80_cnt\": \"" + cmIpPort80CntStr + "\" , " +
+                    "\"cm_ip_port_80_len\": \"" + cmIpPort80LenStr + "\" , " +
+                    "\"cm_ip_tcp_syn_cnt\": \"" + cmIpTcpSynCntStr + "\" , " +
+                    "\"cm_ip_tcp_syn_len\": \"" + cmIpTcpSynLenStr + "\" , " +
+                    "\"cm_ip_tcp_ack_cnt\": \"" + cmIpTcpAckCntStr + "\" , " +
+                    "\"cm_ip_tcp_ack_len\": \"" + cmIpTcpAckLenStr + "\" , " +
+                    "\"cm_ip_tcp_rst_cnt\": \"" + cmIpTcpRstCntStr + "\" , " +
+                    "\"cm_ip_tcp_rst_len\": \"" + cmIpTcpRstLenStr + "\" , " +
+                    "\"cm_ip_icmp_cnt\": \"" + cmIpIcmpCntStr + "\" , " +
+                    "\"cm_ip_icmp_len\": \"" + cmIpIcmpLenStr + "\" , " +
                     "\"bm_ip_src\": \"" + bmIpSrcStr + "\" , " +
                     "\"bm_ip_dst\": \"" + bmIpDstStr + "\" , " +
                     "\"bm_ip_src_port_src\": \"" + bmIpSrcPortSrcStr + "\" , " +

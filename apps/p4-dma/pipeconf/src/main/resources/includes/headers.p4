@@ -54,14 +54,22 @@ header packet_in_header_t {
     bit<64> timestamp;
     bit<32> ip_src;
     bit<32> ip_dst;
-    bit<32> cm_ip;
-    bit<32> cm_ip_port_21;
-    bit<32> cm_ip_port_22;
-    bit<32> cm_ip_port_80;
-    bit<32> cm_ip_tcp_syn;
-    bit<32> cm_ip_tcp_ack;
-    bit<32> cm_ip_tcp_rst;
-    bit<32> cm_ip_icmp;
+    bit<32> cm_ip_cnt;
+    bit<32> cm_ip_len;
+    bit<32> cm_ip_port_21_cnt;
+    bit<32> cm_ip_port_21_len;
+    bit<32> cm_ip_port_22_cnt;
+    bit<32> cm_ip_port_22_len;
+    bit<32> cm_ip_port_80_cnt;
+    bit<32> cm_ip_port_80_len;
+    bit<32> cm_ip_tcp_syn_cnt;
+    bit<32> cm_ip_tcp_syn_len;
+    bit<32> cm_ip_tcp_ack_cnt;
+    bit<32> cm_ip_tcp_ack_len;
+    bit<32> cm_ip_tcp_rst_cnt;
+    bit<32> cm_ip_tcp_rst_len;
+    bit<32> cm_ip_icmp_cnt;
+    bit<32> cm_ip_icmp_len;
     bit<32> bm_ip_src;
     bit<32> bm_ip_dst;
     bit<32> bm_ip_src_port_src;
@@ -88,9 +96,18 @@ header meta_t {
 }
 
 header hash_meta_t {
-    bit<32> ip_src_ip_dst_0;
-    bit<32> ip_src_ip_dst_1;
-    bit<32> ip_src_ip_dst_2;
+    bit<32> ip_0;
+    bit<32> ip_1;
+    bit<32> ip_2;
+    bit<32> ip_port_dst_0;
+    bit<32> ip_port_dst_1;
+    bit<32> ip_port_dst_2;
+    bit<32> ip_tcp_flags_0;
+    bit<32> ip_tcp_flags_1;
+    bit<32> ip_tcp_flags_2;
+    bit<32> ip_proto_0;
+    bit<32> ip_proto_1;
+    bit<32> ip_proto_2;
     bit<32> ip_src;
     bit<32> ip_dst;
     bit<32> ip_src_port_src;
@@ -104,14 +121,18 @@ header hash_meta_t {
 
 header reg_meta_t {
     bit<32> hash_size;
-    bit<32> current_register;
+    bit<32> current_reg;
     bit<32> current_index;
     bit<32> current_sketch_hash;
     bit<32> index_remaining;
-    bit<1> cm_ip;
-    bit<1> cm_ip_port_dst;
-    bit<1> cm_ip_tcp_flags;
-    bit<1> cm_ip_proto;
+    bit<1> cm_ip_cnt;
+    bit<1> cm_ip_len;
+    bit<1> cm_ip_port_dst_cnt;
+    bit<1> cm_ip_port_dst_len;
+    bit<1> cm_ip_tcp_flags_cnt;
+    bit<1> cm_ip_tcp_flags_len;
+    bit<1> cm_ip_proto_cnt;
+    bit<1> cm_ip_proto_len;
     bit<1> bm_ip_src;
     bit<1> bm_ip_dst;
     bit<1> bm_ip_src_port_src;
@@ -120,7 +141,6 @@ header reg_meta_t {
     bit<1> bm_ip_dst_port_dst;
     bit<1> ams;
     bit<1> mv;
-    bit<4> padding;
 }
 
 header epoch_meta_t {
@@ -130,7 +150,7 @@ header epoch_meta_t {
     bit<6>  padding;
 }
 
-header cm_ip_meta_t {
+header cm_ip_cnt_meta_t {
     bit<32> sketch_0;
     bit<32> sketch_1;
     bit<32> sketch_2;
@@ -138,7 +158,7 @@ header cm_ip_meta_t {
     bit<32> sketch_temp;
 }
 
-header cm_ip_port_dst_meta_t {
+header cm_ip_len_meta_t {
     bit<32> sketch_0;
     bit<32> sketch_1;
     bit<32> sketch_2;
@@ -146,7 +166,7 @@ header cm_ip_port_dst_meta_t {
     bit<32> sketch_temp;
 }
 
-header cm_ip_tcp_flags_meta_t {
+header cm_ip_port_dst_cnt_meta_t {
     bit<32> sketch_0;
     bit<32> sketch_1;
     bit<32> sketch_2;
@@ -154,7 +174,39 @@ header cm_ip_tcp_flags_meta_t {
     bit<32> sketch_temp;
 }
 
-header cm_ip_proto_meta_t {
+header cm_ip_port_dst_len_meta_t {
+    bit<32> sketch_0;
+    bit<32> sketch_1;
+    bit<32> sketch_2;
+    bit<32> sketch_final;
+    bit<32> sketch_temp;
+}
+
+header cm_ip_tcp_flags_cnt_meta_t {
+    bit<32> sketch_0;
+    bit<32> sketch_1;
+    bit<32> sketch_2;
+    bit<32> sketch_final;
+    bit<32> sketch_temp;
+}
+
+header cm_ip_tcp_flags_len_meta_t {
+    bit<32> sketch_0;
+    bit<32> sketch_1;
+    bit<32> sketch_2;
+    bit<32> sketch_final;
+    bit<32> sketch_temp;
+}
+
+header cm_ip_proto_cnt_meta_t {
+    bit<32> sketch_0;
+    bit<32> sketch_1;
+    bit<32> sketch_2;
+    bit<32> sketch_final;
+    bit<32> sketch_temp;
+}
+
+header cm_ip_proto_len_meta_t {
     bit<32> sketch_0;
     bit<32> sketch_1;
     bit<32> sketch_2;
@@ -215,31 +267,35 @@ header threshold_meta_t {
 }
 
 struct metadata_t {
-    meta_t 	                meta;
+    meta_t 	                    meta;
     hash_meta_t                 hash;
     reg_meta_t	                reg;
     epoch_meta_t                epoch;
-    cm_ip_meta_t	        cm_ip;
-    cm_ip_port_dst_meta_t       cm_ip_port_dst;
-    cm_ip_tcp_flags_meta_t      cm_ip_tcp_flags;
-    cm_ip_proto_meta_t          cm_ip_proto;
+    cm_ip_cnt_meta_t	        cm_ip_cnt;
+    cm_ip_len_meta_t	        cm_ip_len;
+    cm_ip_port_dst_cnt_meta_t   cm_ip_port_dst_cnt;
+    cm_ip_port_dst_len_meta_t   cm_ip_port_dst_len;
+    cm_ip_tcp_flags_cnt_meta_t  cm_ip_tcp_flags_cnt;
+    cm_ip_tcp_flags_len_meta_t  cm_ip_tcp_flags_len;
+    cm_ip_proto_cnt_meta_t      cm_ip_proto_cnt;
+    cm_ip_proto_len_meta_t      cm_ip_proto_len;
     bm_ip_src_meta_t            bm_ip_src;
     bm_ip_dst_meta_t 	        bm_ip_dst;
     bm_ip_src_port_src_meta_t 	bm_ip_src_port_src;
     bm_ip_src_port_dst_meta_t 	bm_ip_src_port_dst;
     bm_ip_dst_port_src_meta_t 	bm_ip_dst_port_src;
     bm_ip_dst_port_dst_meta_t 	bm_ip_dst_port_dst;
-    ams_meta_t		        ams;
+    ams_meta_t		            ams;
     mv_meta_t 	                mv;
     threshold_meta_t            threshold;
 }
 
 struct headers_t {
     ethernet_t	        ethernet;
-    ipv4_t		ipv4;
-    tcp_t		tcp;
-    udp_t		udp;
-    icmp_t 		icmp;
+    ipv4_t		        ipv4;
+    tcp_t		        tcp;
+    udp_t		        udp;
+    icmp_t 		        icmp;
     packet_out_header_t packet_out;
     packet_in_header_t  packet_in;
 }

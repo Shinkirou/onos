@@ -10,7 +10,7 @@ typedef bit<9> port_t;
 
 const port_t CPU_PORT = 255;
 
-#define PHYSICAL_REG_SIZE 32768
+#define REG_SIZE 32768
 
 // Defined by the physical register size, power of two.
 // Used to perform integer division through right shift.

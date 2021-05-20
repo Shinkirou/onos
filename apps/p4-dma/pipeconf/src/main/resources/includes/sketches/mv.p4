@@ -20,23 +20,23 @@ control c_mv(inout headers_t hdr, inout metadata_t meta, inout standard_metadata
     c_sketch_write() mv_write_2;
     c_sketch_write() mv_write_3;
 
-    bit<32> current_register_temp;
+    bit<32> current_reg_temp;
 
-    action current_register() {
-        current_register_temp = meta.reg.current_register;
+    action current_reg() {
+        current_reg_temp = meta.reg.current_reg;
     }
 
     apply {
 
-        bit<32> register_key_0_temp;
-        bit<32> register_key_1_temp;
+        bit<32> reg_key_0_temp;
+        bit<32> reg_key_1_temp;
 
         bit<32> check = 0;
 
         // Obtain the next hash value to be used.
         // This value will be translated by set_virtual_reg into the actual physical register and index.
 
-        meta.reg.current_sketch_hash = meta.hash.ip_src_ip_dst_0;
+        meta.reg.current_sketch_hash = meta.hash.ip_0;
 
         mv_set_reg_0.apply(hdr, meta, standard_metadata);
 
@@ -47,7 +47,7 @@ control c_mv(inout headers_t hdr, inout metadata_t meta, inout standard_metadata
 
         meta.epoch.sketch_temp = meta.epoch.sketch_temp + 1;
 
-        current_register();
+        current_reg();
 
         mv_write_0.apply(hdr, meta, standard_metadata);
 
@@ -57,7 +57,7 @@ control c_mv(inout headers_t hdr, inout metadata_t meta, inout standard_metadata
 
         mv_epoch_1.apply(hdr, meta, standard_metadata);
 
-        register_key_0_temp = meta.epoch.sketch_temp;
+        reg_key_0_temp = meta.epoch.sketch_temp;
 
         // Register Key 1
 
@@ -65,7 +65,7 @@ control c_mv(inout headers_t hdr, inout metadata_t meta, inout standard_metadata
 
         mv_epoch_2.apply(hdr, meta, standard_metadata);
 
-        register_key_1_temp = meta.epoch.sketch_temp;
+        reg_key_1_temp = meta.epoch.sketch_temp;
 
         // Register Count
 
@@ -76,12 +76,12 @@ control c_mv(inout headers_t hdr, inout metadata_t meta, inout standard_metadata
         meta.mv.count_temp = meta.epoch.sketch_temp;
 
         if (meta.epoch.current_epoch == 1) {
-            register_key_0_temp[31:31] = (bit<1>) 0;
-            register_key_1_temp[31:31] = (bit<1>) 0;
+            reg_key_0_temp[31:31] = (bit<1>) 0;
+            reg_key_1_temp[31:31] = (bit<1>) 0;
         }
 
         // Concatenate both register keys to generate the complete key.
-        meta.mv.key_temp = register_key_0_temp ++ register_key_1_temp;
+        meta.mv.key_temp = reg_key_0_temp ++ reg_key_1_temp;
 
         // If the input key is different from the key stored in the register AND the related count is 0,
         // then the current input key becomes the new candidate heavy flow.
@@ -91,12 +91,12 @@ control c_mv(inout headers_t hdr, inout metadata_t meta, inout standard_metadata
 
             meta.epoch.sketch_temp = hdr.ipv4.src_addr;
             mv_set_reg_4.apply(hdr, meta, standard_metadata);
-            current_register();
+            current_reg();
             mv_write_1.apply(hdr, meta, standard_metadata);
 
             meta.epoch.sketch_temp = hdr.ipv4.dst_addr;
             mv_set_reg_5.apply(hdr, meta, standard_metadata);
-            current_register();
+            current_reg();
             mv_write_2.apply(hdr, meta, standard_metadata);
         }
 
@@ -111,7 +111,7 @@ control c_mv(inout headers_t hdr, inout metadata_t meta, inout standard_metadata
 
         if (check == 1) {
             mv_set_reg_6.apply(hdr, meta, standard_metadata);
-            current_register();
+            current_reg();
         }
 
         mv_write_3.apply(hdr, meta, standard_metadata);

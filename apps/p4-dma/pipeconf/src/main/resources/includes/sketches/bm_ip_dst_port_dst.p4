@@ -11,10 +11,10 @@ control c_bm_ip_dst_port_dst(inout headers_t hdr, inout metadata_t meta, inout s
     c_sketch_write() bm_ip_dst_port_dst_write_0;
     c_sketch_write() bm_ip_dst_port_dst_write_1;
 
-    bit<32> current_register_temp;
+    bit<32> current_reg_temp;
 
-    action current_register() {
-            current_register_temp = meta.reg.current_register;
+    action current_reg() {
+            current_reg_temp = meta.reg.current_reg;
     }
 
     apply {
@@ -42,7 +42,7 @@ control c_bm_ip_dst_port_dst(inout headers_t hdr, inout metadata_t meta, inout s
 
             meta.epoch.sketch_temp[0:0] = 1;
 
-            current_register();
+            current_reg();
 
             bm_ip_dst_port_dst_write_0.apply(hdr, meta, standard_metadata);
 
@@ -54,7 +54,7 @@ control c_bm_ip_dst_port_dst(inout headers_t hdr, inout metadata_t meta, inout s
             meta.epoch.sketch_temp = meta.epoch.sketch_temp + 1;
             meta.bm_ip_dst_port_dst.sketch_1 = meta.epoch.sketch_temp;
 
-            current_register();
+            current_reg();
 
             bm_ip_dst_port_dst_write_1.apply(hdr, meta, standard_metadata);
         

@@ -11,10 +11,10 @@ control c_bm_ip_src(inout headers_t hdr, inout metadata_t meta, inout standard_m
     c_sketch_write() bm_ip_src_write_0;
     c_sketch_write() bm_ip_src_write_1;
 
-    bit<32> current_register_temp;
+    bit<32> current_reg_temp;
 
-    action current_register() {
-            current_register_temp = meta.reg.current_register;
+    action current_reg() {
+            current_reg_temp = meta.reg.current_reg;
     }
 
     apply {
@@ -24,7 +24,7 @@ control c_bm_ip_src(inout headers_t hdr, inout metadata_t meta, inout standard_m
         // Obtain the next hash value to be used.
         // This value will be translated by set_virtual_reg into the actual physical register and index.
 
-        meta.reg.current_sketch_hash = meta.hash.ip_src_ip_dst_0;
+        meta.reg.current_sketch_hash = meta.hash.ip_0;
 
         bm_ip_src_set_reg_0.apply(hdr, meta, standard_metadata);
 
@@ -42,7 +42,7 @@ control c_bm_ip_src(inout headers_t hdr, inout metadata_t meta, inout standard_m
 
             meta.epoch.sketch_temp[0:0] = 1;
 
-            current_register();
+            current_reg();
 
             bm_ip_src_write_0.apply(hdr, meta, standard_metadata);
 
@@ -54,7 +54,7 @@ control c_bm_ip_src(inout headers_t hdr, inout metadata_t meta, inout standard_m
             meta.epoch.sketch_temp = meta.epoch.sketch_temp + 1;
             meta.bm_ip_src.sketch_1 = meta.epoch.sketch_temp;
 
-            current_register();
+            current_reg();
 
             bm_ip_src_write_1.apply(hdr, meta, standard_metadata);
         

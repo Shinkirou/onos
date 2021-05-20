@@ -4,65 +4,89 @@
 
 // The following registers are divided by sketch, assuming their original configuration with all active sketches.
 
-// Count-min sketch (IP src, IP dst)
-register<bit<32>>(32768) register_0;
-register<bit<32>>(32768) register_1;
-register<bit<32>>(32768) register_2;
-register<bit<32>>(32768) register_3;
+// Count-min sketch (IP src, IP dst) - packet count
+register<bit<32>>(REG_SIZE) reg_0;
+register<bit<32>>(REG_SIZE) reg_1;
+register<bit<32>>(REG_SIZE) reg_2;
+register<bit<32>>(REG_SIZE) reg_3;
 
-// Count-min sketch (IP src, IP dst, port dst)
-register<bit<32>>(32768) register_4;
-register<bit<32>>(32768) register_5;
-register<bit<32>>(32768) register_6;
-register<bit<32>>(32768) register_7;
+// Count-min sketch (IP src, IP dst) - packet length
+register<bit<32>>(REG_SIZE) reg_4;
+register<bit<32>>(REG_SIZE) reg_5;
+register<bit<32>>(REG_SIZE) reg_6;
+register<bit<32>>(REG_SIZE) reg_7;
 
-// Count-min sketch (IP src, IP Dst, TCP flags)
-register<bit<32>>(32768) register_8;
-register<bit<32>>(32768) register_9;
-register<bit<32>>(32768) register_10;
-register<bit<32>>(32768) register_11;
+// Count-min sketch (IP src, IP dst, port dst) - packet count
+register<bit<32>>(REG_SIZE) reg_8;
+register<bit<32>>(REG_SIZE) reg_9;
+register<bit<32>>(REG_SIZE) reg_10;
+register<bit<32>>(REG_SIZE) reg_11;
 
-// Count-min sketch (IP src, IP dst, proto)
-register<bit<32>>(32768) register_12;
-register<bit<32>>(32768) register_13;
-register<bit<32>>(32768) register_14;
-register<bit<32>>(32768) register_15;
+// Count-min sketch (IP src, IP dst, port dst) - packet length
+register<bit<32>>(REG_SIZE) reg_12;
+register<bit<32>>(REG_SIZE) reg_13;
+register<bit<32>>(REG_SIZE) reg_14;
+register<bit<32>>(REG_SIZE) reg_15;
+
+// Count-min sketch (IP src, IP Dst, TCP flags) - packet count
+register<bit<32>>(REG_SIZE) reg_16;
+register<bit<32>>(REG_SIZE) reg_17;
+register<bit<32>>(REG_SIZE) reg_18;
+register<bit<32>>(REG_SIZE) reg_19;
+
+// Count-min sketch (IP src, IP Dst, TCP flags) - packet length
+register<bit<32>>(REG_SIZE) reg_20;
+register<bit<32>>(REG_SIZE) reg_21;
+register<bit<32>>(REG_SIZE) reg_22;
+register<bit<32>>(REG_SIZE) reg_23;
+
+// Count-min sketch (IP src, IP dst, proto) - packet count
+register<bit<32>>(REG_SIZE) reg_24;
+register<bit<32>>(REG_SIZE) reg_25;
+register<bit<32>>(REG_SIZE) reg_26;
+register<bit<32>>(REG_SIZE) reg_27;
+
+// Count-min sketch (IP src, IP dst, proto) - packet length
+register<bit<32>>(REG_SIZE) reg_28;
+register<bit<32>>(REG_SIZE) reg_29;
+register<bit<32>>(REG_SIZE) reg_30;
+register<bit<32>>(REG_SIZE) reg_31;
 
 // Bitmap sketch (IP src)
-register<bit<32>>(32768) register_16;
-register<bit<32>>(32768) register_17;
+register<bit<32>>(REG_SIZE) reg_32;
+register<bit<32>>(REG_SIZE) reg_33;
 
 // Bitmap sketch (IP dst)
-register<bit<32>>(32768) register_18;
-register<bit<32>>(32768) register_19;
+register<bit<32>>(REG_SIZE) reg_34;
+register<bit<32>>(REG_SIZE) reg_35;
 
 // Bitmap sketch (IP src, port src)
-register<bit<32>>(32768) register_20;
-register<bit<32>>(32768) register_21;
+register<bit<32>>(REG_SIZE) reg_36;
+register<bit<32>>(REG_SIZE) reg_37;
 
 // Bitmap sketch (IP src, port dst)
-register<bit<32>>(32768) register_22;
-register<bit<32>>(32768) register_23;
+register<bit<32>>(REG_SIZE) reg_38;
+register<bit<32>>(REG_SIZE) reg_39;
 
 // Bitmap sketch (IP dst, port src)
-register<bit<32>>(32768) register_24;
-register<bit<32>>(32768) register_25;
+register<bit<32>>(REG_SIZE) reg_40;
+register<bit<32>>(REG_SIZE) reg_41;
 
 // Bitmap sketch (IP dst, port dst)
-register<bit<32>>(32768) register_26;
-register<bit<32>>(32768) register_27;
+register<bit<32>>(REG_SIZE) reg_42;
+register<bit<32>>(REG_SIZE) reg_43;
 
 // AMS sketch
-register<bit<32>>(32768) register_28;
-register<bit<32>>(32768) register_29;
-register<bit<32>>(32768) register_30;
-register<bit<32>>(32768) register_31;
+register<bit<32>>(REG_SIZE) reg_44;
+register<bit<32>>(REG_SIZE) reg_45;
+register<bit<32>>(REG_SIZE) reg_46;
+register<bit<32>>(REG_SIZE) reg_47;
 
 // MV sketch
-register<bit<32>>(32768) register_32;
-register<bit<32>>(32768) register_33;
-register<bit<32>>(32768) register_34;
-register<bit<32>>(32768) register_35;
+register<bit<32>>(REG_SIZE) reg_48;
+register<bit<32>>(REG_SIZE) reg_49;
+register<bit<32>>(REG_SIZE) reg_50;
+register<bit<32>>(REG_SIZE) reg_51;
 
 //------------------------------------------------------------------------------
 // EPOCH REGISTER
@@ -70,4 +94,4 @@ register<bit<32>>(32768) register_35;
 
 // 1-bit register that represents the current epoch.
 // To perform an epoch change, the operator flips the bit value.
-register<bit<1>>(1) register_epoch;
+register<bit<1>>(1) reg_epoch;

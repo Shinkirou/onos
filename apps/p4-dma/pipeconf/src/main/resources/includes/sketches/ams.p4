@@ -14,14 +14,14 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
     c_sketch_write() ams_write_2;
     c_sketch_write() ams_write_final;
 
-    register<bit<32>>(1) register_sum_0;
-    register<bit<32>>(1) register_sum_1;
-    register<bit<32>>(1) register_sum_2;
+    register<bit<32>>(1) reg_sum_0;
+    register<bit<32>>(1) reg_sum_1;
+    register<bit<32>>(1) reg_sum_2;
 
-    bit<32> current_register_temp;
+    bit<32> current_reg_temp;
 
-    action current_register() {
-        current_register_temp = meta.reg.current_register;
+    action current_reg() {
+        current_reg_temp = meta.reg.current_reg;
     }
 
     // The update is made using the metadata, instead of directly on the registers.
@@ -36,7 +36,7 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
         // Obtain the next hash value to be used.
         // This value will be translated by set_virtual_reg into the actual physical register and index.
 
-        meta.reg.current_sketch_hash = meta.hash.ip_src_ip_dst_0;
+        meta.reg.current_sketch_hash = meta.hash.ip_0;
 
         ams_set_reg_0.apply(hdr, meta, standard_metadata);
 
@@ -53,7 +53,7 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
         // After performing the sketch update, we check the related sum value epoch,
         // before updating the sum value (removing the old sketch value from it first).
 
-        register_sum_0.read(meta.ams.sum_0, (bit<32>)0);
+        reg_sum_0.read(meta.ams.sum_0, (bit<32>)0);
 
         // The epoch value corresponds to the most significant bit in the retrieved value.
         bit<1> index_epoch = meta.ams.sum_0[31:31];
@@ -72,15 +72,15 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
             - ((meta.epoch.sketch_temp - meta.hash.ams_g_0) * (meta.epoch.sketch_temp - meta.hash.ams_g_0))
             + ((meta.epoch.sketch_temp) * (meta.epoch.sketch_temp));
 
-        register_sum_0.write((bit<32>)0, meta.ams.sum_0);
+        reg_sum_0.write((bit<32>)0, meta.ams.sum_0);
 
-        current_register();
+        current_reg();
 
         ams_write_0.apply(hdr, meta, standard_metadata);
 
         // AMS Counter 1.
 
-        meta.reg.current_sketch_hash = meta.hash.ip_src_ip_dst_1;
+        meta.reg.current_sketch_hash = meta.hash.ip_1;
 
         ams_set_reg_1.apply(hdr, meta, standard_metadata);
 
@@ -90,7 +90,7 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
 
         ams_update(meta.hash.ams_g_1);
 
-        register_sum_1.read(meta.ams.sum_1, (bit<32>)0);
+        reg_sum_1.read(meta.ams.sum_1, (bit<32>)0);
 
         index_epoch = meta.ams.sum_1[31:31];
 
@@ -103,15 +103,15 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
             - ((meta.epoch.sketch_temp - meta.hash.ams_g_1) * (meta.epoch.sketch_temp - meta.hash.ams_g_1))
             + ((meta.epoch.sketch_temp) * (meta.epoch.sketch_temp));
 
-        register_sum_1.write((bit<32>)0, meta.ams.sum_1);
+        reg_sum_1.write((bit<32>)0, meta.ams.sum_1);
 
-        current_register();
+        current_reg();
 
         ams_write_1.apply(hdr, meta, standard_metadata);
 
         // AMS Counter 2.
 
-        meta.reg.current_sketch_hash = meta.hash.ip_src_ip_dst_2;
+        meta.reg.current_sketch_hash = meta.hash.ip_2;
 
         ams_set_reg_2.apply(hdr, meta, standard_metadata);
 
@@ -121,7 +121,7 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
 
         ams_update(meta.hash.ams_g_2);
 
-        register_sum_2.read(meta.ams.sum_2, (bit<32>)0);
+        reg_sum_2.read(meta.ams.sum_2, (bit<32>)0);
 
         index_epoch = meta.ams.sum_2[31:31];
 
@@ -134,9 +134,9 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
             - ((meta.epoch.sketch_temp - meta.hash.ams_g_2) * (meta.epoch.sketch_temp - meta.hash.ams_g_2))
             + ((meta.epoch.sketch_temp) * (meta.epoch.sketch_temp));
 
-        register_sum_2.write((bit<32>)0, meta.ams.sum_2);
+        reg_sum_2.write((bit<32>)0, meta.ams.sum_2);
 
-        current_register();
+        current_reg();
 
         ams_write_2.apply(hdr, meta, standard_metadata);
 
@@ -167,7 +167,7 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
 
         meta.epoch.sketch_temp = meta.ams.sketch_final;
 
-        current_register();
+        current_reg();
 
         ams_write_final.apply(hdr, meta, standard_metadata);
     }

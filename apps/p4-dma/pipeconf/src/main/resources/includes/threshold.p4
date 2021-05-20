@@ -47,7 +47,8 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
         hdr.packet_in.ingress_port          = standard_metadata.ingress_port;
         hdr.packet_in.ip_src                = hdr.ipv4.src_addr;
         hdr.packet_in.ip_dst                = hdr.ipv4.dst_addr;
-        hdr.packet_in.cm_ip                 = meta.cm_ip.sketch_final;
+        hdr.packet_in.cm_ip_cnt             = meta.cm_ip_cnt.sketch_final;
+        hdr.packet_in.cm_ip_len             = meta.cm_ip_len.sketch_final;
         hdr.packet_in.bm_ip_src             = meta.bm_ip_src.sketch_1;
         hdr.packet_in.bm_ip_dst             = meta.bm_ip_dst.sketch_1;
         hdr.packet_in.bm_ip_src_port_src    = meta.bm_ip_src_port_src.sketch_1;
@@ -56,13 +57,37 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
         hdr.packet_in.bm_ip_dst_port_dst    = meta.bm_ip_dst_port_dst.sketch_1;
         hdr.packet_in.ams                   = meta.ams.sketch_final;
 
-        if (hdr.tcp.dst_port == 21) hdr.packet_in.cm_ip_port_21 = meta.cm_ip_port_dst.sketch_final;
-        if (hdr.tcp.dst_port == 22) hdr.packet_in.cm_ip_port_22 = meta.cm_ip_port_dst.sketch_final;
-        if (hdr.tcp.dst_port == 80) hdr.packet_in.cm_ip_port_80 = meta.cm_ip_port_dst.sketch_final;
-        if ((hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl) == 2) hdr.packet_in.cm_ip_tcp_syn = meta.cm_ip_tcp_flags.sketch_final;
-        if ((hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl) == 16) hdr.packet_in.cm_ip_tcp_ack = meta.cm_ip_tcp_flags.sketch_final;
-        if ((hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl) == 4) hdr.packet_in.cm_ip_tcp_rst = meta.cm_ip_tcp_flags.sketch_final;
-        if (hdr.ipv4.protocol == 1) hdr.packet_in.cm_ip_icmp = meta.cm_ip_proto.sketch_final;
+        if (hdr.tcp.dst_port == 21) {
+            hdr.packet_in.cm_ip_port_21_cnt = meta.cm_ip_port_dst_cnt.sketch_final;
+            hdr.packet_in.cm_ip_port_21_len = meta.cm_ip_port_dst_len.sketch_final;
+        }
+        if (hdr.tcp.dst_port == 22) {
+            hdr.packet_in.cm_ip_port_22_cnt = meta.cm_ip_port_dst_cnt.sketch_final;
+            hdr.packet_in.cm_ip_port_22_len = meta.cm_ip_port_dst_len.sketch_final;
+        }
+        if (hdr.tcp.dst_port == 80) {
+            hdr.packet_in.cm_ip_port_80_cnt = meta.cm_ip_port_dst_cnt.sketch_final;
+            hdr.packet_in.cm_ip_port_80_len = meta.cm_ip_port_dst_len.sketch_final;
+        }
+        if ((hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl) == 2) {
+            hdr.packet_in.cm_ip_tcp_syn_cnt = meta.cm_ip_tcp_flags_cnt.sketch_final;
+            hdr.packet_in.cm_ip_tcp_syn_len = meta.cm_ip_tcp_flags_len.sketch_final;
+        }
+
+        if ((hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl) == 16) {
+            hdr.packet_in.cm_ip_tcp_ack_cnt = meta.cm_ip_tcp_flags_cnt.sketch_final;
+            hdr.packet_in.cm_ip_tcp_ack_len = meta.cm_ip_tcp_flags_len.sketch_final;
+        }
+
+        if ((hdr.tcp.res ++ hdr.tcp.ecn ++ hdr.tcp.ctrl) == 4) {
+            hdr.packet_in.cm_ip_tcp_rst_cnt = meta.cm_ip_tcp_flags_cnt.sketch_final;
+            hdr.packet_in.cm_ip_tcp_rst_len = meta.cm_ip_tcp_flags_len.sketch_final;
+        }
+
+        if (hdr.ipv4.protocol == 1) {
+            hdr.packet_in.cm_ip_icmp_cnt = meta.cm_ip_proto_cnt.sketch_final;
+            hdr.packet_in.cm_ip_icmp_len = meta.cm_ip_proto_len.sketch_final;
+        }
 
         // Check if the current MV sketch key (strongest candidate) matches the current flow key.
         if (hdr.ipv4.src_addr ++ hdr.ipv4.dst_addr == meta.mv.key_temp) {
@@ -75,7 +100,7 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
     apply {
 
         // The current threshold hash has already been calculated.
-        meta.threshold.hash_flow = meta.hash.ip_src_ip_dst_0;
+        meta.threshold.hash_flow = meta.hash.ip_0;
 
         // Increase the global and flow-specific traffic counters and check the last flow global traffic counter stored.
         global_traffic_incr();

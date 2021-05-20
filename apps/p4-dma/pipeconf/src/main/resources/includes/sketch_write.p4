@@ -1,158 +1,222 @@
 control c_sketch_write(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
 
-    bit<32> current_register_temp;
+    bit<32> current_reg_temp;
 
     action sketch_write_0() {
-        register_0.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_0.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_1() {
-        register_1.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_1.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_2() {
-        register_2.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_2.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_3() {
-        register_3.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_3.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_4() {
-        register_4.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_4.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_5() {
-        register_5.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_5.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_6() {
-        register_6.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_6.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_7() {
-        register_7.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_7.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_8() {
-        register_8.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_8.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_9() {
-        register_9.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_9.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_10() {
-        register_10.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_10.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_11() {
-        register_11.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_11.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_12() {
-        register_12.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_12.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_13() {
-        register_13.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_13.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_14() {
-        register_14.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_14.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_15() {
-        register_15.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_15.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_16() {
-        register_16.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_16.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_17() {
-        register_17.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_17.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_18() {
-        register_18.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_18.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_19() {
-        register_19.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_19.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_20() {
-        register_20.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_20.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_21() {
-        register_21.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_21.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_22() {
-        register_22.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_22.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_23() {
-        register_23.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_23.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_24() {
-        register_24.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_24.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_25() {
-        register_25.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_25.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_26() {
-        register_26.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_26.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
     
     action sketch_write_27() {
-        register_27.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_27.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
     
     action sketch_write_28() {
-        register_28.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_28.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
     
     action sketch_write_29() {
-        register_29.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_29.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_30() {
-        register_30.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_30.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
     
     action sketch_write_31() {
-        register_31.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_31.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
     action sketch_write_32() {
-        register_32.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_32.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
     
     action sketch_write_33() {
-        register_33.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_33.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
     
     action sketch_write_34() {
-        register_34.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_34.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
     
     action sketch_write_35() {
-        register_35.write(meta.reg.current_index, meta.epoch.sketch_temp);
+        reg_35.write(meta.reg.current_index, meta.epoch.sketch_temp);
     }
 
-    action current_register() {
-        current_register_temp = meta.reg.current_register;
+    action sketch_write_36() {
+        reg_36.write(meta.reg.current_index, meta.epoch.sketch_temp);
+    }
+
+    action sketch_write_37() {
+        reg_37.write(meta.reg.current_index, meta.epoch.sketch_temp);
+    }
+
+    action sketch_write_38() {
+        reg_38.write(meta.reg.current_index, meta.epoch.sketch_temp);
+    }
+
+    action sketch_write_39() {
+        reg_39.write(meta.reg.current_index, meta.epoch.sketch_temp);
+    }
+
+    action sketch_write_40() {
+        reg_40.write(meta.reg.current_index, meta.epoch.sketch_temp);
+    }
+
+    action sketch_write_41() {
+        reg_41.write(meta.reg.current_index, meta.epoch.sketch_temp);
+    }
+
+    action sketch_write_42() {
+        reg_42.write(meta.reg.current_index, meta.epoch.sketch_temp);
+    }
+
+    action sketch_write_43() {
+        reg_43.write(meta.reg.current_index, meta.epoch.sketch_temp);
+    }
+
+    action sketch_write_44() {
+        reg_44.write(meta.reg.current_index, meta.epoch.sketch_temp);
+    }
+
+    action sketch_write_45() {
+        reg_45.write(meta.reg.current_index, meta.epoch.sketch_temp);
+    }
+
+    action sketch_write_46() {
+        reg_46.write(meta.reg.current_index, meta.epoch.sketch_temp);
+    }
+
+    action sketch_write_47() {
+        reg_47.write(meta.reg.current_index, meta.epoch.sketch_temp);
+    }
+
+    action sketch_write_48() {
+        reg_48.write(meta.reg.current_index, meta.epoch.sketch_temp);
+    }
+
+    action sketch_write_49() {
+        reg_49.write(meta.reg.current_index, meta.epoch.sketch_temp);
+    }
+
+    action sketch_write_50() {
+        reg_50.write(meta.reg.current_index, meta.epoch.sketch_temp);
+    }
+
+    action sketch_write_51() {
+        reg_51.write(meta.reg.current_index, meta.epoch.sketch_temp);
+    }
+
+    action current_reg() {
+        current_reg_temp = meta.reg.current_reg;
     }
 
     table t_sketch_write {
         key = {
-            current_register_temp: exact;
+            current_reg_temp: exact;
         }
         actions = {
             sketch_write_0;
@@ -191,6 +255,22 @@ control c_sketch_write(inout headers_t hdr, inout metadata_t meta, inout standar
             sketch_write_33;
             sketch_write_34;
             sketch_write_35;
+            sketch_write_36;
+            sketch_write_37;
+            sketch_write_38;
+            sketch_write_39;
+            sketch_write_40;
+            sketch_write_41;
+            sketch_write_42;
+            sketch_write_43;
+            sketch_write_44;
+            sketch_write_45;
+            sketch_write_46;
+            sketch_write_47;
+            sketch_write_48;
+            sketch_write_49;
+            sketch_write_50;
+            sketch_write_51;
         }
     }
 
@@ -198,7 +278,7 @@ control c_sketch_write(inout headers_t hdr, inout metadata_t meta, inout standar
 
         // Write the current sketch value in the register defined by the operator in the table rules.
 			
-        current_register();
+        current_reg();
         t_sketch_write.apply();
     }
 }
