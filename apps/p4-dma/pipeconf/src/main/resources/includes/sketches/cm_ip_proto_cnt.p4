@@ -5,9 +5,9 @@ control c_cm_ip_proto_cnt(inout headers_t hdr, inout metadata_t meta, inout stan
     c_set_reg() cm_ip_proto_cnt_set_reg_2;
     c_set_reg() cm_ip_proto_cnt_set_reg_final;
 
-    c_epoch()   cm_ip_proto_cnt_epoch_0;
-    c_epoch()   cm_ip_proto_cnt_epoch_1;
-    c_epoch()   cm_ip_proto_cnt_epoch_2;
+    c_sketch_read() cm_ip_proto_cnt_read_0;
+    c_sketch_read() cm_ip_proto_cnt_read_1;
+    c_sketch_read() cm_ip_proto_cnt_read_2;
 
     c_sketch_write() cm_ip_proto_cnt_write_0;
     c_sketch_write() cm_ip_proto_cnt_write_1;
@@ -21,7 +21,7 @@ control c_cm_ip_proto_cnt(inout headers_t hdr, inout metadata_t meta, inout stan
     }
 
     action cm_incr() {
-        meta.epoch.sketch_temp = meta.epoch.sketch_temp + 1;
+        meta.reg.sketch_temp = meta.reg.sketch_temp + 1;
     }
 
     apply {
@@ -35,39 +35,39 @@ control c_cm_ip_proto_cnt(inout headers_t hdr, inout metadata_t meta, inout stan
         cm_ip_proto_cnt_set_reg_0.apply(hdr, meta, standard_metadata);
 
         // After determining the register position, check if the epoch has changed.
-        // The obtained sketch value after the check will be stored in meta.epoch.sketch_temp.
-        cm_ip_proto_cnt_epoch_0.apply(hdr, meta, standard_metadata);
+        // The obtained sketch value after the check will be stored in meta.reg.sketch_temp.
+        cm_ip_proto_cnt_read_0.apply(hdr, meta, standard_metadata);
 
         // Update the sketch value.
 
         cm_incr();
         current_reg();
         cm_ip_proto_cnt_write_0.apply(hdr, meta, standard_metadata);
-        meta.cm_ip_proto_cnt.sketch_0 = meta.epoch.sketch_temp;
+        meta.cm_ip_proto_cnt.sketch_0 = meta.reg.sketch_temp;
 
         // CM Hash 1 - Counter 1.
 
         meta.reg.current_sketch_hash = meta.hash.ip_proto_1;
 
         cm_ip_proto_cnt_set_reg_1.apply(hdr, meta, standard_metadata);
-        cm_ip_proto_cnt_epoch_1.apply(hdr, meta, standard_metadata);
+        cm_ip_proto_cnt_read_1.apply(hdr, meta, standard_metadata);
 
         cm_incr();
         current_reg();
         cm_ip_proto_cnt_write_1.apply(hdr, meta, standard_metadata);
-        meta.cm_ip_proto_cnt.sketch_1 = meta.epoch.sketch_temp;
+        meta.cm_ip_proto_cnt.sketch_1 = meta.reg.sketch_temp;
 
         // CM Hash 2 - Counter 2.
 
         meta.reg.current_sketch_hash = meta.hash.ip_proto_2;
 
         cm_ip_proto_cnt_set_reg_2.apply(hdr, meta, standard_metadata);
-        cm_ip_proto_cnt_epoch_2.apply(hdr, meta, standard_metadata);
+        cm_ip_proto_cnt_read_2.apply(hdr, meta, standard_metadata);
 
         cm_incr();
         current_reg();
         cm_ip_proto_cnt_write_2.apply(hdr, meta, standard_metadata);
-        meta.cm_ip_proto_cnt.sketch_2 = meta.epoch.sketch_temp;
+        meta.cm_ip_proto_cnt.sketch_2 = meta.reg.sketch_temp;
 
         // CM Final Value.
 
@@ -86,7 +86,7 @@ control c_cm_ip_proto_cnt(inout headers_t hdr, inout metadata_t meta, inout stan
             meta.cm_ip_proto_cnt.sketch_final = meta.cm_ip_proto_cnt.sketch_2;
         }
 
-        meta.epoch.sketch_temp = meta.cm_ip_proto_cnt.sketch_final;
+        meta.reg.sketch_temp = meta.cm_ip_proto_cnt.sketch_final;
         current_reg();
         cm_ip_proto_cnt_write_final.apply(hdr, meta, standard_metadata);
     }

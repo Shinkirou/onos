@@ -125,6 +125,9 @@ header reg_meta_t {
     bit<32> current_index;
     bit<32> current_sketch_hash;
     bit<32> index_remaining;
+    bit<1>  current_epoch;
+    bit<1>  index_epoch;
+    bit<32> sketch_temp;
     bit<1> cm_ip_cnt;
     bit<1> cm_ip_len;
     bit<1> cm_ip_port_dst_cnt;
@@ -141,13 +144,7 @@ header reg_meta_t {
     bit<1> bm_ip_dst_port_dst;
     bit<1> ams;
     bit<1> mv;
-}
-
-header epoch_meta_t {
-    bit<1>  current_epoch;
-    bit<1>  index_epoch;
-    bit<32> sketch_temp;
-    bit<6>  padding;
+    bit<6> padding;
 }
 
 header cm_ip_cnt_meta_t {
@@ -270,7 +267,6 @@ struct metadata_t {
     meta_t 	                    meta;
     hash_meta_t                 hash;
     reg_meta_t	                reg;
-    epoch_meta_t                epoch;
     cm_ip_cnt_meta_t	        cm_ip_cnt;
     cm_ip_len_meta_t	        cm_ip_len;
     cm_ip_port_dst_cnt_meta_t   cm_ip_port_dst_cnt;

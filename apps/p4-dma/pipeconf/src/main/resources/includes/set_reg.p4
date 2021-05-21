@@ -32,7 +32,7 @@ control c_set_reg(inout headers_t hdr, inout metadata_t meta, inout standard_met
     // Defined by the operator through table rules.
     action set_reg(bit<32> current_reg, bit<32> current_index) {
         meta.reg.current_reg   = current_reg;
-        meta.reg.current_index 	    = current_index;
+        meta.reg.current_index = current_index;
     }
 
     table t_set_reg {

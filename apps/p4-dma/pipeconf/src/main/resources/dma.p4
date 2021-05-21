@@ -7,10 +7,10 @@
 #include "includes/parser.p4"
 #include "includes/deparser.p4"
 #include "includes/set_reg.p4"
-#include "includes/epoch.p4"
+#include "includes/sketch_read.p4"
+#include "includes/sketch_write.p4"
 #include "includes/threshold.p4"
 #include "includes/hash_calc.p4"
-#include "includes/sketch_write.p4"
 #include "includes/sketches/cm_ip_cnt.p4"
 #include "includes/sketches/cm_ip_len.p4"
 #include "includes/sketches/cm_ip_port_dst_cnt.p4"
@@ -106,7 +106,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
     // Read the epoch value bit defined by the operator in register_epoch.
     // This value will be used to check against the epoch values stored in the sketch registers.
     action epoch_read() {
-        reg_epoch.read(meta.epoch.current_epoch, 0);
+        reg_epoch.read(meta.reg.current_epoch, 0);
     }
 
     // Table counter used to count packets and bytes matched by each entry of t_fwd table.
