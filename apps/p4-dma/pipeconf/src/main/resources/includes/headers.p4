@@ -255,11 +255,14 @@ header mv_meta_t {
     bit<32> sketch_temp;
 }
 
-header threshold_meta_t {
+header thres_meta_t {
     bit<32> hash_flow;
-    bit<32> flow_traffic;
-    bit<32> flow_global_traffic;
-    bit<32> global_traffic;
+    bit<32> flow_pkt_cnt;
+    bit<32> flow_pkt_len;
+    bit<32> flow_global_pkt_cnt;
+    bit<32> flow_global_pkt_len;
+    bit<32> global_pkt_cnt;
+    bit<32> global_pkt_len;
     bit<48> flow_ts;
 }
 
@@ -283,7 +286,7 @@ struct metadata_t {
     bm_ip_dst_port_dst_meta_t 	bm_ip_dst_port_dst;
     ams_meta_t		            ams;
     mv_meta_t 	                mv;
-    threshold_meta_t            threshold;
+    thres_meta_t                thres;
 }
 
 struct headers_t {

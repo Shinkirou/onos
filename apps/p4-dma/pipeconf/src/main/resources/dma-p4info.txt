@@ -18721,13 +18721,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16788385
-    name: "c_ingress.threshold.flow_traffic_incr"
-    alias: "flow_traffic_incr"
-  }
-}
-actions {
-  preamble {
     id: 16783010
     name: "c_ingress.threshold.flow_global_traffic_update"
     alias: "flow_global_traffic_update"
@@ -18749,9 +18742,23 @@ actions {
 }
 actions {
   preamble {
-    id: 16829362
-    name: "c_ingress.threshold.send_to_cpu_threshold"
-    alias: "send_to_cpu_threshold"
+    id: 16781295
+    name: "c_ingress.threshold.check_flow_pkt_cnt"
+    alias: "check_flow_pkt_cnt"
+  }
+}
+actions {
+  preamble {
+    id: 16833804
+    name: "c_ingress.threshold.check_flow_pkt_len"
+    alias: "check_flow_pkt_len"
+  }
+}
+actions {
+  preamble {
+    id: 16783389
+    name: "c_ingress.threshold.send_to_cpu_thres"
+    alias: "send_to_cpu_thres"
   }
 }
 actions {
@@ -59907,9 +59914,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369121454
-    name: "c_ingress.threshold.reg_thres_global_traffic"
-    alias: "reg_thres_global_traffic"
+    id: 369136948
+    name: "c_ingress.threshold.reg_global_pkt_cnt"
+    alias: "reg_global_pkt_cnt"
   }
   type_spec {
     bitstring {
@@ -59922,9 +59929,24 @@ registers {
 }
 registers {
   preamble {
-    id: 369153245
-    name: "c_ingress.threshold.reg_thres_flow_global_traffic"
-    alias: "reg_thres_flow_global_traffic"
+    id: 369116979
+    name: "c_ingress.threshold.reg_global_pkt_len"
+    alias: "reg_global_pkt_len"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 1
+}
+registers {
+  preamble {
+    id: 369149233
+    name: "c_ingress.threshold.reg_flow_global_pkt_cnt"
+    alias: "reg_flow_global_pkt_cnt"
   }
   type_spec {
     bitstring {
@@ -59937,9 +59959,39 @@ registers {
 }
 registers {
   preamble {
-    id: 369161343
-    name: "c_ingress.threshold.reg_thres_flow_traffic"
-    alias: "reg_thres_flow_traffic"
+    id: 369143715
+    name: "c_ingress.threshold.reg_flow_global_pkt_len"
+    alias: "reg_flow_global_pkt_len"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 32768
+}
+registers {
+  preamble {
+    id: 369103335
+    name: "c_ingress.threshold.reg_flow_pkt_cnt"
+    alias: "reg_flow_pkt_cnt"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 32768
+}
+registers {
+  preamble {
+    id: 369115288
+    name: "c_ingress.threshold.reg_flow_pkt_len"
+    alias: "reg_flow_pkt_len"
   }
   type_spec {
     bitstring {

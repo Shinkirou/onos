@@ -1,44 +1,56 @@
 control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
 
-    // Stores the total packet count.
-    register<bit<32>>(1)  reg_thres_global_traffic;
-    // Stores the total packet count, excluding the packets in the current stage (for each flow).
-    register<bit<32>>(32768) reg_thres_flow_global_traffic;
-    // Stores the packet count for the current stage (for each flow).
-    register<bit<32>>(32768) reg_thres_flow_traffic;
+    // Store the total packet count/length.
+    register<bit<32>>(1)  reg_global_pkt_cnt;
+    register<bit<32>>(1)  reg_global_pkt_len;
+    // Store the total packet count/length, excluding the packets in the current stage (for each flow).
+    register<bit<32>>(32768) reg_flow_global_pkt_cnt;
+    register<bit<32>>(32768) reg_flow_global_pkt_len;
+    // Store the flow packet count/length, excluding the packets in the current stage (for each flow).
+    register<bit<32>>(32768) reg_flow_pkt_cnt;
+    register<bit<32>>(32768) reg_flow_pkt_len;
 
-    // Increase the global traffic counter.
+    // Increase the global traffic counters.
     action global_traffic_incr() {
-        reg_thres_global_traffic.read(meta.threshold.global_traffic, (bit<32>)0);
-        meta.threshold.global_traffic = meta.threshold.global_traffic + 1;
-        reg_thres_global_traffic.write((bit<32>)0, meta.threshold.global_traffic);
-    }
+        reg_global_pkt_cnt.read(meta.thres.global_pkt_cnt, (bit<32>)0);
+        meta.thres.global_pkt_cnt = meta.thres.global_pkt_cnt + 1;
+        reg_global_pkt_cnt.write((bit<32>)0, meta.thres.global_pkt_cnt);
 
-    // Increase the traffic counter for a specific flow.
-    action flow_traffic_incr() {
-        reg_thres_flow_traffic.read(meta.threshold.flow_traffic, (bit<32>)meta.threshold.hash_flow);
-        meta.threshold.flow_traffic = meta.threshold.flow_traffic + 1;
-        reg_thres_flow_traffic.write((bit<32>)meta.threshold.hash_flow, meta.threshold.flow_traffic);
+        reg_global_pkt_len.read(meta.thres.global_pkt_len, (bit<32>)0);
+        meta.thres.global_pkt_len = meta.thres.global_pkt_len + standard_metadata.packet_length;
+        reg_global_pkt_len.write((bit<32>)0, meta.thres.global_pkt_len);
     }
 
     // Update the global traffic counter for the current flow with the global traffic counter.
     action flow_global_traffic_update() {
-        reg_thres_flow_global_traffic.write((bit<32>)meta.threshold.hash_flow, meta.threshold.global_traffic);
+        reg_flow_global_pkt_cnt.write((bit<32>)meta.hash.ip_0, meta.thres.global_pkt_cnt);
+        reg_flow_global_pkt_len.write((bit<32>)meta.hash.ip_0, meta.thres.global_pkt_len);
     }
 
     // Reset the counters for a specific flow.
     action flow_traffic_reset() {
-        reg_thres_flow_traffic.write((bit<32>)meta.threshold.hash_flow, 0);
-        reg_thres_flow_global_traffic.write((bit<32>)meta.threshold.hash_flow, meta.threshold.global_traffic);
+        reg_flow_pkt_cnt.write((bit<32>)meta.hash.ip_0, meta.cm_ip_cnt.sketch_final);
+        reg_flow_global_pkt_cnt.write((bit<32>)meta.hash.ip_0, meta.thres.global_pkt_cnt);
     }
 
-    // Obtain the global traffic value corresponding to the last stage for the current flow.
+    // Obtain the global traffic counters corresponding to the last stage for the current flow.
     action check_flow_global_traffic() {
-        reg_thres_flow_global_traffic.read(meta.threshold.flow_global_traffic, (bit<32>)meta.threshold.hash_flow);
+        reg_flow_global_pkt_cnt.read(meta.thres.flow_global_pkt_cnt, (bit<32>)meta.hash.ip_0);
+        reg_flow_global_pkt_len.read(meta.thres.flow_global_pkt_len, (bit<32>)meta.hash.ip_0);
+    }
+
+    // Obtain the total packet count corresponding to the last stage for the current flow.
+    action check_flow_pkt_cnt() {
+        reg_flow_pkt_cnt.read(meta.thres.flow_pkt_cnt, (bit<32>)meta.hash.ip_0);
+    }
+
+    // Obtain the total packet length corresponding to the last stage for the current flow.
+    action check_flow_pkt_len() {
+        reg_flow_pkt_len.read(meta.thres.flow_pkt_len, (bit<32>)meta.hash.ip_0);
     }
 
     // Specify a packet_in header containing all flow stats.
-    action send_to_cpu_threshold() {
+    action send_to_cpu_thres() {
 
         // Packets sent to the controller needs to be prepended with the packet-in header.
         // By setting it valid we make sure it will be deparsed on the wire (see c_deparser).
@@ -99,27 +111,30 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
 
     apply {
 
-        // The current threshold hash has already been calculated.
-        meta.threshold.hash_flow = meta.hash.ip_0;
-
         // Increase the global and flow-specific traffic counters and check the last flow global traffic counter stored.
         global_traffic_incr();
-        flow_traffic_incr();
         check_flow_global_traffic();
 
         // If the last flow global traffic value stored is 0, the current flow is considered new.
         // We then update its value with the current global traffic counter.
-        if (meta.threshold.flow_global_traffic == 0) {
-            flow_global_traffic_update();
-        }
+        if (meta.thres.flow_global_pkt_cnt == 0) flow_global_traffic_update();
 
         // Verify if more than x packets have traversed the switch since the last threshold check for the current flow.
-        if ((meta.threshold.global_traffic - meta.threshold.flow_global_traffic) > 5000) {
+        if ((meta.thres.global_pkt_cnt - meta.thres.flow_global_pkt_cnt) > 5000) {
+
+            check_flow_pkt_cnt();
 
             // Check if the flow traffic at the current stage corresponds to more than 5% of the total traffic.
             // If so, we send the current flow stats to the controller.
-            if ((meta.threshold.flow_traffic * 40) > (meta.threshold.global_traffic - meta.threshold.flow_global_traffic)) {
-                send_to_cpu_threshold();
+            if (((meta.cm_ip_cnt.sketch_final - meta.thres.flow_pkt_cnt) * 40) > (meta.thres.global_pkt_cnt - meta.thres.flow_global_pkt_cnt)) {
+                send_to_cpu_thres();
+            } else {
+
+                check_flow_pkt_len();
+
+                if (((meta.cm_ip_len.sketch_final - meta.thres.flow_pkt_len) * 40) > (meta.thres.global_pkt_len - meta.thres.flow_global_pkt_len)) {
+                    send_to_cpu_thres();
+                }
             }
 
             // Either the check did not trigger an alert, or the threshold has been exceeded.
