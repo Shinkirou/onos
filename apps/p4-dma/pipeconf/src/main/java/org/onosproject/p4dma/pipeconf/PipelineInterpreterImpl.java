@@ -98,6 +98,9 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
     private static final String BM_IP_SRC_PORT_DST  = "bm_ip_src_port_dst";
     private static final String BM_IP_DST_PORT_SRC  = "bm_ip_dst_port_src";
     private static final String BM_IP_DST_PORT_DST  = "bm_ip_dst_port_dst";
+    private static final String IS_TUPLE_N          = "is_tuple_n";
+    private static final String IS_TUPLE_LS         = "is_tuple_ls";
+    private static final String IS_TUPLE_SS         = "is_tuple_ss";
     private static final int PORT_FIELD_BITWIDTH    = 9;
 
     private static final PiMatchFieldId INGRESS_PORT_ID = PiMatchFieldId.of(STANDARD_METADATA + DOT + "ingress_port");
@@ -408,6 +411,24 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
             String bmIpDstPortDstStr = Integer.toString(packetMetadataBmIpDstPortDst.get().value().asReadOnlyBuffer().getInt());
 
+            Optional<PiPacketMetadata> packetMetadataISTupleN = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(IS_TUPLE_N))
+                    .findFirst();
+
+            String ISTupleNStr = Long.toString(packetMetadataISTupleN.get().value().asReadOnlyBuffer().getLong());
+
+            Optional<PiPacketMetadata> packetMetadataISTupleLS = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(IS_TUPLE_LS))
+                    .findFirst();
+
+            String ISTupleLSStr = Long.toString(packetMetadataISTupleLS.get().value().asReadOnlyBuffer().getLong());
+
+            Optional<PiPacketMetadata> packetMetadataISTupleSS = packetIn.metadatas().stream()
+                    .filter(metadata -> metadata.id().toString().equals(IS_TUPLE_SS))
+                    .findFirst();
+
+            String ISTupleSSStr = Long.toString(packetMetadataISTupleSS.get().value().asReadOnlyBuffer().getLong());
+
             String dma =
                     "{\"ip_src\": \"" + ipSrcStr + "\" , " +
                     "\"ip_dst\": \"" + ipDstStr + "\" , " +
@@ -432,7 +453,10 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
                     "\"bm_ip_src_port_src\": \"" + bmIpSrcPortSrcStr + "\" , " +
                     "\"bm_ip_src_port_dst\": \"" + bmIpSrcPortDstStr + "\" , " +
                     "\"bm_ip_dst_port_src\": \"" + bmIpDstPortSrcStr + "\" , " +
-                    "\"bm_ip_dst_port_dst\": \"" + bmIpDstPortDstStr + "\"}";
+                    "\"bm_ip_dst_port_dst\": \"" + bmIpDstPortDstStr + "\" , " +
+                    "\"is_tuple_n\": \"" + ISTupleNStr + "\" , " +
+                    "\"is_tuple_ls\": \"" + ISTupleLSStr + "\" , " +
+                    "\"is_tuple_ss\": \"" + ISTupleSSStr + "\"}";
 
             dmaPost(dma);
         }

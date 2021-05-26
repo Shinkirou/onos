@@ -87,11 +87,3 @@ register<bit<32>>(REG_SIZE) reg_48;
 register<bit<32>>(REG_SIZE) reg_49;
 register<bit<32>>(REG_SIZE) reg_50;
 register<bit<32>>(REG_SIZE) reg_51;
-
-//------------------------------------------------------------------------------
-// EPOCH REGISTER
-//------------------------------------------------------------------------------
-
-// 1-bit register that represents the current epoch.
-// To perform an epoch change, the operator flips the bit value.
-register<bit<1>>(1) reg_epoch;

@@ -29,12 +29,12 @@ control c_cm_ip_tcp_flags_len(inout headers_t hdr, inout metadata_t meta, inout 
         // CM Hash 0 - Counter 0.
 
         // Obtain the next hash value to be used.
-        // This value will be translated by set_virtual_reg into the actual physical register and index.
+        // This value will be translated by set_reg into the actual physical register and index.
 
         meta.reg.current_sketch_hash =meta.hash.ip_tcp_flags_0;
         cm_ip_tcp_flags_len_set_reg_0.apply(hdr, meta, standard_metadata);
 
-        // After determining the register position, check if the epoch has changed.
+        // After determining the register position, read the respective sketch value.
         // The obtained sketch value after the check will be stored in meta.reg.sketch_temp.
         cm_ip_tcp_flags_len_read_0.apply(hdr, meta, standard_metadata);
 
@@ -72,9 +72,6 @@ control c_cm_ip_tcp_flags_len(inout headers_t hdr, inout metadata_t meta, inout 
         // CM Final Value.
 
         cm_ip_tcp_flags_len_set_reg_final.apply(hdr, meta, standard_metadata);
-
-        // No need to apply an epoch check here, since all the cm values are already in the correct epoch
-        // and one of them will be the final value.
 
         meta.cm_ip_tcp_flags_len.sketch_final = meta.cm_ip_tcp_flags_len.sketch_0;
 

@@ -34,13 +34,13 @@ control c_mv(inout headers_t hdr, inout metadata_t meta, inout standard_metadata
         bit<32> check = 0;
 
         // Obtain the next hash value to be used.
-        // This value will be translated by set_virtual_reg into the actual physical register and index.
+        // This value will be translated by set_reg into the actual physical register and index.
 
         meta.reg.current_sketch_hash = meta.hash.ip_0;
 
         mv_set_reg_0.apply(hdr, meta, standard_metadata);
 
-        // After determining the register position, check if the epoch has changed.
+        // After determining the register position, read the respective sketch value.
         // The obtained sketch value after the check will be stored in meta.reg.sketch_temp.
 
         mv_read_0.apply(hdr, meta, standard_metadata);
@@ -74,11 +74,6 @@ control c_mv(inout headers_t hdr, inout metadata_t meta, inout standard_metadata
         mv_read_3.apply(hdr, meta, standard_metadata);
 
         meta.mv.count_temp = meta.reg.sketch_temp;
-
-        if (meta.reg.current_epoch == 1) {
-            reg_key_0_temp[31:31] = (bit<1>) 0;
-            reg_key_1_temp[31:31] = (bit<1>) 0;
-        }
 
         // Concatenate both register keys to generate the complete key.
         meta.mv.key_temp = reg_key_0_temp ++ reg_key_1_temp;

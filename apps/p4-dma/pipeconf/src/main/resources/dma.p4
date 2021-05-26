@@ -103,12 +103,6 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         meta.reg.hash_size = hash_size;
     }
 
-    // Read the epoch value bit defined by the operator in register_epoch.
-    // This value will be used to check against the epoch values stored in the sketch registers.
-    action epoch_read() {
-        reg_epoch.read(meta.reg.current_epoch, 0);
-    }
-
     // Table counter used to count packets and bytes matched by each entry of t_fwd table.
     direct_counter(CounterType.packets_and_bytes) fwd_counter;	
 
@@ -167,10 +161,8 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
                 if (hdr.ipv4.isValid()) {
 					
                     t_sketches.apply();
-                    epoch_read();
 
                     // Hash calculations.
-
                     hash_calc.apply(hdr, meta, standard_metadata);
 
                     // Execute the active sketching algorithms.

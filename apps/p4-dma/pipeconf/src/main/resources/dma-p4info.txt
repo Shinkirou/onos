@@ -476,7 +476,7 @@ tables {
     id: 16785309
   }
   action_refs {
-    id: 16841439
+    id: 16841438
   }
   action_refs {
     id: 16783563
@@ -5115,7 +5115,7 @@ tables {
     id: 16786617
   }
   action_refs {
-    id: 16793636
+    id: 16793635
   }
   action_refs {
     id: 16826730
@@ -9116,7 +9116,7 @@ tables {
     id: 16786022
   }
   action_refs {
-    id: 16833153
+    id: 16833152
   }
   action_refs {
     id: 16808431
@@ -10856,7 +10856,7 @@ tables {
     id: 16820788
   }
   action_refs {
-    id: 16828808
+    id: 16828807
   }
   action_refs {
     id: 16839065
@@ -18580,7 +18580,7 @@ tables {
     id: 16792417
   }
   action_refs {
-    id: 16828809
+    id: 16828808
   }
   action_refs {
     id: 16821036
@@ -19398,13 +19398,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16787586
-    name: "c_ingress.cm_ip_cnt.cm_ip_cnt_read_0.change_index_epoch"
-    alias: "cm_ip_cnt_read_0.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16826865
     name: "c_ingress.cm_ip_cnt.cm_ip_cnt_read_0.current_reg"
     alias: "cm_ip_cnt_read_0.current_reg"
@@ -19776,13 +19769,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16802647
-    name: "c_ingress.cm_ip_cnt.cm_ip_cnt_read_1.change_index_epoch"
-    alias: "cm_ip_cnt_read_1.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16786794
     name: "c_ingress.cm_ip_cnt.cm_ip_cnt_read_1.current_reg"
     alias: "cm_ip_cnt_read_1.current_reg"
@@ -19902,7 +19888,7 @@ actions {
 }
 actions {
   preamble {
-    id: 16841439
+    id: 16841438
     name: "c_ingress.cm_ip_cnt.cm_ip_cnt_read_2.sketch_read_16"
     alias: "cm_ip_cnt_read_2.sketch_read_16"
   }
@@ -20150,13 +20136,6 @@ actions {
     id: 16840638
     name: "c_ingress.cm_ip_cnt.cm_ip_cnt_read_2.sketch_read_51"
     alias: "cm_ip_cnt_read_2.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16835022
-    name: "c_ingress.cm_ip_cnt.cm_ip_cnt_read_2.change_index_epoch"
-    alias: "cm_ip_cnt_read_2.change_index_epoch"
   }
 }
 actions {
@@ -22154,13 +22133,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16787684
-    name: "c_ingress.cm_ip_len.cm_ip_len_read_0.change_index_epoch"
-    alias: "cm_ip_len_read_0.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16818133
     name: "c_ingress.cm_ip_len.cm_ip_len_read_0.current_reg"
     alias: "cm_ip_len_read_0.current_reg"
@@ -22532,13 +22504,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16831858
-    name: "c_ingress.cm_ip_len.cm_ip_len_read_1.change_index_epoch"
-    alias: "cm_ip_len_read_1.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16831536
     name: "c_ingress.cm_ip_len.cm_ip_len_read_1.current_reg"
     alias: "cm_ip_len_read_1.current_reg"
@@ -22906,13 +22871,6 @@ actions {
     id: 16809758
     name: "c_ingress.cm_ip_len.cm_ip_len_read_2.sketch_read_51"
     alias: "cm_ip_len_read_2.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16785532
-    name: "c_ingress.cm_ip_len.cm_ip_len_read_2.change_index_epoch"
-    alias: "cm_ip_len_read_2.change_index_epoch"
   }
 }
 actions {
@@ -24910,13 +24868,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16829417
-    name: "c_ingress.cm_ip_port_dst_cnt.cm_ip_port_dst_cnt_read_0.change_index_epoch"
-    alias: "cm_ip_port_dst_cnt_read_0.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16804082
     name: "c_ingress.cm_ip_port_dst_cnt.cm_ip_port_dst_cnt_read_0.current_reg"
     alias: "cm_ip_port_dst_cnt_read_0.current_reg"
@@ -25288,13 +25239,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16802347
-    name: "c_ingress.cm_ip_port_dst_cnt.cm_ip_port_dst_cnt_read_1.change_index_epoch"
-    alias: "cm_ip_port_dst_cnt_read_1.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16797869
     name: "c_ingress.cm_ip_port_dst_cnt.cm_ip_port_dst_cnt_read_1.current_reg"
     alias: "cm_ip_port_dst_cnt_read_1.current_reg"
@@ -25662,13 +25606,6 @@ actions {
     id: 16799328
     name: "c_ingress.cm_ip_port_dst_cnt.cm_ip_port_dst_cnt_read_2.sketch_read_51"
     alias: "cm_ip_port_dst_cnt_read_2.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16814022
-    name: "c_ingress.cm_ip_port_dst_cnt.cm_ip_port_dst_cnt_read_2.change_index_epoch"
-    alias: "cm_ip_port_dst_cnt_read_2.change_index_epoch"
   }
 }
 actions {
@@ -27666,13 +27603,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16809903
-    name: "c_ingress.cm_ip_port_dst_len.cm_ip_port_dst_len_read_0.change_index_epoch"
-    alias: "cm_ip_port_dst_len_read_0.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16812102
     name: "c_ingress.cm_ip_port_dst_len.cm_ip_port_dst_len_read_0.current_reg"
     alias: "cm_ip_port_dst_len_read_0.current_reg"
@@ -28044,13 +27974,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16806000
-    name: "c_ingress.cm_ip_port_dst_len.cm_ip_port_dst_len_read_1.change_index_epoch"
-    alias: "cm_ip_port_dst_len_read_1.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16795621
     name: "c_ingress.cm_ip_port_dst_len.cm_ip_port_dst_len_read_1.current_reg"
     alias: "cm_ip_port_dst_len_read_1.current_reg"
@@ -28418,13 +28341,6 @@ actions {
     id: 16832396
     name: "c_ingress.cm_ip_port_dst_len.cm_ip_port_dst_len_read_2.sketch_read_51"
     alias: "cm_ip_port_dst_len_read_2.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16808970
-    name: "c_ingress.cm_ip_port_dst_len.cm_ip_port_dst_len_read_2.change_index_epoch"
-    alias: "cm_ip_port_dst_len_read_2.change_index_epoch"
   }
 }
 actions {
@@ -29829,7 +29745,7 @@ actions {
 }
 actions {
   preamble {
-    id: 16793636
+    id: 16793635
     name: "c_ingress.cm_ip_port_dst_len.cm_ip_port_dst_len_write_final.sketch_write_40"
     alias: "cm_ip_port_dst_len_write_final.sketch_write_40"
   }
@@ -30422,13 +30338,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16792671
-    name: "c_ingress.cm_ip_tcp_flags_cnt.cm_ip_tcp_flags_cnt_read_0.change_index_epoch"
-    alias: "cm_ip_tcp_flags_cnt_read_0.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16815893
     name: "c_ingress.cm_ip_tcp_flags_cnt.cm_ip_tcp_flags_cnt_read_0.current_reg"
     alias: "cm_ip_tcp_flags_cnt_read_0.current_reg"
@@ -30800,13 +30709,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16793045
-    name: "c_ingress.cm_ip_tcp_flags_cnt.cm_ip_tcp_flags_cnt_read_1.change_index_epoch"
-    alias: "cm_ip_tcp_flags_cnt_read_1.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16816280
     name: "c_ingress.cm_ip_tcp_flags_cnt.cm_ip_tcp_flags_cnt_read_1.current_reg"
     alias: "cm_ip_tcp_flags_cnt_read_1.current_reg"
@@ -31174,13 +31076,6 @@ actions {
     id: 16831188
     name: "c_ingress.cm_ip_tcp_flags_cnt.cm_ip_tcp_flags_cnt_read_2.sketch_read_51"
     alias: "cm_ip_tcp_flags_cnt_read_2.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16801113
-    name: "c_ingress.cm_ip_tcp_flags_cnt.cm_ip_tcp_flags_cnt_read_2.change_index_epoch"
-    alias: "cm_ip_tcp_flags_cnt_read_2.change_index_epoch"
   }
 }
 actions {
@@ -33178,13 +33073,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16797146
-    name: "c_ingress.cm_ip_tcp_flags_len.cm_ip_tcp_flags_len_read_0.change_index_epoch"
-    alias: "cm_ip_tcp_flags_len_read_0.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16796628
     name: "c_ingress.cm_ip_tcp_flags_len.cm_ip_tcp_flags_len_read_0.current_reg"
     alias: "cm_ip_tcp_flags_len_read_0.current_reg"
@@ -33556,13 +33444,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16819451
-    name: "c_ingress.cm_ip_tcp_flags_len.cm_ip_tcp_flags_len_read_1.change_index_epoch"
-    alias: "cm_ip_tcp_flags_len_read_1.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16813450
     name: "c_ingress.cm_ip_tcp_flags_len.cm_ip_tcp_flags_len_read_1.current_reg"
     alias: "cm_ip_tcp_flags_len_read_1.current_reg"
@@ -33930,13 +33811,6 @@ actions {
     id: 16804381
     name: "c_ingress.cm_ip_tcp_flags_len.cm_ip_tcp_flags_len_read_2.sketch_read_51"
     alias: "cm_ip_tcp_flags_len_read_2.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16820423
-    name: "c_ingress.cm_ip_tcp_flags_len.cm_ip_tcp_flags_len_read_2.change_index_epoch"
-    alias: "cm_ip_tcp_flags_len_read_2.change_index_epoch"
   }
 }
 actions {
@@ -35934,13 +35808,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16816135
-    name: "c_ingress.cm_ip_proto_cnt.cm_ip_proto_cnt_read_0.change_index_epoch"
-    alias: "cm_ip_proto_cnt_read_0.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16777837
     name: "c_ingress.cm_ip_proto_cnt.cm_ip_proto_cnt_read_0.current_reg"
     alias: "cm_ip_proto_cnt_read_0.current_reg"
@@ -36312,13 +36179,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16782252
-    name: "c_ingress.cm_ip_proto_cnt.cm_ip_proto_cnt_read_1.change_index_epoch"
-    alias: "cm_ip_proto_cnt_read_1.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16781921
     name: "c_ingress.cm_ip_proto_cnt.cm_ip_proto_cnt_read_1.current_reg"
     alias: "cm_ip_proto_cnt_read_1.current_reg"
@@ -36686,13 +36546,6 @@ actions {
     id: 16783397
     name: "c_ingress.cm_ip_proto_cnt.cm_ip_proto_cnt_read_2.sketch_read_51"
     alias: "cm_ip_proto_cnt_read_2.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16804196
-    name: "c_ingress.cm_ip_proto_cnt.cm_ip_proto_cnt_read_2.change_index_epoch"
-    alias: "cm_ip_proto_cnt_read_2.change_index_epoch"
   }
 }
 actions {
@@ -38361,7 +38214,7 @@ actions {
 }
 actions {
   preamble {
-    id: 16833153
+    id: 16833152
     name: "c_ingress.cm_ip_proto_len.cm_ip_proto_len_read_0.sketch_read_5"
     alias: "cm_ip_proto_len_read_0.sketch_read_5"
   }
@@ -38686,13 +38539,6 @@ actions {
     id: 16807262
     name: "c_ingress.cm_ip_proto_len.cm_ip_proto_len_read_0.sketch_read_51"
     alias: "cm_ip_proto_len_read_0.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16782628
-    name: "c_ingress.cm_ip_proto_len.cm_ip_proto_len_read_0.change_index_epoch"
-    alias: "cm_ip_proto_len_read_0.change_index_epoch"
   }
 }
 actions {
@@ -39068,13 +38914,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16840424
-    name: "c_ingress.cm_ip_proto_len.cm_ip_proto_len_read_1.change_index_epoch"
-    alias: "cm_ip_proto_len_read_1.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16801158
     name: "c_ingress.cm_ip_proto_len.cm_ip_proto_len_read_1.current_reg"
     alias: "cm_ip_proto_len_read_1.current_reg"
@@ -39442,13 +39281,6 @@ actions {
     id: 16790702
     name: "c_ingress.cm_ip_proto_len.cm_ip_proto_len_read_2.sketch_read_51"
     alias: "cm_ip_proto_len_read_2.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16821792
-    name: "c_ingress.cm_ip_proto_len.cm_ip_proto_len_read_2.change_index_epoch"
-    alias: "cm_ip_proto_len_read_2.change_index_epoch"
   }
 }
 actions {
@@ -41415,13 +41247,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16841438
-    name: "c_ingress.bm_ip_src.bm_ip_src_read_0.change_index_epoch"
-    alias: "bm_ip_src_read_0.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16840935
     name: "c_ingress.bm_ip_src.bm_ip_src_read_0.current_reg"
     alias: "bm_ip_src_read_0.current_reg"
@@ -41793,13 +41618,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16783635
-    name: "c_ingress.bm_ip_src.bm_ip_src_read_1.change_index_epoch"
-    alias: "bm_ip_src_read_1.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16836715
     name: "c_ingress.bm_ip_src.bm_ip_src_read_1.current_reg"
     alias: "bm_ip_src_read_1.current_reg"
@@ -42115,7 +41933,7 @@ actions {
 }
 actions {
   preamble {
-    id: 16828808
+    id: 16828807
     name: "c_ingress.bm_ip_src.bm_ip_src_read_2.sketch_read_44"
     alias: "bm_ip_src_read_2.sketch_read_44"
   }
@@ -42167,13 +41985,6 @@ actions {
     id: 16820097
     name: "c_ingress.bm_ip_src.bm_ip_src_read_2.sketch_read_51"
     alias: "bm_ip_src_read_2.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16838017
-    name: "c_ingress.bm_ip_src.bm_ip_src_read_2.change_index_epoch"
-    alias: "bm_ip_src_read_2.change_index_epoch"
   }
 }
 actions {
@@ -43391,13 +43202,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16799940
-    name: "c_ingress.bm_ip_dst.bm_ip_dst_read_0.change_index_epoch"
-    alias: "bm_ip_dst_read_0.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16834614
     name: "c_ingress.bm_ip_dst.bm_ip_dst_read_0.current_reg"
     alias: "bm_ip_dst_read_0.current_reg"
@@ -43769,13 +43573,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16816216
-    name: "c_ingress.bm_ip_dst.bm_ip_dst_read_1.change_index_epoch"
-    alias: "bm_ip_dst_read_1.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16814336
     name: "c_ingress.bm_ip_dst.bm_ip_dst_read_1.current_reg"
     alias: "bm_ip_dst_read_1.current_reg"
@@ -44143,13 +43940,6 @@ actions {
     id: 16787979
     name: "c_ingress.bm_ip_dst.bm_ip_dst_read_2.sketch_read_51"
     alias: "bm_ip_dst_read_2.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16812524
-    name: "c_ingress.bm_ip_dst.bm_ip_dst_read_2.change_index_epoch"
-    alias: "bm_ip_dst_read_2.change_index_epoch"
   }
 }
 actions {
@@ -45367,13 +45157,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16807481
-    name: "c_ingress.bm_ip_src_port_src.bm_ip_src_port_src_read_0.change_index_epoch"
-    alias: "bm_ip_src_port_src_read_0.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16815100
     name: "c_ingress.bm_ip_src_port_src.bm_ip_src_port_src_read_0.current_reg"
     alias: "bm_ip_src_port_src_read_0.current_reg"
@@ -45745,13 +45528,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16823761
-    name: "c_ingress.bm_ip_src_port_src.bm_ip_src_port_src_read_1.change_index_epoch"
-    alias: "bm_ip_src_port_src_read_1.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16801215
     name: "c_ingress.bm_ip_src_port_src.bm_ip_src_port_src_read_1.current_reg"
     alias: "bm_ip_src_port_src_read_1.current_reg"
@@ -46119,13 +45895,6 @@ actions {
     id: 16800744
     name: "c_ingress.bm_ip_src_port_src.bm_ip_src_port_src_read_2.sketch_read_51"
     alias: "bm_ip_src_port_src_read_2.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16804262
-    name: "c_ingress.bm_ip_src_port_src.bm_ip_src_port_src_read_2.change_index_epoch"
-    alias: "bm_ip_src_port_src_read_2.change_index_epoch"
   }
 }
 actions {
@@ -47343,13 +47112,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16784164
-    name: "c_ingress.bm_ip_src_port_dst.bm_ip_src_port_dst_read_0.change_index_epoch"
-    alias: "bm_ip_src_port_dst_read_0.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16831057
     name: "c_ingress.bm_ip_src_port_dst.bm_ip_src_port_dst_read_0.current_reg"
     alias: "bm_ip_src_port_dst_read_0.current_reg"
@@ -47721,13 +47483,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16795877
-    name: "c_ingress.bm_ip_src_port_dst.bm_ip_src_port_dst_read_1.change_index_epoch"
-    alias: "bm_ip_src_port_dst_read_1.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16820837
     name: "c_ingress.bm_ip_src_port_dst.bm_ip_src_port_dst_read_1.current_reg"
     alias: "bm_ip_src_port_dst_read_1.current_reg"
@@ -48095,13 +47850,6 @@ actions {
     id: 16783673
     name: "c_ingress.bm_ip_src_port_dst.bm_ip_src_port_dst_read_2.sketch_read_51"
     alias: "bm_ip_src_port_dst_read_2.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16817274
-    name: "c_ingress.bm_ip_src_port_dst.bm_ip_src_port_dst_read_2.change_index_epoch"
-    alias: "bm_ip_src_port_dst_read_2.change_index_epoch"
   }
 }
 actions {
@@ -49319,13 +49067,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16831059
-    name: "c_ingress.bm_ip_dst_port_src.bm_ip_dst_port_src_read_0.change_index_epoch"
-    alias: "bm_ip_dst_port_src_read_0.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16801480
     name: "c_ingress.bm_ip_dst_port_src.bm_ip_dst_port_src_read_0.current_reg"
     alias: "bm_ip_dst_port_src_read_0.current_reg"
@@ -49697,13 +49438,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16833152
-    name: "c_ingress.bm_ip_dst_port_src.bm_ip_dst_port_src_read_1.change_index_epoch"
-    alias: "bm_ip_dst_port_src_read_1.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16819973
     name: "c_ingress.bm_ip_dst_port_src.bm_ip_dst_port_src_read_1.current_reg"
     alias: "bm_ip_dst_port_src_read_1.current_reg"
@@ -50071,13 +49805,6 @@ actions {
     id: 16795864
     name: "c_ingress.bm_ip_dst_port_src.bm_ip_dst_port_src_read_2.sketch_read_51"
     alias: "bm_ip_dst_port_src_read_2.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16835542
-    name: "c_ingress.bm_ip_dst_port_src.bm_ip_dst_port_src_read_2.change_index_epoch"
-    alias: "bm_ip_dst_port_src_read_2.change_index_epoch"
   }
 }
 actions {
@@ -51295,13 +51022,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16822851
-    name: "c_ingress.bm_ip_dst_port_dst.bm_ip_dst_port_dst_read_0.change_index_epoch"
-    alias: "bm_ip_dst_port_dst_read_0.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16794478
     name: "c_ingress.bm_ip_dst_port_dst.bm_ip_dst_port_dst_read_0.current_reg"
     alias: "bm_ip_dst_port_dst_read_0.current_reg"
@@ -51673,13 +51393,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16793635
-    name: "c_ingress.bm_ip_dst_port_dst.bm_ip_dst_port_dst_read_1.change_index_epoch"
-    alias: "bm_ip_dst_port_dst_read_1.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16806458
     name: "c_ingress.bm_ip_dst_port_dst.bm_ip_dst_port_dst_read_1.current_reg"
     alias: "bm_ip_dst_port_dst_read_1.current_reg"
@@ -52047,13 +51760,6 @@ actions {
     id: 16837718
     name: "c_ingress.bm_ip_dst_port_dst.bm_ip_dst_port_dst_read_2.sketch_read_51"
     alias: "bm_ip_dst_port_dst_read_2.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16794136
-    name: "c_ingress.bm_ip_dst_port_dst.bm_ip_dst_port_dst_read_2.change_index_epoch"
-    alias: "bm_ip_dst_port_dst_read_2.change_index_epoch"
   }
 }
 actions {
@@ -53302,13 +53008,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16821162
-    name: "c_ingress.ams.ams_read_0.change_index_epoch"
-    alias: "ams_read_0.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16839279
     name: "c_ingress.ams.ams_read_0.current_reg"
     alias: "ams_read_0.current_reg"
@@ -53680,13 +53379,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16828807
-    name: "c_ingress.ams.ams_read_1.change_index_epoch"
-    alias: "ams_read_1.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16831039
     name: "c_ingress.ams.ams_read_1.current_reg"
     alias: "ams_read_1.current_reg"
@@ -54054,13 +53746,6 @@ actions {
     id: 16827589
     name: "c_ingress.ams.ams_read_2.sketch_read_51"
     alias: "ams_read_2.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16786460
-    name: "c_ingress.ams.ams_read_2.change_index_epoch"
-    alias: "ams_read_2.change_index_epoch"
   }
 }
 actions {
@@ -56151,13 +55836,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16808311
-    name: "c_ingress.mv.mv_read_0.change_index_epoch"
-    alias: "mv_read_0.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16818188
     name: "c_ingress.mv.mv_read_0.current_reg"
     alias: "mv_read_0.current_reg"
@@ -56525,13 +56203,6 @@ actions {
     id: 16816995
     name: "c_ingress.mv.mv_read_1.sketch_read_51"
     alias: "mv_read_1.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16805130
-    name: "c_ingress.mv.mv_read_1.change_index_epoch"
-    alias: "mv_read_1.change_index_epoch"
   }
 }
 actions {
@@ -56907,13 +56578,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16831299
-    name: "c_ingress.mv.mv_read_2.change_index_epoch"
-    alias: "mv_read_2.change_index_epoch"
-  }
-}
-actions {
-  preamble {
     id: 16789711
     name: "c_ingress.mv.mv_read_2.current_reg"
     alias: "mv_read_2.current_reg"
@@ -57281,13 +56945,6 @@ actions {
     id: 16808427
     name: "c_ingress.mv.mv_read_3.sketch_read_51"
     alias: "mv_read_3.sketch_read_51"
-  }
-}
-actions {
-  preamble {
-    id: 16836446
-    name: "c_ingress.mv.mv_read_3.change_index_epoch"
-    alias: "mv_read_3.change_index_epoch"
   }
 }
 actions {
@@ -58622,7 +58279,7 @@ actions {
 }
 actions {
   preamble {
-    id: 16828809
+    id: 16828808
     name: "c_ingress.mv.mv_write_3.sketch_write_30"
     alias: "mv_write_3.sketch_write_30"
   }
@@ -58906,13 +58563,6 @@ actions {
     bitwidth: 32
   }
 }
-actions {
-  preamble {
-    id: 16840401
-    name: "c_ingress.epoch_read"
-    alias: "epoch_read"
-  }
-}
 counters {
   preamble {
     id: 302003196
@@ -59095,6 +58745,21 @@ controller_packet_metadata {
   }
   metadata {
     id: 29
+    name: "is_tuple_n"
+    bitwidth: 64
+  }
+  metadata {
+    id: 30
+    name: "is_tuple_ls"
+    bitwidth: 64
+  }
+  metadata {
+    id: 31
+    name: "is_tuple_ss"
+    bitwidth: 64
+  }
+  metadata {
+    id: 32
     name: "_padding"
     bitwidth: 6
   }
@@ -59899,48 +59564,18 @@ registers {
 }
 registers {
   preamble {
-    id: 369099051
-    name: "reg_epoch"
-    alias: "reg_epoch"
+    id: 369123800
+    name: "c_ingress.threshold.reg_is_tuple"
+    alias: "reg_is_tuple"
   }
   type_spec {
     bitstring {
       bit {
-        bitwidth: 1
+        bitwidth: 64
       }
     }
   }
-  size: 1
-}
-registers {
-  preamble {
-    id: 369136948
-    name: "c_ingress.threshold.reg_global_pkt_cnt"
-    alias: "reg_global_pkt_cnt"
-  }
-  type_spec {
-    bitstring {
-      bit {
-        bitwidth: 32
-      }
-    }
-  }
-  size: 1
-}
-registers {
-  preamble {
-    id: 369116979
-    name: "c_ingress.threshold.reg_global_pkt_len"
-    alias: "reg_global_pkt_len"
-  }
-  type_spec {
-    bitstring {
-      bit {
-        bitwidth: 32
-      }
-    }
-  }
-  size: 1
+  size: 3
 }
 registers {
   preamble {
@@ -59951,7 +59586,7 @@ registers {
   type_spec {
     bitstring {
       bit {
-        bitwidth: 32
+        bitwidth: 64
       }
     }
   }
@@ -59966,7 +59601,7 @@ registers {
   type_spec {
     bitstring {
       bit {
-        bitwidth: 32
+        bitwidth: 64
       }
     }
   }
@@ -59981,7 +59616,7 @@ registers {
   type_spec {
     bitstring {
       bit {
-        bitwidth: 32
+        bitwidth: 64
       }
     }
   }
@@ -59996,7 +59631,7 @@ registers {
   type_spec {
     bitstring {
       bit {
-        bitwidth: 32
+        bitwidth: 64
       }
     }
   }

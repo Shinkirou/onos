@@ -78,6 +78,9 @@ header packet_in_header_t {
     bit<32> bm_ip_dst_port_dst;
     bit<32> ams;
     bit<9>  mv;
+    bit<64> is_tuple_n;
+    bit<64> is_tuple_ls;
+    bit<64> is_tuple_ss;
     bit<6>  _padding;
 }
 
@@ -125,8 +128,6 @@ header reg_meta_t {
     bit<32> current_index;
     bit<32> current_sketch_hash;
     bit<32> index_remaining;
-    bit<1>  current_epoch;
-    bit<1>  index_epoch;
     bit<32> sketch_temp;
     bit<1> cm_ip_cnt;
     bit<1> cm_ip_len;
@@ -144,7 +145,6 @@ header reg_meta_t {
     bit<1> bm_ip_dst_port_dst;
     bit<1> ams;
     bit<1> mv;
-    bit<6> padding;
 }
 
 header cm_ip_cnt_meta_t {
@@ -256,14 +256,13 @@ header mv_meta_t {
 }
 
 header thres_meta_t {
-    bit<32> hash_flow;
-    bit<32> flow_pkt_cnt;
-    bit<32> flow_pkt_len;
-    bit<32> flow_global_pkt_cnt;
-    bit<32> flow_global_pkt_len;
-    bit<32> global_pkt_cnt;
-    bit<32> global_pkt_len;
-    bit<48> flow_ts;
+    bit<64> flow_pkt_cnt;
+    bit<64> flow_pkt_len;
+    bit<64> flow_global_pkt_cnt;
+    bit<64> flow_global_pkt_len;
+    bit<64> global_pkt_cnt;
+    bit<64> global_pkt_len;
+    bit<64> global_pkt_len_ss;
 }
 
 struct metadata_t {

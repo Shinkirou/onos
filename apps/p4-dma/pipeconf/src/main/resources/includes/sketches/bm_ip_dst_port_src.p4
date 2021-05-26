@@ -22,25 +22,22 @@ control c_bm_ip_dst_port_src(inout headers_t hdr, inout metadata_t meta, inout s
         // BM IP Dst Port Src - Bitmap value.
 
         // Obtain the next hash value to be used.
-        // This value will be translated by set_virtual_reg into the actual physical register and index.
+        // This value will be translated by set_reg into the actual physical register and index.
 
         meta.reg.current_sketch_hash = meta.hash.ip_dst_port_src;
 
         bm_ip_dst_port_src_set_reg_0.apply(hdr, meta, standard_metadata);
 
-        // After determining the register position, check if the epoch has changed.
+        // After determining the register position, read the respective sketch value.
         // The obtained sketch value after the check will be stored in meta.reg.sketch_temp.
         bm_ip_dst_port_src_read_0.apply(hdr, meta, standard_metadata);
 
         // Check the bitmap value for the (ip dst, port src) pair.
-        // This value is retrieved in epoch().
-
         // If the value is 0, it means we have a new pair.
         // Flip the respective bitmap bit to 1 and increase the counter for the ip dst.
+        if (meta.reg.sketch_temp == 0) {
 
-        if (meta.reg.sketch_temp[0:0] == 0) {
-
-            meta.reg.sketch_temp[0:0] = 1;
+            meta.reg.sketch_temp = 1;
 
             current_reg();
 

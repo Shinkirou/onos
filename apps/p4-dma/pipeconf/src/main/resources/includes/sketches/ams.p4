@@ -34,13 +34,13 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
         // AMS Counter 0.
 
         // Obtain the next hash value to be used.
-        // This value will be translated by set_virtual_reg into the actual physical register and index.
+        // This value will be translated by set_reg into the actual physical register and index.
 
         meta.reg.current_sketch_hash = meta.hash.ip_0;
 
         ams_set_reg_0.apply(hdr, meta, standard_metadata);
 
-        // After determining the register position, check if the epoch has changed.
+        // After determining the register position, read the respective sketch value.
         // The obtained sketch value after the check will be stored in meta.reg.sketch_temp.
         ams_read_0.apply(hdr, meta, standard_metadata);
 
@@ -50,23 +50,10 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
 
         ams_update(meta.hash.ams_g_0);
 
-        // After performing the sketch update, we check the related sum value epoch,
-        // before updating the sum value (removing the old sketch value from it first).
+        // After performing the sketch update, read the respective sum value,
+        // before its update (removing the old sketch value from it first).
 
         reg_sum_0.read(meta.ams.sum_0, (bit<32>)0);
-
-        // The epoch value corresponds to the most significant bit in the retrieved value.
-        bit<1> index_epoch = meta.ams.sum_0[31:31];
-
-        // If current_epoch doesn't match index_epoch, then the actual epoch has since changed.
-        // The current register position must be reset.
-        // Assume that the register value is 0 and update while also changing the cur_epoch bit.
-
-        if (meta.reg.current_epoch != index_epoch) {
-            meta.ams.sum_0 = 0;
-            // After resetting the register value, the epoch bit is also changed to the current one.
-            meta.ams.sum_0[31:31] = meta.reg.current_epoch;
-        }
 
         meta.ams.sum_0 = meta.ams.sum_0
             - ((meta.reg.sketch_temp - meta.hash.ams_g_0) * (meta.reg.sketch_temp - meta.hash.ams_g_0))
@@ -92,13 +79,6 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
 
         reg_sum_1.read(meta.ams.sum_1, (bit<32>)0);
 
-        index_epoch = meta.ams.sum_1[31:31];
-
-        if (meta.reg.current_epoch != index_epoch) {
-            meta.ams.sum_1 = 0;
-            meta.ams.sum_1[31:31] = meta.reg.current_epoch;
-        }
-
         meta.ams.sum_1 = meta.ams.sum_1
             - ((meta.reg.sketch_temp - meta.hash.ams_g_1) * (meta.reg.sketch_temp - meta.hash.ams_g_1))
             + ((meta.reg.sketch_temp) * (meta.reg.sketch_temp));
@@ -123,13 +103,6 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
 
         reg_sum_2.read(meta.ams.sum_2, (bit<32>)0);
 
-        index_epoch = meta.ams.sum_2[31:31];
-
-        if (meta.reg.current_epoch != index_epoch) {
-            meta.ams.sum_2 = 0;
-            meta.ams.sum_2[31:31] = meta.reg.current_epoch;
-        }
-
         meta.ams.sum_2 = meta.ams.sum_2
             - ((meta.reg.sketch_temp - meta.hash.ams_g_2) * (meta.reg.sketch_temp - meta.hash.ams_g_2))
             + ((meta.reg.sketch_temp) * (meta.reg.sketch_temp));
@@ -143,9 +116,6 @@ control c_ams(inout headers_t hdr, inout metadata_t meta, inout standard_metadat
         // AMS Final Value.
 
         ams_set_reg_final.apply(hdr, meta, standard_metadata);
-
-        // No need to apply an epoch check here, since all the ams sum values are already in the correct epoch
-        // and one of them will be the final value.
 
         // Obtain the median value from all registers.
 

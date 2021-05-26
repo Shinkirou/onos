@@ -1,6 +1,4 @@
-// Control block responsible for reading a register value and checking if the epoch value stored in the current position
-// matches the value defined by the operator.
-// If the values do not match, it resets the register position and updates the respective epoch value.
+// Control block responsible for reading the value in the current register/position.
 
 control c_sketch_read(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
 
@@ -213,14 +211,6 @@ control c_sketch_read(inout headers_t hdr, inout metadata_t meta, inout standard
         reg_51.read(meta.reg.sketch_temp, meta.reg.current_index);
     }
 
-    action change_index_epoch() {
-
-        meta.reg.sketch_temp = 0;
-
-        // After resetting the register value, the epoch bit is also changed to the current one.
-        meta.reg.sketch_temp[31:31] = meta.reg.current_epoch;
-    }
-
     action current_reg() {
         current_reg_temp = meta.reg.current_reg;
     }
@@ -287,18 +277,9 @@ control c_sketch_read(inout headers_t hdr, inout metadata_t meta, inout standard
 
     apply {
 
-        // Check the current value stored in the register position, in order to retrieve its epoch value.
+        // Read the value stored in the current register position.
+
         current_reg();
         t_sketch_read.apply();
-
-        // The epoch value corresponds to the most significant bit in the retrieved value.
-        bit<1> index_epoch = meta.reg.sketch_temp[31:31];
-
-        // If current_epoch doesn't match index_epoch, then the actual epoch has since changed.
-        // The current register position must be reset.
-        // Assume that the register value is 0 and update while also changing the cur_epoch bit.
-        if (meta.reg.current_epoch != index_epoch) {
-            change_index_epoch();
-        }
     }
 }
