@@ -56,6 +56,7 @@ header packet_in_header_t {
     bit<32> ip_dst;
     bit<32> cm_ip_cnt;
     bit<32> cm_ip_len;
+    bit<64> cm_ip_len_ss;
     bit<32> cm_ip_port_21_cnt;
     bit<32> cm_ip_port_21_len;
     bit<32> cm_ip_port_22_cnt;
@@ -78,9 +79,6 @@ header packet_in_header_t {
     bit<32> bm_ip_dst_port_dst;
     bit<32> ams;
     bit<9>  mv;
-    bit<64> is_tuple_n;
-    bit<64> is_tuple_ls;
-    bit<64> is_tuple_ss;
     bit<6>  _padding;
 }
 
@@ -161,6 +159,10 @@ header cm_ip_len_meta_t {
     bit<32> sketch_2;
     bit<32> sketch_final;
     bit<32> sketch_temp;
+    bit<64> ss_0;
+    bit<64> ss_1;
+    bit<64> ss_2;
+    bit<64> ss_final;
 }
 
 header cm_ip_port_dst_cnt_meta_t {
@@ -262,7 +264,6 @@ header thres_meta_t {
     bit<64> flow_global_pkt_len;
     bit<64> global_pkt_cnt;
     bit<64> global_pkt_len;
-    bit<64> global_pkt_len_ss;
 }
 
 struct metadata_t {

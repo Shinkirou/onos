@@ -2,27 +2,23 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
 
     // Store the total packet count / length / squared sum.
     // IS tuple (number, linear sum, squared sum).
-    register<bit<64>>(3)  reg_is_tuple;
+    register<bit<64>>(2)  reg_global_pkt;
     // Store the total packet count/length, excluding the packets in the current stage (for each flow).
-    register<bit<64>>(32768) reg_flow_global_pkt_cnt;
-    register<bit<64>>(32768) reg_flow_global_pkt_len;
+    register<bit<64>>(REG_SIZE) reg_flow_global_pkt_cnt;
+    register<bit<64>>(REG_SIZE) reg_flow_global_pkt_len;
     // Store the flow packet count/length, excluding the packets in the current stage (for each flow).
-    register<bit<64>>(32768) reg_flow_pkt_cnt;
-    register<bit<64>>(32768) reg_flow_pkt_len;
+    register<bit<64>>(REG_SIZE) reg_flow_pkt_cnt;
+    register<bit<64>>(REG_SIZE) reg_flow_pkt_len;
 
     // Increase the global traffic counters.
     action global_traffic_incr() {
-        reg_is_tuple.read(meta.thres.global_pkt_cnt, 0);
+        reg_global_pkt.read(meta.thres.global_pkt_cnt, 0);
         meta.thres.global_pkt_cnt = meta.thres.global_pkt_cnt + 1;
-        reg_is_tuple.write(0, meta.thres.global_pkt_cnt);
+        reg_global_pkt.write(0, meta.thres.global_pkt_cnt);
 
-        reg_is_tuple.read(meta.thres.global_pkt_len, 1);
+        reg_global_pkt.read(meta.thres.global_pkt_len, 1);
         meta.thres.global_pkt_len = meta.thres.global_pkt_len + (bit<64>)standard_metadata.packet_length;
-        reg_is_tuple.write(1, meta.thres.global_pkt_len);
-
-        reg_is_tuple.read(meta.thres.global_pkt_len_ss, 2);
-        meta.thres.global_pkt_len_ss = meta.thres.global_pkt_len_ss + (bit<64>)(standard_metadata.packet_length * standard_metadata.packet_length);
-        reg_is_tuple.write(2, meta.thres.global_pkt_len_ss);
+        reg_global_pkt.write(1, meta.thres.global_pkt_len);
     }
 
     // Update the global traffic counter for the current flow with the global traffic counter.
@@ -67,6 +63,7 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
         hdr.packet_in.ip_dst                = hdr.ipv4.dst_addr;
         hdr.packet_in.cm_ip_cnt             = meta.cm_ip_cnt.sketch_final;
         hdr.packet_in.cm_ip_len             = meta.cm_ip_len.sketch_final;
+        hdr.packet_in.cm_ip_len_ss          = meta.cm_ip_len.ss_final;
         hdr.packet_in.bm_ip_src             = meta.bm_ip_src.sketch_1;
         hdr.packet_in.bm_ip_dst             = meta.bm_ip_dst.sketch_1;
         hdr.packet_in.bm_ip_src_port_src    = meta.bm_ip_src_port_src.sketch_1;
@@ -74,9 +71,6 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
         hdr.packet_in.bm_ip_dst_port_src    = meta.bm_ip_dst_port_src.sketch_1;
         hdr.packet_in.bm_ip_dst_port_dst    = meta.bm_ip_dst_port_dst.sketch_1;
         hdr.packet_in.ams                   = meta.ams.sketch_final;
-        hdr.packet_in.is_tuple_n            = meta.thres.global_pkt_cnt;
-        hdr.packet_in.is_tuple_ls           = meta.thres.global_pkt_len;
-        hdr.packet_in.is_tuple_ss           = meta.thres.global_pkt_len_ss;
 
         if (hdr.tcp.dst_port == 21) {
             hdr.packet_in.cm_ip_port_21_cnt = meta.cm_ip_port_dst_cnt.sketch_final;

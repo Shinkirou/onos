@@ -14,7 +14,14 @@ control c_cm_ip_len(inout headers_t hdr, inout metadata_t meta, inout standard_m
     c_sketch_write() cm_ip_len_write_2;
     c_sketch_write() cm_ip_len_write_final;
 
+    // Store the squared sum of the packet length values, for each flow.
+    register<bit<64>>(REG_SIZE) reg_cm_ip_len_ss_0;
+    register<bit<64>>(REG_SIZE) reg_cm_ip_len_ss_1;
+    register<bit<64>>(REG_SIZE) reg_cm_ip_len_ss_2;
+    register<bit<64>>(REG_SIZE) reg_cm_ip_len_ss_final;
+
     bit<32> current_reg_temp;
+    bit<64> squared_sum;
 
     action current_reg() {
         current_reg_temp = meta.reg.current_reg;
@@ -25,6 +32,8 @@ control c_cm_ip_len(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
 
     apply {
+
+        squared_sum = (bit<64>)standard_metadata.packet_length * (bit<64>)standard_metadata.packet_length;
 
         // CM Hash 0 - Counter 0.
 
@@ -45,6 +54,12 @@ control c_cm_ip_len(inout headers_t hdr, inout metadata_t meta, inout standard_m
         cm_ip_len_write_0.apply(hdr, meta, standard_metadata);
         meta.cm_ip_len.sketch_0 = meta.reg.sketch_temp;
 
+        // Update the squared sum value.
+
+        reg_cm_ip_len_ss_0.read(meta.cm_ip_len.ss_0, meta.reg.current_sketch_hash);
+        meta.cm_ip_len.ss_0 = meta.cm_ip_len.ss_0 + squared_sum;
+        reg_cm_ip_len_ss_0.write(meta.reg.current_sketch_hash, meta.cm_ip_len.ss_0);
+
         // CM Hash 1 - Counter 1.
 
         meta.reg.current_sketch_hash = meta.hash.ip_1;
@@ -57,6 +72,10 @@ control c_cm_ip_len(inout headers_t hdr, inout metadata_t meta, inout standard_m
         cm_ip_len_write_1.apply(hdr, meta, standard_metadata);
         meta.cm_ip_len.sketch_1 = meta.reg.sketch_temp;
 
+        reg_cm_ip_len_ss_1.read(meta.cm_ip_len.ss_1, meta.reg.current_sketch_hash);
+        meta.cm_ip_len.ss_1 = meta.cm_ip_len.ss_1 + squared_sum;
+        reg_cm_ip_len_ss_1.write(meta.reg.current_sketch_hash, meta.cm_ip_len.ss_1);
+
         // CM Hash 2 - Counter 2.
 
         meta.reg.current_sketch_hash = meta.hash.ip_2;
@@ -68,6 +87,10 @@ control c_cm_ip_len(inout headers_t hdr, inout metadata_t meta, inout standard_m
         current_reg();
         cm_ip_len_write_2.apply(hdr, meta, standard_metadata);
         meta.cm_ip_len.sketch_2 = meta.reg.sketch_temp;
+
+        reg_cm_ip_len_ss_2.read(meta.cm_ip_len.ss_2, meta.reg.current_sketch_hash);
+        meta.cm_ip_len.ss_2 = meta.cm_ip_len.ss_2 + squared_sum;
+        reg_cm_ip_len_ss_2.write(meta.reg.current_sketch_hash, meta.cm_ip_len.ss_2);
 
         // CM Final Value.
 
@@ -86,5 +109,19 @@ control c_cm_ip_len(inout headers_t hdr, inout metadata_t meta, inout standard_m
         meta.reg.sketch_temp = meta.cm_ip_len.sketch_final;
         current_reg();
         cm_ip_len_write_final.apply(hdr, meta, standard_metadata);
+
+        // Squared sum final value.
+
+        meta.cm_ip_len.ss_final = meta.cm_ip_len.ss_0;
+
+        if (meta.cm_ip_len.ss_final > meta.cm_ip_len.ss_1) {
+            meta.cm_ip_len.ss_final = meta.cm_ip_len.ss_1;
+        }
+
+        if (meta.cm_ip_len.ss_final > meta.cm_ip_len.ss_2) {
+            meta.cm_ip_len.ss_final = meta.cm_ip_len.ss_2;
+        }
+
+         reg_cm_ip_len_ss_final.write(meta.reg.current_sketch_hash, meta.cm_ip_len.ss_final);
     }
 }

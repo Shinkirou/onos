@@ -58635,131 +58635,121 @@ controller_packet_metadata {
   }
   metadata {
     id: 7
+    name: "cm_ip_len_ss"
+    bitwidth: 64
+  }
+  metadata {
+    id: 8
     name: "cm_ip_port_21_cnt"
     bitwidth: 32
   }
   metadata {
-    id: 8
+    id: 9
     name: "cm_ip_port_21_len"
     bitwidth: 32
   }
   metadata {
-    id: 9
+    id: 10
     name: "cm_ip_port_22_cnt"
     bitwidth: 32
   }
   metadata {
-    id: 10
+    id: 11
     name: "cm_ip_port_22_len"
     bitwidth: 32
   }
   metadata {
-    id: 11
+    id: 12
     name: "cm_ip_port_80_cnt"
     bitwidth: 32
   }
   metadata {
-    id: 12
+    id: 13
     name: "cm_ip_port_80_len"
     bitwidth: 32
   }
   metadata {
-    id: 13
+    id: 14
     name: "cm_ip_tcp_syn_cnt"
     bitwidth: 32
   }
   metadata {
-    id: 14
+    id: 15
     name: "cm_ip_tcp_syn_len"
     bitwidth: 32
   }
   metadata {
-    id: 15
+    id: 16
     name: "cm_ip_tcp_ack_cnt"
     bitwidth: 32
   }
   metadata {
-    id: 16
+    id: 17
     name: "cm_ip_tcp_ack_len"
     bitwidth: 32
   }
   metadata {
-    id: 17
+    id: 18
     name: "cm_ip_tcp_rst_cnt"
     bitwidth: 32
   }
   metadata {
-    id: 18
+    id: 19
     name: "cm_ip_tcp_rst_len"
     bitwidth: 32
   }
   metadata {
-    id: 19
+    id: 20
     name: "cm_ip_icmp_cnt"
     bitwidth: 32
   }
   metadata {
-    id: 20
+    id: 21
     name: "cm_ip_icmp_len"
     bitwidth: 32
   }
   metadata {
-    id: 21
+    id: 22
     name: "bm_ip_src"
     bitwidth: 32
   }
   metadata {
-    id: 22
+    id: 23
     name: "bm_ip_dst"
     bitwidth: 32
   }
   metadata {
-    id: 23
+    id: 24
     name: "bm_ip_src_port_src"
     bitwidth: 32
   }
   metadata {
-    id: 24
+    id: 25
     name: "bm_ip_src_port_dst"
     bitwidth: 32
   }
   metadata {
-    id: 25
+    id: 26
     name: "bm_ip_dst_port_src"
     bitwidth: 32
   }
   metadata {
-    id: 26
+    id: 27
     name: "bm_ip_dst_port_dst"
     bitwidth: 32
   }
   metadata {
-    id: 27
+    id: 28
     name: "ams"
     bitwidth: 32
   }
   metadata {
-    id: 28
+    id: 29
     name: "mv"
     bitwidth: 9
   }
   metadata {
-    id: 29
-    name: "is_tuple_n"
-    bitwidth: 64
-  }
-  metadata {
     id: 30
-    name: "is_tuple_ls"
-    bitwidth: 64
-  }
-  metadata {
-    id: 31
-    name: "is_tuple_ss"
-    bitwidth: 64
-  }
-  metadata {
-    id: 32
     name: "_padding"
     bitwidth: 6
   }
@@ -59564,9 +59554,9 @@ registers {
 }
 registers {
   preamble {
-    id: 369123800
-    name: "c_ingress.threshold.reg_is_tuple"
-    alias: "reg_is_tuple"
+    id: 369119179
+    name: "c_ingress.threshold.reg_global_pkt"
+    alias: "reg_global_pkt"
   }
   type_spec {
     bitstring {
@@ -59575,7 +59565,7 @@ registers {
       }
     }
   }
-  size: 3
+  size: 2
 }
 registers {
   preamble {
@@ -59627,6 +59617,66 @@ registers {
     id: 369115288
     name: "c_ingress.threshold.reg_flow_pkt_len"
     alias: "reg_flow_pkt_len"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 64
+      }
+    }
+  }
+  size: 32768
+}
+registers {
+  preamble {
+    id: 369115099
+    name: "c_ingress.cm_ip_len.reg_cm_ip_len_ss_0"
+    alias: "reg_cm_ip_len_ss_0"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 64
+      }
+    }
+  }
+  size: 32768
+}
+registers {
+  preamble {
+    id: 369124473
+    name: "c_ingress.cm_ip_len.reg_cm_ip_len_ss_1"
+    alias: "reg_cm_ip_len_ss_1"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 64
+      }
+    }
+  }
+  size: 32768
+}
+registers {
+  preamble {
+    id: 369154825
+    name: "c_ingress.cm_ip_len.reg_cm_ip_len_ss_2"
+    alias: "reg_cm_ip_len_ss_2"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 64
+      }
+    }
+  }
+  size: 32768
+}
+registers {
+  preamble {
+    id: 369102713
+    name: "c_ingress.cm_ip_len.reg_cm_ip_len_ss_final"
+    alias: "reg_cm_ip_len_ss_final"
   }
   type_spec {
     bitstring {
