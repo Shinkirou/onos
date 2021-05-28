@@ -141,7 +141,8 @@ public class KubevirtNetworkHandler {
     private static final String DEFAULT_OF_PROTO = "tcp";
     private static final int DEFAULT_OFPORT = 6653;
     private static final int DPID_BEGIN = 3;
-    private static final long SLEEP_MS = 3000; // we wait 3s for init each node
+    private static final long SLEEP_MS = 3000;
+    private static final long SLEEP_LARGE_MS = 5000;
     private static final int DEFAULT_TTL = 0xff;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
@@ -309,6 +310,11 @@ public class KubevirtNetworkHandler {
                         .peer(tenantToTunIntf)
                         .build();
         ifaceConfig.addPatchMode(tunToTenantIntf, brTunTenantPatchDesc);
+    }
+
+    private void removeAllFlows(KubevirtNode node, KubevirtNetwork network) {
+        DeviceId deviceId = network.tenantDeviceId(node.hostname());
+        flowService.purgeRules(deviceId);
     }
 
     private void removePatchInterface(KubevirtNode node, KubevirtNetwork network) {
@@ -1082,6 +1088,8 @@ public class KubevirtNetworkHandler {
             if (!isRelevantHelper()) {
                 return;
             }
+            log.info("###### processRouterGatewayNodeAttached called for router {} and new router is {}",
+                    router.name(), associatedGateway);
 
             KubevirtNode gatewayNode = nodeService.node(associatedGateway);
             if (gatewayNode == null) {
@@ -1145,7 +1153,7 @@ public class KubevirtNetworkHandler {
                 KubevirtNetwork network = networkService.network(networkName);
 
                 if (network != null) {
-                    initGatewayNodeForInternalNetwork(network, router, oldGatewayNode, true);
+                    initGatewayNodeForInternalNetwork(network, router, newGatewayNode, true);
                 }
             });
         }
@@ -1230,8 +1238,16 @@ public class KubevirtNetworkHandler {
                 return;
             }
 
-            nodeService.completeNodes().forEach(n -> {
+            nodeService.completeNodes(WORKER).forEach(n -> {
+                removeAllFlows(n, network);
                 removePatchInterface(n, network);
+
+                try {
+                    sleep(SLEEP_LARGE_MS);
+                } catch (InterruptedException e) {
+                    log.error("Sleep exception", e);
+                }
+
                 removeBridge(n, network);
             });
         }
@@ -1249,10 +1265,10 @@ public class KubevirtNetworkHandler {
                 case KUBEVIRT_NODE_COMPLETE:
                     eventExecutor.execute(() -> processNodeCompletion(event.subject()));
                     break;
+                case KUBEVIRT_NODE_INCOMPLETE:
                 case KUBEVIRT_NODE_REMOVED:
                     eventExecutor.execute(() -> processNodeDeletion(event.subject()));
                     break;
-                case KUBEVIRT_NODE_INCOMPLETE:
                 case KUBEVIRT_NODE_UPDATED:
                 default:
                     // do nothing
@@ -1290,19 +1306,6 @@ public class KubevirtNetworkHandler {
                 }
             } else if (node.type().equals(GATEWAY)) {
                 updateGatewayNodeForRouter();
-                for (KubevirtNetwork network : networkService.networks()) {
-                    switch (network.type()) {
-                        case FLAT:
-                        case VLAN:
-                            break;
-                        case VXLAN:
-                        case GRE:
-                        case GENEVE:
-                        default:
-                            // do nothing
-                            break;
-                    }
-                }
             }
         }
 
@@ -1310,22 +1313,20 @@ public class KubevirtNetworkHandler {
             if (!isRelevantHelper()) {
                 return;
             }
-
             if (node.type().equals(GATEWAY)) {
+                kubevirtRouterService.routers()
+                        .stream()
+                        .filter(router -> router.electedGateway().equals(node.hostname()))
+                        .forEach(router -> {
+                            router.internal().forEach(networkName -> {
+                                KubevirtNetwork network = networkService.network(networkName);
+
+                                if (network != null) {
+                                    initGatewayNodeForInternalNetwork(network, router, node, false);
+                                }
+                            });
+                        });
                 updateGatewayNodeForRouter();
-                for (KubevirtNetwork network : networkService.networks()) {
-                    switch (network.type()) {
-                        case FLAT:
-                        case VLAN:
-                            break;
-                        case VXLAN:
-                        case GRE:
-                        case GENEVE:
-                        default:
-                            // do nothing
-                            break;
-                    }
-                }
             }
         }
 

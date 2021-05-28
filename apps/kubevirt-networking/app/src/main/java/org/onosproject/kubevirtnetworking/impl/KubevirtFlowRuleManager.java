@@ -213,6 +213,11 @@ public class KubevirtFlowRuleManager implements KubevirtFlowRuleService {
                 true);
     }
 
+    @Override
+    public void purgeRules(DeviceId deviceId) {
+        flowRuleService.purgeFlowRules(deviceId);
+    }
+
     private void applyRule(FlowRule flowRule, boolean install) {
         FlowRuleOperations.Builder flowOpsBuilder = FlowRuleOperations.builder();
 

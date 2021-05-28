@@ -73,8 +73,6 @@ public class KubevirtVmWatcher {
 
     private final Logger log = getLogger(getClass());
 
-    private static final long SLEEP_MS = 3000; // we wait 3s
-
     private static final String SPEC = "spec";
     private static final String TEMPLATE = "template";
     private static final String METADATA = "metadata";
@@ -250,7 +248,9 @@ public class KubevirtVmWatcher {
                     port = port.updateDeviceId(deviceId);
                 }
 
-                portAdminService.createPort(port);
+                if (portAdminService.port(port.macAddress()) == null) {
+                    portAdminService.createPort(port);
+                }
             });
         }
 
