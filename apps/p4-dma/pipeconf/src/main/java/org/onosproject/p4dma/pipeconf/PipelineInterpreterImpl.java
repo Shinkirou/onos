@@ -415,12 +415,25 @@ public final class PipelineInterpreterImpl extends AbstractHandlerBehaviour impl
 
             String bmIpDstPortDstStr = Integer.toString(packetMetadataBmIpDstPortDst.get().value().asReadOnlyBuffer().getInt());
 
+            // Calculate mean and std. deviation from the received packet length values.
+
+            double cmIpLenMean    = Double.parseDouble(cmIpLenStr) / Double.parseDouble(cmIpCntStr);
+            double cmIpLenStdDev = Math.sqrt(Math.abs(Double.parseDouble(cmIpLenSSStr) / Double.parseDouble(cmIpCntStr) -
+                                                Math.pow(cmIpLenMean, 2)));
+
+            String cmIpLenMeanStr = Double.toString(cmIpLenMean);
+            String cmIpLenStdDevStr = Double.toString(cmIpLenStdDev);
+            
+            // Generate the final string to be sent.
+
             String dma =
                     "{\"ip_src\": \"" + ipSrcStr + "\" , " +
                     "\"ip_dst\": \"" + ipDstStr + "\" , " +
                     "\"cm_ip_cnt\": \"" + cmIpCntStr + "\" , " +
                     "\"cm_ip_len\": \"" + cmIpLenStr + "\" , " +
                     "\"cm_ip_len_ss\": \"" + cmIpLenSSStr + "\" , " +
+                    "\"cm_ip_len_mean\": \"" + cmIpLenMeanStr + "\" , " +
+                    "\"cm_ip_len_std_dev\": \"" + cmIpLenStdDevStr + "\" , " +
                     "\"cm_ip_port_21_cnt\": \"" + cmIpPort21CntStr + "\" , " +
                     "\"cm_ip_port_21_len\": \"" + cmIpPort21LenStr + "\" , " +
                     "\"cm_ip_port_22_cnt\": \"" + cmIpPort22CntStr + "\" , " +
