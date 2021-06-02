@@ -82,7 +82,7 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
                          bit<1> cm_ip_tcp_flags_len_flag, bit<1> cm_ip_proto_cnt_flag, bit<1> cm_ip_proto_len_flag,
                          bit<1> bm_ip_src_flag, bit<1> bm_ip_dst_flag, bit<1> bm_ip_src_port_src_flag,
                          bit<1> bm_ip_src_port_dst_flag, bit<1> bm_ip_dst_port_src_flag, bit<1> bm_ip_dst_port_dst_flag,
-                         bit<1> ams_flag, bit<1> mv_flag, bit<32> hash_size) {
+                         bit<1> ams_flag, bit<1> mv_flag, bit<32> hash_size, bit<64> thres_alert, bit<64> thres_interval) {
 		
         meta.reg.cm_ip_cnt = cm_ip_cnt_flag;
         meta.reg.cm_ip_len = cm_ip_len_flag;
@@ -101,6 +101,8 @@ control c_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_met
         meta.reg.ams = ams_flag;
         meta.reg.mv = mv_flag;
         meta.reg.hash_size = hash_size;
+        meta.thres.alert = thres_alert;
+        meta.thres.interval = thres_interval;
     }
 
     // Table counter used to count packets and bytes matched by each entry of t_fwd table.

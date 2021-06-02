@@ -58562,6 +58562,16 @@ actions {
     name: "hash_size"
     bitwidth: 32
   }
+  params {
+    id: 18
+    name: "thres_alert"
+    bitwidth: 64
+  }
+  params {
+    id: 19
+    name: "thres_interval"
+    bitwidth: 64
+  }
 }
 counters {
   preamble {

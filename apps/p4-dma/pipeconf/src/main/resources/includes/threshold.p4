@@ -123,13 +123,13 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
         if (meta.thres.flow_global_pkt_cnt == 0) flow_global_traffic_update();
 
         // Verify if more than x packets have traversed the switch since the last threshold check for the current flow.
-        if ((meta.thres.global_pkt_cnt - meta.thres.flow_global_pkt_cnt) > 5000) {
+        if ((meta.thres.global_pkt_cnt - meta.thres.flow_global_pkt_cnt) > meta.thres.interval) {
 
             check_flow_pkt_cnt();
 
             // Check if the flow traffic at the current stage corresponds to more than 5% of the total traffic.
             // If so, we send the current flow stats to the controller.
-            if ((((bit<64>)meta.cm_ip_cnt.sketch_final - meta.thres.flow_pkt_cnt) * 40) >
+            if ((((bit<64>)meta.cm_ip_cnt.sketch_final - meta.thres.flow_pkt_cnt) * meta.thres.alert) >
                 (meta.thres.global_pkt_cnt - meta.thres.flow_global_pkt_cnt) &&
                 ((bit<64>)meta.cm_ip_cnt.sketch_final > meta.thres.flow_pkt_cnt)) {
               send_to_cpu_thres();
@@ -137,7 +137,7 @@ control c_threshold(inout headers_t hdr, inout metadata_t meta, inout standard_m
 
                 check_flow_pkt_len();
 
-                if ((((bit<64>)meta.cm_ip_len.sketch_final - meta.thres.flow_pkt_len) * 40) >
+                if ((((bit<64>)meta.cm_ip_len.sketch_final - meta.thres.flow_pkt_len) * meta.thres.alert) >
                     (meta.thres.global_pkt_len - meta.thres.flow_global_pkt_len) &&
                     ((bit<64>)meta.cm_ip_len.sketch_final > meta.thres.flow_pkt_len)) {
                     send_to_cpu_thres();

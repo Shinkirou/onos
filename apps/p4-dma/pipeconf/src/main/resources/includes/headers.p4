@@ -258,6 +258,8 @@ header mv_meta_t {
 }
 
 header thres_meta_t {
+    bit<64> alert;
+    bit<64> interval;
     bit<64> flow_pkt_cnt;
     bit<64> flow_pkt_len;
     bit<64> flow_global_pkt_cnt;
