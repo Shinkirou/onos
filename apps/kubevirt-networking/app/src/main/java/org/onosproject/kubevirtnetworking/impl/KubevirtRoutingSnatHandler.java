@@ -173,7 +173,7 @@ public class KubevirtRoutingSnatHandler {
     }
 
     private void initGatewayNodeSnatForRouter(KubevirtRouter router, String gateway, boolean install) {
-        if (router.electedGateway() == null) {
+        if (gateway == null) {
             log.warn("Fail to initialize gateway node snat for router {} " +
                     "because there's no gateway assigned to it", router.name());
             return;
@@ -319,19 +319,13 @@ public class KubevirtRoutingSnatHandler {
                 install);
 
         if (network.type() == VXLAN || network.type() == GENEVE || network.type() == GRE) {
-            setDownStreamRulesToGatewayTunBridge(router, network, kubevirtPort, install);
+            setDownStreamRulesToGatewayTunBridge(network, gatewayNode, kubevirtPort, install);
         }
     }
 
-    private void setDownStreamRulesToGatewayTunBridge(KubevirtRouter router,
-                                                      KubevirtNetwork network,
+    private void setDownStreamRulesToGatewayTunBridge(KubevirtNetwork network,
+                                                      KubevirtNode electedGw,
                                                       KubevirtPort port, boolean install) {
-        KubevirtNode electedGw = gatewayNodeForSpecifiedRouter(kubevirtNodeService, router);
-
-        if (electedGw == null) {
-            return;
-        }
-
         KubevirtNode workerNode = kubevirtNodeService.node(port.deviceId());
         if (workerNode == null) {
             return;
@@ -515,7 +509,7 @@ public class KubevirtRoutingSnatHandler {
             if (!isRelevantHelper()) {
                 return;
             }
-            KubevirtNode electedGw = gatewayNodeForSpecifiedRouter(kubevirtNodeService, router);
+            KubevirtNode electedGw = kubevirtNodeService.node(router.electedGateway());
 
             if (electedGw == null) {
                 log.warn("Fail to process router external network attached gateway node snat for router {} " +
